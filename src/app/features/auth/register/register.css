@@ -1,0 +1,24 @@
+.glass-panel {
+  background: rgba(255, 255, 255, 0.7);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(226, 232, 240, 0.5);
+  box-shadow: 0px 4px 20px rgba(15, 23, 42, 0.05);
+}
+
+.role-btn {
+  border-color: #e2e8f0;
+  background-color: var(--color-surface-container-lowest);
+  color: var(--color-on-surface-variant);
+}
+.role-btn:hover {
+  border-color: rgba(249, 115, 22, 0.4);
+}
+.role-btn-selected {
+  border-color: var(--color-primary-container);
+  background-color: var(--color-primary-container);
+  color: var(--color-on-secondary);
+}
+.role-btn-selected:hover {
+  border-color: var(--color-primary-container);
+}
