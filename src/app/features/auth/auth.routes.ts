@@ -4,6 +4,11 @@ import { Register } from './register/register';
 
 export const AUTH_ROUTES: Routes = [
   {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'login',
+  },
+  {
     path: 'login',
     component: Login,
   },
