@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/container-queries';
- 
+
 @theme {
   --color-background: #faf8ff;
   --color-on-primary: #ffffff;
@@ -50,12 +50,12 @@
   --color-tertiary-fixed-dim: #ffb3b6;
   --color-surface-dim: #d2d9f4;
   --color-on-secondary-fixed: #002113;
- 
+
   --radius-DEFAULT: 0.25rem;
   --radius-lg: 0.5rem;
   --radius-xl: 0.75rem;
   --radius-full: 9999px;
- 
+
   --spacing-rally-xl: 64px;
   --spacing-rally-gutter: 24px;
   --spacing-rally-container-max: 1280px;
@@ -64,44 +64,55 @@
   --spacing-rally-base: 4px;
   --spacing-rally-md: 24px;
   --spacing-rally-sm: 16px;
- 
+
   --font-display-lg-mobile: Inter;
   --font-display-lg: Inter;
   --font-headline-md: Inter;
   --font-label-sm: Geist;
   --font-body-md: Inter;
   --font-body-lg: Inter;
- 
+
   --text-display-lg-mobile: 32px;
   --text-display-lg-mobile--line-height: 40px;
   --text-display-lg-mobile--letter-spacing: -0.02em;
   --text-display-lg-mobile--font-weight: 700;
- 
+
   --text-display-lg: 48px;
   --text-display-lg--line-height: 56px;
   --text-display-lg--letter-spacing: -0.02em;
   --text-display-lg--font-weight: 700;
- 
+
   --text-headline-md: 24px;
   --text-headline-md--line-height: 32px;
   --text-headline-md--letter-spacing: -0.01em;
   --text-headline-md--font-weight: 600;
- 
+
   --text-label-sm: 12px;
   --text-label-sm--line-height: 16px;
   --text-label-sm--letter-spacing: 0.05em;
   --text-label-sm--font-weight: 500;
- 
+
   --text-body-md: 16px;
   --text-body-md--line-height: 24px;
   --text-body-md--font-weight: 400;
- 
+
   --text-body-lg: 18px;
   --text-body-lg--line-height: 28px;
   --text-body-lg--font-weight: 400;
 }
- 
+
 body {
   margin: 0;
   min-height: 100vh;
+}
+
+.btn-primary {
+  color: white;
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+.btn-primary:hover {
+  transform: scale(1.01);
+  box-shadow: 0 8px 25px rgba(249, 115, 22, 0.25);
 }
