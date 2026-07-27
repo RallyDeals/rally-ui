@@ -27,5 +27,6 @@ export class Header {
   }
   setSelectedLink = (link: string) => {
     this.selectedLink = link;
+    this.menuVisible = false;
   };
 }
