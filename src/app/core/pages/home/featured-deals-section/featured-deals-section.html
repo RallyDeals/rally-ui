@@ -1,0 +1,23 @@
+<section class="bg-surface-container-low py-rally-xl md:py-24">
+  <div class="max-w-container-max mx-auto px-rally-gutter">
+    <div class="flex justify-between items-end mb-10">
+      <div>
+        <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-2">Featured Deals</h2>
+        <p class="font-body-md text-on-surface-variant">Hot products close to unlocking their final tier.</p>
+      </div>
+      <a
+        class="hidden md:flex items-center gap-1 text-primary font-semibold hover:text-primary-container transition-colors"
+        routerLink="/deals">
+        View All <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+      </a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      @for (deal of deals; track deal.id; let last = $last) {
+        <app-deal-card [deal]="deal" [extraClasses]="last ? 'hidden lg:flex' : ''" />
+      }
+    </div>
+    <div class="mt-8 text-center md:hidden">
+      <a class="btn-ghost border border-outline w-full py-3 block" routerLink="/deals">View All Deals</a>
+    </div>
+  </div>
+</section>
