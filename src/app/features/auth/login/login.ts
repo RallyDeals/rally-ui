@@ -2,7 +2,7 @@ import { Component } from '@angular/core';
 import { TxtInput } from '../../../shared/components/txt-input/txt-input';
 import { Logo } from '../../../shared/components/logo/logo';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
-import { AuthSwitchLink } from '../../../shared/components/auth-switch-link/auth-switch-link';
+import { AuthSwitchLink } from '../auth-switch-link/auth-switch-link';
 
 @Component({
   selector: 'app-login',
