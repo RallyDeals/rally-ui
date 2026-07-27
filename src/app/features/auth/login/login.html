@@ -59,24 +59,16 @@
             >
           </div>
           <!-- Primary CTA -->
-          <button
-            class="w-full bg-primary-container text-on-primary py-3 rounded-lg font-body-md text-body-md font-semibold hover:bg-primary-container/90 active:scale-[0.98] transition-all shadow-sm"
-            type="submit"
-          >
-            Sign In
-          </button>
+          <app-primary-btn content="Sign In" type="submit" bgClass="bg-primary-container" />
         </form>
       </div>
       <!-- Card Footer -->
       <div class="bg-surface-container-low p-rally-md border-t border-outline-variant/30 text-center">
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          Don't have an account?
-          <a
-            class="text-primary hover:text-primary-container font-semibold transition-colors"
-            href="auth/register"
-            >Sign up</a
-          >
-        </p>
+        <app-auth-switch-link
+          prompt="Don't have an account?"
+          linkText="Sign up"
+          linkPath="/auth/register"
+        />
       </div>
     </div>
   </main>

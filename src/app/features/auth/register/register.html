@@ -69,7 +69,7 @@
         />
         <div>
           <label class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
-            >I want to be</label
+          >I want to be</label
           >
           <div class="grid grid-cols-2 gap-rally-xs" role="radiogroup" aria-label="Account type">
             <button
@@ -97,18 +97,16 @@
           </div>
         </div>
         <div class="pt-rally-sm">
-          <app-primary-btn content="Create Account" type="submit"/>
+          <app-primary-btn content="Create Account" type="submit" bgClass="bg-primary-container" />
         </div>
       </form>
 
-      <p class="mt-rally-sm text-center font-body-md text-body-md text-on-surface-variant">
-        Already have an account?
-        <a
-          class="text-primary hover:text-primary-container font-semibold transition-colors"
-          href="auth/login"
-          >Sign in</a
-        >
-      </p>
+      <app-auth-switch-link
+        prompt="Already have an account?"
+        linkText="Sign in"
+        linkPath="/auth/login"
+        wrapperClass="mt-rally-sm"
+      />
     </div>
   </div>
 </main>

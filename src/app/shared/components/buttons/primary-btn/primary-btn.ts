@@ -1,13 +1,15 @@
 import { Component, input } from '@angular/core';
+import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-primary-btn',
-  imports: [RouterLink],
+  imports: [NgClass, RouterLink],
   templateUrl: './primary-btn.html',
-  styleUrl: './primary-btn.css',
 })
 export class PrimaryBtn {
   content = input.required<string>();
-  type = input.required<string>();
+  type = input<'button' | 'submit'>('button');
+  bgClass = input('bg-primary');
+  routerLink = input<string>();
 }
