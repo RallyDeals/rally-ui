@@ -6,6 +6,7 @@ import { Deal } from '../../../core/models/deal';
   selector: 'app-deal-card',
   imports: [RouterLink],
   templateUrl: './deal-card.html',
+  styleUrl: './deal-card.css',
 })
 export class DealCard {
   deal = input.required<Deal>();

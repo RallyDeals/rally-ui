@@ -1,6 +1,6 @@
 <section class="bg-surface-container-low border-y border-outline-variant/30 py-12">
   <div
-    class="max-w-container-max mx-auto px-rally-gutter grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-outline-variant/30">
+    class="max-w-rally-container-max mx-auto px-rally-gutter grid grid-cols-1 md:grid-cols-3 gap-8 divide-y md:divide-y-0 md:divide-x divide-outline-variant/30">
     @for (stat of stats; track stat.label) {
       <div class="flex flex-col items-center justify-center text-center p-4">
         <p [class]="'font-display-lg text-[40px] font-black tracking-tight mb-2 ' + stat.colorClass">{{ stat.value }}</p>
