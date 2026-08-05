@@ -1,0 +1,35 @@
+<div class="lg:col-span-7">
+  <div class="bg-white p-rally-lg rounded-lg shadow-lg border border-outline-variant/20 relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-32 h-32 bg-secondary-container/20 rounded-bl-full -z-10 blur-2xl"></div>
+    <h2 class="font-headline-md text-headline-md text-on-surface mb-rally-md">Send a Message</h2>
+    <form action="#" class="space-y-rally-md" method="POST">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-md">
+        <div class="relative">
+          <input class="floating-input peer block w-full px-4 pt-6 pb-2 text-on-surface bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="name" name="name" placeholder=" " type="text"/>
+          <label class="floating-label absolute text-on-surface-variant duration-300 transform -translate-y-1.5 scale-85 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 font-body-md text-body-md cursor-text pointer-events-none" for="name">Full Name</label>
+        </div>
+        <div class="relative">
+          <input class="floating-input peer block w-full px-4 pt-6 pb-2 text-on-surface bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow" id="email" name="email" placeholder=" " type="email"/>
+          <label class="floating-label absolute text-on-surface-variant duration-300 transform -translate-y-1.5 scale-85 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 font-body-md text-body-md cursor-text pointer-events-none" for="email">Email Address</label>
+        </div>
+      </div>
+      <div class="relative">
+        <select class="block w-full px-4 py-4 text-on-surface bg-surface-container-low border border-outline-variant rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent font-body-md text-body-md appearance-none" id="subject" name="subject">
+          <option class="text-on-surface-variant" disabled="" selected="" value="">Select a topic...</option>
+          <option value="support">Customer Support</option>
+          <option value="sales">Sales &amp; Partnerships</option>
+          <option value="feedback">General Feedback</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+      <div class="relative">
+        <textarea class="floating-input peer block w-full px-4 pt-6 pb-2 text-on-surface bg-surface-container-low border border-outline-variant rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-shadow resize-none" id="message" name="message" placeholder=" " rows="5"></textarea>
+        <label class="floating-label absolute text-on-surface-variant duration-300 transform -translate-y-1.5 scale-85 top-4 z-10 origin-[0] left-4 peer-placeholder-shown:scale-100 peer-placeholder-shown:translate-y-0 font-body-md text-body-md cursor-text pointer-events-none" for="message">How can we help you?</label>
+      </div>
+      <button class="w-full bg-primary-container text-on-primary-container hover:bg-primary hover:text-on-primary font-label-sm text-label-sm uppercase tracking-wider font-bold py-4 px-lg rounded-lg transition-all duration-300 shadow-md hover:shadow-lg flex justify-center items-center gap-xs group" type="submit">
+        Send Message
+        <span class="material-symbols-outlined text-sm group-hover:translate-x-1 transition-transform">send</span>
+      </button>
+    </form>
+  </div>
+</div>

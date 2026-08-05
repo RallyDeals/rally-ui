@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { AuthLayout } from './core/layout/auth-layout/auth-layout';
-import { MainLayout } from './core/layout/main-layout/main-layout';
-import { Home } from './core/pages/home/home';
-import { About } from './core/pages/about/about';
-import { Contact } from './core/pages/contact/contact';
+import { AuthLayout } from './layout/auth-layout/auth-layout';
+import { MainLayout } from './layout/main-layout/main-layout';
+import { Home } from './pages/home/home';
+import { About } from './pages/about/about';
+import { Contact } from './pages/contact/contact';
 import { Categories } from './features/categories/categories';
 import { AUTH_ROUTES } from './features/auth/auth.routes';
 import { PRODUCTS_ROUTES } from './features/products/products.routes';

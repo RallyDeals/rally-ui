@@ -1,0 +1,9 @@
+:host {
+  display: contents;
+}
+
+.floating-input:focus ~ .floating-label,
+.floating-input:not(:placeholder-shown) ~ .floating-label {
+  transform: translateY(-1.5rem) scale(0.85);
+  color: var(--color-primary);
+}

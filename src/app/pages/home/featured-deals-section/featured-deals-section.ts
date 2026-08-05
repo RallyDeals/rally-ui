@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DealCard } from '../../../../shared/components/deal-card/deal-card';
-import { Deal } from '../../../models/deal';
+import { DealCard } from '../../../shared/components/deal-card/deal-card';
+import { Deal } from '../../../shared/models/deal';
 
 @Component({
   selector: 'app-featured-deals-section',

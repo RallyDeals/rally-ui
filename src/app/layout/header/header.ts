@@ -1,10 +1,10 @@
 import { Component, ElementRef, HostListener } from '@angular/core';
-import { Logo } from '../../../shared/components/logo/logo';
+import { Logo } from '../../shared/components/logo/logo';
 import { NgClass } from '@angular/common';
 import { DesktopNavLinks } from './desktop-nav-links/desktop-nav-links';
 import { MobileNavLinks } from './mobile-nav-links/mobile-nav-links';
 import { RouterLink } from '@angular/router';
-import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
+import { PrimaryBtn } from '../../shared/components/buttons/primary-btn/primary-btn';
 
 @Component({
   selector: 'app-header',

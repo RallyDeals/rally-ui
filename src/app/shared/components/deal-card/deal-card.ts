@@ -1,6 +1,6 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { Deal } from '../../../core/models/deal';
+import { Deal } from '../../models/deal';
 
 @Component({
   selector: 'app-deal-card',
