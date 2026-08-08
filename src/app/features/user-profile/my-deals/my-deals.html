@@ -1,0 +1,20 @@
+<!-- Stats Overview Bento -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-rally-md mb-rally-xl">
+  @for (stat of stats; track stat.label) {
+    <app-stat-card [stat]="stat" />
+  }
+</div>
+<!-- My Active Deals -->
+<section>
+  <div class="flex justify-between items-center mb-rally-md">
+    <h3 class="font-headline-md text-headline-md font-bold text-on-surface">My Deals</h3>
+    <a class="text-primary hover:underline text-sm font-semibold flex items-center gap-1" href="javascript:void(0)">
+      View All <span class="material-symbols-outlined text-sm">arrow_forward</span>
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-rally-md">
+    @for (deal of deals; track deal.id) {
+      <app-my-deal-card [deal]="deal" />
+    }
+  </div>
+</section>
