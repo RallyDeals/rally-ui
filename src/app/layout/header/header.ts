@@ -17,7 +17,7 @@ export class Header {
 
   menuVisible: boolean = false;
   selectedLink: string = 'home';
-  loggedIn: boolean = false;
+  loggedIn: boolean = true;
   navLinks = [
     { name: 'Products', path: '/products', symbol: 'inventory_2' },
     { name: 'Deals', path: '/deals', symbol: 'local_offer' },
