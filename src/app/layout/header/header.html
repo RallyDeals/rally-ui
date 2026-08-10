@@ -15,12 +15,12 @@
     <!-- Right: Actions -->
     @if (loggedIn) {
       <div class="flex items-center gap-1 sm:gap-rally-sm justify-self-end">
-        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative" routerLink="/cart"
+        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hover:cursor-pointer" routerLink="/cart"
                 (click)="setSelectedLink('cart')">
           <span class="material-symbols-outlined">shopping_cart</span>
           <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full"></span>
         </button>
-        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors" routerLink="/profile"
+        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer" routerLink="/profile"
                 (click)="setSelectedLink('profile')">
           <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
         </button>
