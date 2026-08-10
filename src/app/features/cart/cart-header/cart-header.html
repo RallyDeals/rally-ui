@@ -1,0 +1,15 @@
+<header class="mb-rally-lg flex justify-between items-end">
+  <div>
+    <h1 class="font-headline-md text-headline-md md:text-[32px] font-bold text-on-background mb-xs">Your Cart</h1>
+    <p class="font-body-lg text-on-surface-variant">
+      {{ itemsCount() }} item{{ itemsCount() === 1 ? '' : 's' }} ready for checkout
+    </p>
+  </div>
+  <button
+    class="hidden md:flex font-label-sm text-on-surface-variant items-center gap-1 hover:text-error transition-colors hover:cursor-pointer"
+    (click)="onClearCart()()"
+  >
+    <span class="material-symbols-outlined text-[18px]">delete</span>
+    Clear Cart
+  </button>
+</header>

@@ -1,1 +1,25 @@
-<p>cart works!</p>
+<main class="grow max-w-rally-container-max mx-auto w-full px-rally-gutter pt-10 pb-rally-xl">
+  <app-cart-header [itemsCount]="items.length" [onClearCart]="clearCart" />
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg relative items-start">
+    <!-- Cart Items List -->
+    <div class="lg:col-span-8 flex flex-col gap-rally-sm">
+      @for (item of items; track item.id) {
+        <app-cart-item
+          [item]="item"
+          [onIncrement]="incrementQuantity"
+          [onDecrement]="decrementQuantity"
+          [onRemove]="removeItem"
+        />
+      }
+    </div>
+    <!-- Sidebar Summary -->
+    <aside class="lg:col-span-4 sticky top-24 w-full">
+      <app-order-summary
+        [itemsCount]="totalUnits"
+        [subtotal]="subtotal"
+        [tax]="estimatedTax"
+        [total]="total"
+      />
+    </aside>
+  </div>
+</main>
