@@ -11,17 +11,7 @@
     <app-profile-summary [avatarUrl]="avatarUrl" avatarAlt="User Profile" [name]="userName" />
   </header>
 
-  <app-profile-tabs [tabs]="tabs" [activeTab]="activeTab" [setActiveTab]="setActiveTab" />
+  <app-profile-tabs [tabs]="tabs" />
 
-  @switch (activeTab) {
-    @case ('personal-info') {
-      <app-personal-info />
-    }
-    @case ('my-orders') {
-      <app-my-orders />
-    }
-    @case ('my-deals') {
-      <app-my-deals />
-    }
-  }
+  <router-outlet />
 </main>

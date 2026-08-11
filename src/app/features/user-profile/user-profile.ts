@@ -1,14 +1,12 @@
 import { Component } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
 import { ProfileSummary } from './profile-summary/profile-summary';
 import { ProfileTabs } from './profile-tabs/profile-tabs';
-import { PersonalInfo } from './personal-info/personal-info';
-import { MyOrders } from './my-orders/my-orders';
-import { MyDeals } from './my-deals/my-deals';
-import { ProfileTab, ProfileTabId } from './interfaces/profile-tab';
+import { ProfileTab } from './interfaces/profile-tab';
 
 @Component({
   selector: 'app-user-profile',
-  imports: [ProfileSummary, ProfileTabs, PersonalInfo, MyOrders, MyDeals],
+  imports: [ProfileSummary, ProfileTabs, RouterOutlet],
   templateUrl: './user-profile.html',
 })
 export class UserProfile {
@@ -21,11 +19,4 @@ export class UserProfile {
     { id: 'my-orders', label: 'My Orders' },
     { id: 'my-deals', label: 'My Deals' },
   ];
-
-  // Personal Info opens by default, matching the account icon in the main nav.
-  activeTab: ProfileTabId = 'personal-info';
-
-  setActiveTab = (tab: ProfileTabId) => {
-    this.activeTab = tab;
-  };
 }

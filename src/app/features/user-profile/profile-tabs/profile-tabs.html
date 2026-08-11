@@ -2,13 +2,14 @@
   <nav aria-label="Tabs" class="-mb-px flex space-x-8">
     @for (tab of tabs(); track tab.id) {
       <a
-        href="javascript:void(0)"
-        [attr.aria-current]="activeTab() === tab.id ? 'page' : null"
-        [ngClass]="activeTab() === tab.id
+        [routerLink]="['/profile', tab.id]"
+        routerLinkActive
+        #rla="routerLinkActive"
+        [attr.aria-current]="rla.isActive ? 'page' : null"
+        [ngClass]="rla.isActive
           ? 'border-primary text-primary'
           : 'border-transparent text-on-surface-variant hover:text-on-surface hover:border-outline'"
         class="whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm"
-        (click)="setActiveTab()(tab.id)"
       >
         {{ tab.label }}
       </a>
