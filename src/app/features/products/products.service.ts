@@ -38,4 +38,26 @@ export class ProductsService {
   getProduct(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
   }
+
+  getSellerProducts(
+    sellerId: string,
+    params: { status?: string; sort?: string; page?: number; limit?: number } = {},
+  ): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(
+      `${this.apiUrl}/products/sellers/${sellerId}`,
+      {
+        params: {
+          includeDeleted: false,
+          page: params.page ?? 1,
+          limit: params.limit ?? 20,
+          ...(params.status && { status: params.status }),
+          ...(params.sort && { sort: params.sort }),
+        },
+      },
+    );
+  }
+
+  deleteProduct(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/${id}`);
+  }
 }

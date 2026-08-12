@@ -9,6 +9,7 @@ import { Component, computed, input, output } from '@angular/core';
 export class Pagination {
   page = input.required<number>();
   totalPages = input.required<number>();
+  compact = input(false);
   pageChange = output<number>();
 
   pages = computed<(number | '...')[]>(() => {
