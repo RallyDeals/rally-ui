@@ -8,7 +8,7 @@ export const PRODUCTS_ROUTES: Routes = [
     component: BrowseProducts
   },
   {
-    path: '{id}',
+    path: ':id',
     component: ProductDetails,
   }
 ];

@@ -8,7 +8,7 @@ export const DEALS_ROUTES: Routes = [
     component: BrowseDeals,
   },
   {
-    path: '{id}',
+    path: ':id',
     component: DealDetails,
   },
 ];
