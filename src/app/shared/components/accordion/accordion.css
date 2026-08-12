@@ -1,0 +1,31 @@
+.accordion {
+  border-bottom: 1px solid color-mix(in srgb, var(--color-outline-variant) 20%, transparent);
+}
+
+.accordion__summary {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1rem 0;
+  cursor: pointer;
+  user-select: none;
+}
+.accordion__summary::-webkit-details-marker {
+  display: none;
+}
+.accordion__summary:hover h3 {
+  color: var(--color-primary);
+}
+
+.accordion__chevron {
+  color: var(--color-on-surface-variant);
+  transition: transform 0.2s ease;
+}
+.accordion[open] .accordion__chevron {
+  transform: rotate(180deg);
+}
+
+.accordion__content {
+  padding: 0 0 1.5rem;
+}
