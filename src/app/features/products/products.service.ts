@@ -15,6 +15,19 @@ export interface ProductQueryParams {
   limit?: number;
 }
 
+export interface UpsertProductRequest {
+  name: string;
+  description: string;
+  categoryId?: string;
+  basePrice: number;
+  imageUrl?: string;
+  images?: string[];
+}
+
+export interface ImageUploadResponse {
+  path: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class ProductsService {
   private readonly apiUrl = environment.apiUrl;
@@ -59,5 +72,19 @@ export class ProductsService {
 
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/products/${id}`);
+  }
+
+  createProduct(request: UpsertProductRequest): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/products`, request);
+  }
+
+  updateProduct(id: string, request: UpsertProductRequest): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/products/${id}`, request);
+  }
+
+  uploadImage(file: File): Observable<ImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ImageUploadResponse>(`${this.apiUrl}/products/images`, formData);
   }
 }

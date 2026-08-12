@@ -1,4 +1,5 @@
 import { Component, input, output } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 export type IconButtonTone = 'default' | 'primary' | 'error';
 
@@ -10,13 +11,14 @@ const TONE_CLASSES: Record<IconButtonTone, string> = {
 
 @Component({
   selector: 'app-icon-button',
-  imports: [],
+  imports: [RouterLink],
   templateUrl: './icon-button.html',
 })
 export class IconButton {
   symbol = input.required<string>();
   label = input.required<string>();
   tone = input<IconButtonTone>('default');
+  routerLink = input<string | string[]>();
   click = output<MouseEvent>();
 
   buttonClass(): string {
