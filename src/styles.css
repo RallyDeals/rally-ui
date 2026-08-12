@@ -135,6 +135,10 @@ body {
   background-color: #eaedff;
 }
 
+button:hover{
+  cursor: pointer;
+}
+
 .card-surface {
   background-color: #ffffff;
   border-radius: 0.75rem;
