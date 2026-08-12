@@ -1,2 +1,1 @@
-export const PLACEHOLDER_IMAGE =
-  'https://lh3.googleusercontent.com/aida-public/AB6AXuC1je5hKQEew_DKnev-fBRklI9fyrGub7O1rzQph5cXnvuJhzJWwMNLzN9N65U1sBDw4rNjdkUXc24Vz89evSwsiOR4WjwoJnecn49BrfSTvn5RR31e33mfCp5B0nmKDsxU-hbAAwc8N_MSIPUJWcEP6PzAvjzH3RbWHfskqXU3xXcSvWlWU8ltyVp7JR7kkh7j1eAgRMR9aai30vRKe97Zouqdm4zWbRU7IoeyA4CQs27hHaqS_xNJf0yCWaozLsUGRjbd39sXV8M';
+export const PLACEHOLDER_IMAGE = '/assets/placeholder.png';
