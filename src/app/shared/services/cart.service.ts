@@ -2,6 +2,7 @@ import { Injectable, computed, signal } from '@angular/core';
 import { CartItem } from '../models/cart-item';
 import { PLACEHOLDER_IMAGE } from '../constants/placeholder';
 import { Product } from '../models/product';
+import { resolveImageUrl } from '../utils/image-url';
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
@@ -24,7 +25,7 @@ export class CartService {
         ...items,
         {
           id: product.id,
-          image: product.imageUrl ?? PLACEHOLDER_IMAGE,
+          image: resolveImageUrl(product.imageUrl, PLACEHOLDER_IMAGE),
           imageAlt: product.name,
           name: product.name,
           price: product.basePrice,

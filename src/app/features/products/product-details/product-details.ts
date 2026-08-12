@@ -7,6 +7,7 @@ import { ProductCard } from '../../../shared/components/product-card/product-car
 import { CartService } from '../../../shared/services/cart.service';
 import { Product } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 @Component({
   selector: 'app-product-details',
@@ -17,11 +18,23 @@ import { ProductsService } from '../products.service';
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
+  selectedImage = signal('');
   loading = signal(true);
   error = signal<string | null>(null);
   quantity = signal(1);
   added = signal(false);
   private addTimer: ReturnType<typeof setTimeout> | undefined;
+
+  readonly resolveImageUrl = resolveImageUrl;
+
+  readonly galleryImages = computed<string[]>(() => {
+    const product = this.product();
+    if (!product) {
+      return [];
+    }
+    const images = product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : [];
+    return images.filter((url) => !!url);
+  });
 
   breadcrumbs = computed<BreadcrumbItem[]>(() => {
     const product = this.product();
@@ -46,8 +59,10 @@ export class ProductDetails implements OnInit, OnDestroy {
   ) {}
 
   get imageSrc(): string {
-    return this.product()?.imageUrl ?? PLACEHOLDER_IMAGE;
+    return resolveImageUrl(this.selectedImage() || this.galleryImages()[0], PLACEHOLDER_IMAGE);
   }
+
+  selectImage = (url: string) => this.selectedImage.set(url);
 
   ngOnInit() {
     this.route.paramMap.subscribe((params) => {
@@ -64,6 +79,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     this.productsService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
+        this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
         this.loadRelatedProducts(product);
       },

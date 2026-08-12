@@ -18,6 +18,7 @@
       <button
         type="button"
         class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
+        [routerLink]="['/seller/products/new']"
       >
         <span class="material-symbols-outlined text-lg sm:text-xl">add</span>
         <span class="hidden sm:inline">Add Product</span>
@@ -128,7 +129,7 @@
                       <img
                         alt="Product"
                         class="w-full h-full object-cover"
-                        [src]="product.imageUrl || placeholderImage"
+                        [src]="resolveImageUrl(product.imageUrl, placeholderImage)"
                         fallbackSrc="/assets/placeholder.svg"
                       />
                     </div>
@@ -173,7 +174,12 @@
                 </td>
                 <td class="px-6 py-5 text-center">
                   <div class="flex justify-center gap-2">
-                    <app-icon-button symbol="edit" label="Edit product" tone="primary" />
+                    <app-icon-button
+                      symbol="edit"
+                      label="Edit product"
+                      tone="primary"
+                      [routerLink]="['/seller/products', product.id, 'edit']"
+                    />
                     <app-icon-button
                       symbol="delete"
                       label="Delete product"

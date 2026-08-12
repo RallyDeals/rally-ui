@@ -190,7 +190,7 @@
               <td class="px-rally-md py-4">
                 <div class="flex items-center gap-rally-sm">
                   <div class="w-10 h-10 rounded border border-outline-variant overflow-hidden bg-surface-container-low">
-                    <img alt="Product" class="w-full h-full object-cover" [src]="productImage" />
+                    <img alt="Product" class="w-full h-full object-cover" [src]="resolveImageUrl(deal.image, productImage)" />
                   </div>
                   <span class="font-medium">{{ deal.name }}</span>
                 </div>

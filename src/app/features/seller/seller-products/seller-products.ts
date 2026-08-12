@@ -1,6 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { DatePipe } from '@angular/common';
+import { RouterLink } from '@angular/router';
 import { ProductsService } from '../../products/products.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
@@ -14,6 +15,7 @@ import { InsightCard } from '../../../shared/components/insight-card/insight-car
 import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { ProductRow, StockStatus, toProductRow } from './product-row';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 type StatusFilter = 'ALL' | Product['status'];
 
@@ -22,6 +24,7 @@ type StatusFilter = 'ALL' | Product['status'];
   imports: [
     NgClass,
     DatePipe,
+    RouterLink,
     Pagination,
     PageHeader,
     StatCard,
@@ -82,6 +85,8 @@ export class SellerProducts implements OnInit {
         product.category.name.toLowerCase().includes(query),
     );
   });
+
+  readonly resolveImageUrl = resolveImageUrl;
 
   readonly pendingCount = computed(
     () => this.products().filter((product) => product.status === 'PENDING_APPROVAL').length,

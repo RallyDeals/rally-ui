@@ -4,6 +4,7 @@ import { PLACEHOLDER_IMAGE } from '../../constants/placeholder';
 import { Product } from '../../models/product';
 import { CartService } from '../../services/cart.service';
 import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
+import { resolveImageUrl } from '../../utils/image-url';
 
 @Component({
   selector: 'app-product-card',
@@ -23,7 +24,7 @@ export class ProductCard implements OnDestroy {
   ) {}
 
   get imageSrc(): string {
-    return this.product().imageUrl ?? PLACEHOLDER_IMAGE;
+    return resolveImageUrl(this.product().imageUrl, PLACEHOLDER_IMAGE);
   }
 
   openDetails = () => {

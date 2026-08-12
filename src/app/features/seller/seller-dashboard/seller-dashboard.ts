@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 interface ActivityItem {
   icon: string;
@@ -13,6 +14,7 @@ interface ActivityItem {
 
 interface DealRow {
   name: string;
+  image?: string;
   status: string;
   statusLabel: string;
   joined: number;
@@ -29,6 +31,7 @@ interface DealRow {
 })
 export class SellerDashboard {
   readonly productImage = PLACEHOLDER_IMAGE;
+  readonly resolveImageUrl = resolveImageUrl;
 
   readonly toneClasses: Record<string, string> = {
     primary: 'bg-surface-container-high text-primary',
