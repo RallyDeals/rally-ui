@@ -3,10 +3,11 @@ import { Router } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../constants/placeholder';
 import { Product } from '../../models/product';
 import { CartService } from '../../services/cart.service';
+import { ImageFallbackDirective } from '../../directives/image-fallback.directive';
 
 @Component({
   selector: 'app-product-card',
-  imports: [],
+  imports: [ImageFallbackDirective],
   templateUrl: './product-card.html',
   styleUrl: './product-card.css',
 })
