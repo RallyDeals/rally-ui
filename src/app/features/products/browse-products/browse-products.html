@@ -1,1 +1,124 @@
-<p>browse-products works!</p>
+<section class="bg-surface py-rally-xl md:py-24 min-h-screen">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    @let category = selectedCategory();
+
+    <div class="mb-8">
+      <h1
+        class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mb-2"
+      >
+        {{ category ? category.name : 'All Products' }}
+      </h1>
+      <p class="font-body-md text-on-surface-variant">
+        Browse admin-approved products ready for group deals.
+      </p>
+    </div>
+
+    <div class="flex flex-col lg:flex-row gap-rally-lg">
+      <aside class="w-full lg:w-64 flex-shrink-0 self-start lg:sticky lg:top-32">
+        <app-product-filters
+          [categories]="categories()"
+          [selectedCategoryId]="selectedCategoryId()"
+          [minPrice]="minPrice()"
+          [maxPrice]="maxPrice()"
+          (categoryChange)="onCategoryChange($event)"
+          (priceApply)="onPriceApply($event)"
+          (reset)="resetFilters()"
+        />
+      </aside>
+
+      <div class="flex-grow">
+        <div class="filter-toolbar">
+          <div class="search-box">
+            <button
+              class="search-icon hover:cursor-pointer"
+              (mousedown)="$event.preventDefault()"
+              (click)="search()"
+              aria-label="Search"
+            >
+              <span class="material-symbols-outlined">search</span>
+            </button>
+            <input
+              class="search-input"
+              placeholder="Search products..."
+              [value]="searchQuery()"
+              (input)="onSearchInput($any($event.target).value)"
+              (keyup.enter)="search()"
+            />
+            @if (searchQuery()) {
+              <button
+                class="search-clear hover:cursor-pointer"
+                (mousedown)="$event.preventDefault()"
+                (click)="clearSearch()"
+              >
+                <span class="material-symbols-outlined text-[18px]">close</span>
+              </button>
+            }
+          </div>
+
+          <p class="result-count font-body-md text-body-md">
+            Showing {{ fromIndex }}–{{ toIndex }} of {{ total() }}
+          </p>
+
+          <select
+            class="filter-select"
+            [value]="sortBy()"
+            (change)="onSortChange($any($event.target).value)"
+          >
+            <option value="createdAt:desc">Newest</option>
+            <option value="basePrice:asc">Price: Low to High</option>
+            <option value="basePrice:desc">Price: High to Low</option>
+            <option value="name:asc">Name A-Z</option>
+          </select>
+        </div>
+
+        @if (loading()) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
+            @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
+              <div class="card-surface overflow-hidden animate-pulse">
+                <div class="aspect-square bg-surface-container-low"></div>
+                <div class="p-4">
+                  <div class="h-3 bg-surface-container rounded mb-2 w-1/4"></div>
+                  <div class="h-4 bg-surface-container rounded mb-2 w-3/4"></div>
+                  <div class="h-3 bg-surface-container rounded w-1/2"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (error()) {
+          <div class="text-center py-16">
+            <span class="material-symbols-outlined text-5xl text-error mb-4 block">error</span>
+            <p class="font-body-md text-on-surface">{{ error() }}</p>
+          </div>
+        } @else if (products().length === 0) {
+          <div class="text-center py-16">
+            <span class="material-symbols-outlined text-5xl text-primary mb-4 block"
+              >search_off</span
+            >
+            <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-1">
+              No products found
+            </h2>
+            <p class="font-body-md text-on-surface-variant">
+              Try adjusting your filters or search.
+            </p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
+            @for (product of products(); track product.id) {
+              <app-product-card [product]="product" />
+            }
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="flex justify-center mt-10">
+              <app-pagination
+                [page]="page()"
+                [totalPages]="totalPages()"
+                (pageChange)="goToPage($event)"
+              />
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</section>

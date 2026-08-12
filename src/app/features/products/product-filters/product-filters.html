@@ -1,0 +1,55 @@
+<aside class="product-filters">
+  <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-rally-md">Filters</h2>
+
+  <div class="product-filters__section">
+    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Category</h3>
+    <div class="flex flex-col gap-rally-xs">
+      @for (category of categories(); track category.id) {
+        <label class="flex items-center gap-rally-xs group hover:cursor-pointer">
+          <input
+            class="h-4 w-4 rounded border-outline text-primary focus:ring-primary"
+            type="checkbox"
+            [checked]="selectedCategoryId() === category.id"
+            (change)="onCategoryToggle(category.id, $event)"
+          />
+          <span
+            class="text-on-surface-variant group-hover:text-primary transition-colors font-body-md text-body-md"
+          >
+            {{ category.name }}
+          </span>
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="product-filters__section">
+    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Price Range</h3>
+    <div class="flex items-center gap-rally-xs">
+      <input
+        class="product-filters__price"
+        type="number"
+        min="0"
+        placeholder="Min"
+        [value]="priceMin"
+        (input)="onPriceInput('min', $event)"
+        (keyup.enter)="onPriceApply()"
+      />
+      <span class="text-on-surface-variant">-</span>
+      <input
+        class="product-filters__price"
+        type="number"
+        min="0"
+        placeholder="Max"
+        [value]="priceMax"
+        (input)="onPriceInput('max', $event)"
+        (keyup.enter)="onPriceApply()"
+      />
+    </div>
+    <button class="product-filters__apply" (click)="onPriceApply()">Apply</button>
+  </div>
+
+  <button class="product-filters__clear" (click)="reset.emit()">
+    <span class="material-symbols-outlined text-[16px]">filter_alt_off</span>
+    Clear all filters
+  </button>
+</aside>
