@@ -43,12 +43,12 @@
   >
     <div class="flex items-center gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
       <div
-        class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
+        class="shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
       >
         <span class="material-symbols-outlined text-body-md">filter_list</span>
         <span class="font-bold text-sm">Filters</span>
       </div>
-      <div class="h-6 w-px bg-outline-variant/30 flex-shrink-0"></div>
+      <div class="h-6 w-px bg-outline-variant/30 shrink-0"></div>
       <app-filter-pills
         [options]="statusOptions"
         [selected]="statusFilter()"
@@ -87,14 +87,6 @@
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
-              <th class="table-head-cell w-8">
-                <input
-                  class="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
-                  type="checkbox"
-                  [checked]="allSelected()"
-                  (change)="toggleSelectAll()"
-                />
-              </th>
               <th class="table-head-cell">Product</th>
               <th class="table-head-cell">SKU</th>
               <th class="table-head-cell text-center">Category</th>
@@ -109,17 +101,9 @@
             @for (product of visibleProducts(); track product.id) {
               <tr class="product-row-hover group">
                 <td class="table-cell">
-                  <input
-                    class="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
-                    type="checkbox"
-                    [checked]="isSelected(product.id)"
-                    (change)="toggleSelect(product.id)"
-                  />
-                </td>
-                <td class="table-cell">
                   <div class="flex items-center gap-4">
                     <div
-                      class="w-14 h-14 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/50 flex-shrink-0"
+                      class="w-14 h-14 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/50 shrink-0"
                     >
                       <img
                         alt="Product"
@@ -128,11 +112,11 @@
                         fallbackSrc="/assets/placeholder.svg"
                       />
                     </div>
-                    <div class="truncate max-w-[200px]">
+                    <div class="truncate max-w-50">
                       <p class="font-bold text-on-surface group-hover:text-primary transition-colors truncate">
                         {{ product.name }}
                       </p>
-                      <p class="text-xs text-on-surface-variant truncate">{{ product.id }}</p>
+                      <p class="text-xs text-on-surface-variant truncate">{{ product.id.slice(0, 8).toUpperCase() }}</p>
                     </div>
                   </div>
                 </td>

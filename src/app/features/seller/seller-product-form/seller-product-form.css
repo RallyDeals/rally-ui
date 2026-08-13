@@ -16,9 +16,8 @@
   border-radius: var(--radius-xl);
   padding: var(--spacing-rally-md);
   box-shadow: 0 1px 3px rgba(19, 27, 46, 0.05);
-  transition:
-    box-shadow 0.2s ease,
-    ring 0.2s ease;
+  transition: box-shadow 0.2s ease,
+  ring 0.2s ease;
 }
 
 .product-form__section:focus-within {
@@ -38,9 +37,15 @@
   color: var(--color-on-surface);
   transition: border-color 0.2s ease, box-shadow 0.2s ease;
 }
+
 .product-form__input::placeholder {
   color: var(--color-on-surface-variant);
 }
+
+.product-form__input.price-input {
+  padding-left: 1.6rem;
+}
+
 .product-form__input:focus {
   outline: none;
   border-color: var(--color-primary);
@@ -57,10 +62,10 @@
   background-color: var(--color-surface-container-lowest);
   border: 2px dashed color-mix(in srgb, var(--color-outline-variant) 50%, transparent);
   border-radius: var(--radius-xl);
-  transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease;
+  transition: background-color 0.2s ease,
+  border-color 0.2s ease;
 }
+
 .product-form__dropzone:hover {
   background-color: var(--color-surface-container-low);
   border-color: var(--color-primary);
