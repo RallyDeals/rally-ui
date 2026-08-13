@@ -6,13 +6,13 @@ import { SellerDashboard } from './features/seller/seller-dashboard/seller-dashb
 import { SellerSidebar } from './layout/seller-layout/seller-sidebar/seller-sidebar';
 import { DevRoleSwitcher } from './shared/components/dev-role-switcher/dev-role-switcher';
 import { routes } from './app.routes';
-import { authTokenInterceptor } from './shared/interceptors/auth-token.interceptor';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 describe('Seller render smoke', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SellerLayout, SellerDashboard, SellerSidebar, DevRoleSwitcher],
-      providers: [provideRouter(routes), provideHttpClient(withInterceptors([authTokenInterceptor]))],
+      providers: [provideRouter(routes), provideHttpClient(withInterceptors([authInterceptor]))],
     }).compileComponents();
   });
 

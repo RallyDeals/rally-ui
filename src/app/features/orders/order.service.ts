@@ -10,12 +10,12 @@ export class OrderService {
   private http = inject(HttpClient);
 
   getMyOrders(page: number, limit: number): Observable<BriefOrderPageResponse> {
-    return this.http.get<BriefOrderPageResponse>(`${environment.gatewayUrl}/api/orders/my`, {
+    return this.http.get<BriefOrderPageResponse>(`${environment.apiUrl}/api/orders/my`, {
       params: { page, limit },
     });
   }
 
   getOrderById(id: string): Observable<DetailedOrderResponse>{
-    return this.http.get<DetailedOrderResponse>(`${environment.gatewayUrl}/api/orders/${id}`);
+    return this.http.get<DetailedOrderResponse>(`${environment.apiUrl}/api/orders/${id}`);
   }
 }
