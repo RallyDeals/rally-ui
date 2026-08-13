@@ -1,4 +1,4 @@
-<section>
+﻿<section>
   <!-- Page Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-rally-md mb-rally-lg">
     <div>
@@ -27,67 +27,33 @@
 
   <!-- Key Metrics -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md mb-rally-lg">
-    <!-- Revenue -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Total Revenue</p>
-        <span class="material-symbols-outlined text-primary bg-primary-fixed p-1.5 rounded-lg">payments</span>
-      </div>
-      <div>
-        <h3 class="section-title">$45.2k</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          12.5% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Participants -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Active Participants</p>
-        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">groups</span>
-      </div>
-      <div>
-        <h3 class="section-title">1,204</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          8.2% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Success Rate -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Success Rate</p>
-        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">check_circle</span>
-      </div>
-      <div>
-        <h3 class="section-title">92%</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          2.1% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Pending -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Pending Orders</p>
-        <span class="material-symbols-outlined text-tertiary bg-tertiary-container p-1.5 rounded-lg">pending_actions</span>
-      </div>
-      <div>
-        <h3 class="section-title">18</h3>
-        <p class="font-label-sm text-on-surface-variant mt-1">Needs attention</p>
-      </div>
-    </div>
+    <app-metric-card
+      label="Total Revenue"
+      value="$45.2k"
+      symbol="payments"
+      trend="positive"
+      trendLabel="12.5% vs last month"
+    />
+    <app-metric-card
+      label="Participants"
+      value="1,204"
+      symbol="groups"
+      trend="positive"
+      trendLabel="8.2% vs last month"
+    />
+    <app-metric-card
+      label="Success Rate"
+      value="92%"
+      symbol="check_circle"
+      trend="positive"
+      trendLabel="2.1% vs last month"
+    />
+    <app-metric-card
+      label="Pending Orders"
+      value="18"
+      symbol="pending_actions"
+      trendLabel="Needs attention"
+    />
   </div>
 
   <!-- Main Charts Row -->
@@ -219,3 +185,4 @@
     </div>
   </div>
 </section>
+
