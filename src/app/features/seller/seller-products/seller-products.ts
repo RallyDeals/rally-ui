@@ -192,6 +192,10 @@ export class SellerProducts implements OnInit {
     this.loadProducts();
   };
 
+  goToDeals = () => {
+    this.router.navigate(['/seller/deals'], { queryParams: { status: 'active' } });
+  };
+
   toggleSelect = (id: string) => {
     const next = new Set(this.selectedIds());
     if (next.has(id)) {

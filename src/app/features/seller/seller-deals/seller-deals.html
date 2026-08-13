@@ -1,4 +1,31 @@
 <section class="flex-1 space-y-rally-md">
+  @if (menu()) {
+    <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
+    <div
+      class="fixed z-50 w-48 rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg p-1 mt-0!"
+      [style.left.px]="menuX"
+      [style.top.px]="menuY"
+    >
+      <button
+        type="button"
+        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors"
+        (click)="openDeal(menuId)"
+      >
+        <span class="material-symbols-outlined text-base">edit</span>
+        Edit Deal
+      </button>
+      @if (menuDeal()?.status === 'active') {
+        <button
+          type="button"
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-error hover:bg-error/10 transition-colors"
+          (click)="deleteDeal(menuId)"
+        >
+          <span class="material-symbols-outlined text-base">delete</span>
+          Delete Deal
+        </button>
+      }
+    </div>
+  }
   <!-- Page Top Bar (search + actions) -->
   <header
     class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
@@ -18,6 +45,7 @@
       <button
         type="button"
         class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
+        (click)="goToCreate()"
       >
         <span class="material-symbols-outlined text-lg sm:text-xl">add</span>
         <span class="hidden sm:inline">New Deal</span>
@@ -88,14 +116,17 @@
           </thead>
           <tbody class="divide-y divide-outline-variant/30">
             @for (deal of pagedDeals(); track deal.id) {
-              <tr class="product-row-hover">
+              <tr
+                class="product-row-hover cursor-pointer"
+                (click)="openDeal(deal.id)"
+              >
                 <td class="table-cell">
-                  <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === 'expired'">
+                  <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === 'failed' || deal.status === 'cancelled'">
                     <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
                       <img
                         alt="Deal Product"
                         class="w-full h-full object-cover"
-                        [class.grayscale]="deal.status === 'expired'"
+                        [class.grayscale]="deal.status === 'failed' || deal.status === 'cancelled'"
                         [src]="deal.image"
                       />
                     </div>
@@ -110,11 +141,12 @@
                 </td>
                 <td class="table-cell w-64">
                   <app-deal-progress
-                    [joined]="deal.joined"
-                    [required]="deal.required"
+                    [joined]="deal.currentParticipants"
+                    [required]="deal.dealStock"
                     [tone]="progressToneFor(deal.status)"
                     [pulse]="deal.status === 'active'"
                   />
+                  <p class="text-[11px] text-on-surface-variant mt-1">min {{ deal.minParticipants }} to succeed</p>
                 </td>
                 <td class="table-cell">
                   <p class="font-bold" [class]="deal.status === 'active' ? 'text-primary' : 'text-on-surface'">
@@ -136,9 +168,17 @@
                     }
                     {{ deal.time }}
                   </div>
+                  <p class="text-label-sm text-on-surface-variant mt-1">Duration: {{ formatDuration(deal.durationMinutes) }}</p>
+                  <p class="text-label-sm text-on-surface-variant">Ends {{ formatDateTime(endOf(deal)) }}</p>
                 </td>
                 <td class="table-cell text-right">
-                  <app-icon-button symbol="more_vert" label="Deal actions" />
+                  <div class="relative inline-block" (click)="$event.stopPropagation()">
+                    <app-icon-button
+                      symbol="more_vert"
+                      label="Deal actions"
+                      (click)="toggleMenu($event, deal.id)"
+                    />
+                  </div>
                 </td>
               </tr>
             }

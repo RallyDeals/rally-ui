@@ -8,16 +8,22 @@
       </p>
     </div>
     <div class="flex gap-rally-sm w-full sm:w-auto">
-      <button
-        type="button"
-        class="flex-1 sm:flex-none px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-2 bg-surface-container-lowest"
+      <div
+        class="relative flex-1 sm:flex-none px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-2 bg-surface-container-lowest overflow-hidden"
       >
-        <span class="material-symbols-outlined text-sm">calendar_month</span>
-        Last 30 Days
-      </button>
+        <span class="material-symbols-outlined text-sm pointer-events-none">calendar_month</span>
+        <span class="pointer-events-none">{{ selectedDate() || 'Last 30 Days' }}</span>
+        <input
+          type="date"
+          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+          [value]="selectedDate()"
+          (input)="onDateChange($event)"
+        />
+      </div>
       <button
         type="button"
         class="flex-1 sm:flex-none px-rally-md py-2 bg-primary-container text-on-primary rounded-lg font-label-sm font-semibold hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-2"
+        (click)="goToCreateDeal()"
       >
         <span class="material-symbols-outlined text-sm">add</span>
         Create Deal

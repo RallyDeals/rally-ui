@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { MetricCard } from '../components/metric-card/metric-card';
@@ -31,8 +32,19 @@ interface DealRow {
   styleUrl: './seller-dashboard.css',
 })
 export class SellerDashboard {
+  private readonly router = inject(Router);
+
   readonly productImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
+
+  readonly selectedDate = signal('');
+  readonly onDateChange = ($event: Event) => {
+    this.selectedDate.set(($event.target as HTMLInputElement).value);
+  };
+
+  goToCreateDeal = () => {
+    this.router.navigate(['/seller/deals/new']);
+  };
 
   readonly toneClasses: Record<string, string> = {
     primary: 'bg-surface-container-high text-primary',
