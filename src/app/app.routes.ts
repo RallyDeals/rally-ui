@@ -12,6 +12,8 @@ import { SELLER_ROUTES } from './features/seller/seller.routes';
 import { Cart } from './features/cart/cart';
 import { USER_PROFILE_ROUTES } from './features/user-profile/user-profile.routes';
 import { SellerLayout } from './layout/seller-layout/seller-layout';
+import { OrderDetails } from './features/orders/order-details/order-details';
+import { authGuard } from './core/guards/auth.guard';
 
 
 export const routes: Routes = [
@@ -50,7 +52,12 @@ export const routes: Routes = [
         component: Cart
       },
       {
+        path: 'orders/:orderId',
+        component: OrderDetails,
+      },
+      {
         path: 'profile',
+        canActivate: [authGuard],
         children: USER_PROFILE_ROUTES,
       },
       {

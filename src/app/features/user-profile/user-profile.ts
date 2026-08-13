@@ -11,7 +11,7 @@ import { ProfileTab } from './interfaces/profile-tab';
 })
 export class UserProfile {
   avatarUrl =
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuD58mNB7M3Stz7IlWktdlohliy-OACXslqprlFJNef3LbbFOEZOnTGfSre-pTW0wbckq5yCFT1QM7rzNLL5eX0L_DZk7uV2OEyn-e5wTjYXM3iWjjAczNBOkVgT-U9KMJlcZxcASiDqVvdNEYrVQdOOLj09aQmD58ok0J03FvzSF2Ijr9jjV7ywAYmiwRZPg5Pn5bpR8I7OlKFXO1Fz7htPBOGA1MC3HDlUiQqllcMiuQcGUNsph9MobMNp8DLddt4mPkGzebyEgms';
+    'https://lh3.googleusercontent.com/aida-public/AB6AXuBHSol_IxxKg-QlxhfK4We-hTAfWhkOLPIQ1TxgecpcFSkrQlLUqIdxLUVNdsiimfTGmgY2uHGSUDyILFA3LcqOdkOJMb21zUKK2d48TUodmjamQ2xf8Nd5QIq8WXRrn7CLxz-lpnoZO3_1WfE3baCJFBGr5LnVAt2xNmvTARnrX4W2qv6uFTtptYsnK1Q2UyTL5dueCR6WSemU-kTunJtXL1-qzfFLmHqa7hBGjMRZJEtBAuFE8Dd4awphHXylEZRkzA';
   userName = 'Alex Johnson';
 
   tabs: ProfileTab[] = [
