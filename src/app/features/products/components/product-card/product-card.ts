@@ -1,6 +1,7 @@
 import { Component, OnDestroy, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
+import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { Product } from '../../../../shared/models/product';
 import { CartService } from '../../../cart/cart.service';
 
@@ -22,7 +23,7 @@ export class ProductCard implements OnDestroy {
   ) {}
 
   get imageSrc(): string {
-    return this.product().imageUrl ?? PLACEHOLDER_IMAGE;
+    return resolveImageUrl(this.product().imageUrl, PLACEHOLDER_IMAGE);
   }
 
   openDetails = () => {

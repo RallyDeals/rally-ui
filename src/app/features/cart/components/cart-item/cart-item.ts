@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CartItem as CartItemModel } from '../../interfaces/cart-item';
+import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
+import { resolveImageUrl } from '../../../../shared/utils/image-url';
 
 @Component({
   selector: 'app-cart-item',
@@ -13,4 +15,5 @@ export class CartItem {
   onRemove = input.required<(id: string) => void>();
 
   subtotal = computed(() => this.item().price * this.item().quantity);
+  imageSrc = computed(() => resolveImageUrl(this.item().image, PLACEHOLDER_IMAGE));
 }

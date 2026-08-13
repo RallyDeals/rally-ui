@@ -13,6 +13,7 @@ import { DetailedOrderResponse } from '../interfaces/detailed-order-response';
 import { ActivatedRoute } from '@angular/router';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 
 const SHIPPING_COST = 20;
@@ -79,7 +80,7 @@ export class OrderDetails {
               productName: item.productName,
               quantity: item.quantity,
               unitPrice: item.unitPrice,
-              productImageUrl: item.productImageUrl,
+              productImageUrl: resolveImageUrl(item.productImageUrl),
             })),
           );
           const subtotal =
