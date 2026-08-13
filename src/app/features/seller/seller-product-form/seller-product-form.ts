@@ -89,7 +89,9 @@ export class SellerProductForm implements OnInit {
         this.description.set(product.description);
         this.categoryId.set(product.category.id);
         this.basePrice.set(product.basePrice ? String(product.basePrice) : '');
-        this.active.set(product.status !== 'REJECTED');
+        this.sku.set(product.sku ?? '');
+        this.active.set(product.visible);
+        this.tags.set(product.tags ?? []);
         this.images.set([
           ...(product.images?.length ? product.images : product.imageUrl ? [product.imageUrl] : []).map(
             (url) => ({ id: newImageId(), url }),
@@ -188,6 +190,9 @@ export class SellerProductForm implements OnInit {
       description: this.description().trim(),
       categoryId: this.categoryId() || undefined,
       basePrice: Number(this.basePrice()) || 0,
+      sku: this.sku().trim() || undefined,
+      visible: this.active(),
+      tags: this.tags(),
       imageUrl: images[0],
       images,
     };
