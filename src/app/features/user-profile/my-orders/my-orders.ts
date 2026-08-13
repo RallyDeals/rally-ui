@@ -6,7 +6,7 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
-import { RouterLink } from '@angular/router';
+
 const PAGE_SIZE = 2;
 
 @Component({
