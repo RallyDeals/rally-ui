@@ -1,5 +1,5 @@
 import { Injectable, computed, effect, signal } from '@angular/core';
-import { CartItem } from '../../shared/models/cart-item';
+import { CartItem } from './interfaces/cart-item';
 import { PLACEHOLDER_IMAGE } from '../../shared/constants/placeholder';
 import { Product } from '../../shared/models/product';
 

@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { PageResponse } from '../../shared/models/page-response';
+import { PageResponse } from './page-response';
 import { Product } from '../../shared/models/product';
 
 export interface ProductQueryParams {
