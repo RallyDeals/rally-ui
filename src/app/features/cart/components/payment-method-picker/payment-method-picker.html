@@ -1,0 +1,47 @@
+<section
+  class="bg-surface-container-lowest rounded-lg soft-shadow p-rally-md border border-outline-variant/30"
+>
+  <div class="flex items-center gap-rally-xs mb-rally-sm text-on-surface-variant">
+    <span class="material-symbols-outlined text-[18px]">credit_card</span>
+    <h2 class="font-label-sm uppercase tracking-wider">Payment Method</h2>
+  </div>
+  <div class="flex flex-col gap-rally-xs">
+    @for (method of methods; track method.id) {
+      <button
+        type="button"
+        class="flex items-center gap-rally-sm p-rally-sm rounded-lg border transition-colors text-left hover:cursor-pointer"
+        [class]="
+          selectedId() === method.id
+            ? 'border-primary bg-primary-container/10'
+            : 'border-outline-variant hover:border-primary/50'
+        "
+        (click)="select(method.id)"
+      >
+        <span
+          class="material-symbols-outlined text-[20px]"
+          [class]="selectedId() === method.id ? 'text-primary' : 'text-on-surface-variant'"
+        >
+          {{ selectedId() === method.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
+        </span>
+        <div
+          class="bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs font-bold tracking-wider"
+        >
+          {{ method.brand.toUpperCase() }}
+        </div>
+        <div>
+          <div class="font-body-md text-sm font-bold text-on-surface">
+            •••• {{ method.lastFourDigits }}
+          </div>
+          <div class="font-body-md text-xs text-on-surface-variant">Expires {{ method.expiry }}</div>
+        </div>
+      </button>
+    }
+    <button
+      type="button"
+      class="flex items-center gap-rally-xs p-rally-sm rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors hover:cursor-pointer"
+    >
+      <span class="material-symbols-outlined text-[18px]">add</span>
+      <span class="font-label-sm text-label-sm">Add New Card</span>
+    </button>
+  </div>
+</section>

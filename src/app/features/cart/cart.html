@@ -32,12 +32,18 @@
         }
       </div>
       <!-- Sidebar Summary -->
-      <aside class="lg:col-span-4 sticky top-24 w-full">
+      <aside class="lg:col-span-4 sticky top-24 w-full flex flex-col gap-rally-sm">
+        <app-checkout-address [address]="address()" (addressChange)="setAddress($event)" />
+        <app-payment-method-picker
+          [selectedId]="selectedPaymentMethodId()"
+          (selectedIdChange)="selectPaymentMethod($event)"
+        />
         <app-order-summary
           [itemsCount]="totalUnits()"
           [subtotal]="subtotal()"
           [tax]="estimatedTax()"
           [total]="total()"
+          [checkoutDisabled]="checkoutDisabled()"
         />
       </aside>
     </div>

@@ -1,15 +1,24 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { CartHeader } from './components/cart-header/cart-header';
 import { CartItem as CartItemComponent } from './components/cart-item/cart-item';
 import { OrderSummary } from './components/order-summary/order-summary';
+import { CheckoutAddress } from './components/checkout-address/checkout-address';
+import { PaymentMethodPicker } from './components/payment-method-picker/payment-method-picker';
 import { CartService } from './cart.service';
 
 const TAX_RATE = 0.08;
 
 @Component({
   selector: 'app-cart',
-  imports: [CartHeader, CartItemComponent, OrderSummary, RouterLink],
+  imports: [
+    CartHeader,
+    CartItemComponent,
+    OrderSummary,
+    CheckoutAddress,
+    PaymentMethodPicker,
+    RouterLink,
+  ],
   templateUrl: './cart.html',
 })
 export class Cart {
@@ -25,4 +34,13 @@ export class Cart {
   readonly decrementQuantity = this.cartService.decrement;
   readonly removeItem = this.cartService.remove;
   readonly clearCart = this.cartService.clear;
+
+  readonly address = signal('');
+  readonly selectedPaymentMethodId = signal<string | null>(null);
+  readonly checkoutDisabled = computed(
+    () => !this.address().trim() || !this.selectedPaymentMethodId(),
+  );
+
+  readonly setAddress = (value: string) => this.address.set(value);
+  readonly selectPaymentMethod = (id: string) => this.selectedPaymentMethodId.set(id);
 }
