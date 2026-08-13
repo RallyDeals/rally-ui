@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { MetricCard } from '../components/metric-card/metric-card';
 
 interface ActivityItem {
   icon: string;
@@ -25,7 +26,7 @@ interface DealRow {
 
 @Component({
   selector: 'app-seller-dashboard',
-  imports: [NgClass],
+  imports: [NgClass, MetricCard],
   templateUrl: './seller-dashboard.html',
   styleUrl: './seller-dashboard.css',
 })
