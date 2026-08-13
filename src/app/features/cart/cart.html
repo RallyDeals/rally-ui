@@ -1,25 +1,45 @@
-<main class="grow max-w-rally-container-max mx-auto w-full px-rally-gutter pt-10 pb-rally-xl">
-  <app-cart-header [itemsCount]="items().length" [onClearCart]="clearCart" />
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg relative items-start">
-    <!-- Cart Items List -->
-    <div class="lg:col-span-8 flex flex-col gap-rally-sm">
-      @for (item of items(); track item.id) {
-        <app-cart-item
-          [item]="item"
-          [onIncrement]="incrementQuantity"
-          [onDecrement]="decrementQuantity"
-          [onRemove]="removeItem"
-        />
-      }
+<main class="grow max-w-rally-container-max mx-auto w-full px-rally-gutter pt-10 pb-rally-xl min-h-screen">
+  @if (items().length === 0) {
+    <div
+      class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl bg-surface-container-lowest rounded-lg border border-outline-variant"
+    >
+      <span class="material-symbols-outlined text-on-surface-variant text-[40px]">
+        remove_shopping_cart
+      </span>
+      <h2 class="font-headline-md text-headline-md text-on-surface">Your cart is empty</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+        Looks like you haven't added anything yet. Start browsing to find something you like.
+      </p>
+      <a
+        routerLink="/products"
+        class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+      >
+        Browse Products
+      </a>
     </div>
-    <!-- Sidebar Summary -->
-    <aside class="lg:col-span-4 sticky top-24 w-full">
-      <app-order-summary
-        [itemsCount]="totalUnits()"
-        [subtotal]="subtotal()"
-        [tax]="estimatedTax()"
-        [total]="total()"
-      />
-    </aside>
-  </div>
+  } @else {
+    <app-cart-header [itemsCount]="items().length" [onClearCart]="clearCart" />
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg relative items-start">
+      <!-- Cart Items List -->
+      <div class="lg:col-span-8 flex flex-col gap-rally-sm">
+        @for (item of items(); track item.id) {
+          <app-cart-item
+            [item]="item"
+            [onIncrement]="incrementQuantity"
+            [onDecrement]="decrementQuantity"
+            [onRemove]="removeItem"
+          />
+        }
+      </div>
+      <!-- Sidebar Summary -->
+      <aside class="lg:col-span-4 sticky top-24 w-full">
+        <app-order-summary
+          [itemsCount]="totalUnits()"
+          [subtotal]="subtotal()"
+          [tax]="estimatedTax()"
+          [total]="total()"
+        />
+      </aside>
+    </div>
+  }
 </main>

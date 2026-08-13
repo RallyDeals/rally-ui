@@ -1,16 +1,33 @@
-import { Injectable, computed, signal } from '@angular/core';
-import { CartItem } from '../models/cart-item';
-import { PLACEHOLDER_IMAGE } from '../constants/placeholder';
-import { Product } from '../models/product';
+import { Injectable, computed, effect, signal } from '@angular/core';
+import { CartItem } from '../../shared/models/cart-item';
+import { PLACEHOLDER_IMAGE } from '../../shared/constants/placeholder';
+import { Product } from '../../shared/models/product';
+
+const STORAGE_KEY = 'cart';
+
+function loadStoredItems(): CartItem[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? (JSON.parse(raw) as CartItem[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 @Injectable({ providedIn: 'root' })
 export class CartService {
-  readonly items = signal<CartItem[]>([]);
+  readonly items = signal<CartItem[]>(loadStoredItems());
 
   readonly totalUnits = computed(() => this.items().reduce((sum, item) => sum + item.quantity, 0));
   readonly subtotal = computed(() =>
     this.items().reduce((sum, item) => sum + item.price * item.quantity, 0),
   );
+
+  constructor() {
+    effect(() => {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(this.items()));
+    });
+  }
 
   add(product: Product, quantity = 1) {
     this.items.update((items) => {

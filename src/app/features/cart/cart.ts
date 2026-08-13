@@ -1,14 +1,15 @@
 import { Component, computed, inject } from '@angular/core';
-import { CartHeader } from './cart-header/cart-header';
-import { CartItem as CartItemComponent } from './cart-item/cart-item';
-import { OrderSummary } from './order-summary/order-summary';
-import { CartService } from '../../shared/services/cart.service';
+import { RouterLink } from '@angular/router';
+import { CartHeader } from './components/cart-header/cart-header';
+import { CartItem as CartItemComponent } from './components/cart-item/cart-item';
+import { OrderSummary } from './components/order-summary/order-summary';
+import { CartService } from './cart.service';
 
-const TAX_RATE = 0.07;
+const TAX_RATE = 0.08;
 
 @Component({
   selector: 'app-cart',
-  imports: [CartHeader, CartItemComponent, OrderSummary],
+  imports: [CartHeader, CartItemComponent, OrderSummary, RouterLink],
   templateUrl: './cart.html',
 })
 export class Cart {
