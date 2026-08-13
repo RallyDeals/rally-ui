@@ -8,17 +8,17 @@ interface ShippingStatusMeta {
 }
 
 const SHIPPING_STATUS_META: Record<ShippingStatus, ShippingStatusMeta> = {
-  processing: {
+  PROCESSING: {
     label: 'Processing',
     icon: 'sync',
     badgeClass: 'bg-surface-container-high text-on-surface-variant',
   },
-  shipped: {
+  SHIPPED: {
     label: 'Shipped',
     icon: 'local_shipping',
     badgeClass: 'bg-secondary-container text-on-secondary-container',
   },
-  delivered: {
+  DELIVERED: {
     label: 'Delivered',
     icon: 'check_circle',
     badgeClass: 'bg-secondary-container text-on-secondary-container',

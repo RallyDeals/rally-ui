@@ -4,8 +4,9 @@ import { ShippingStatus } from '../../../shared/models/shipping-status';
 
 export interface OrderHeaderInfo {
   deliveryType: string;
-  placedDateLabel: string;
+  placedDate: string;
   orderNumber: string;
+  dealNumber: string;
   orderStatus: OrderStatus;
   shippingStatus?: ShippingStatus;
   cancelReason?: CancelReason;

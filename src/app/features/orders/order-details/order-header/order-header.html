@@ -6,10 +6,13 @@
           class="bg-primary-fixed text-primary px-rally-sm py-rally-xs rounded font-label-sm uppercase tracking-wider font-bold">
           {{ info().deliveryType }}
         </div>
-        <p class="font-body-md text-on-surface-variant text-sm">Placed on {{ info().placedDateLabel }}</p>
+        <p class="font-body-md text-on-surface-variant text-sm">Placed on {{ info().placedDate | date:'MMM dd, y' }}</p>
       </div>
       <div class="flex items-center gap-xs">
         <h1 class="font-body-md text-on-surface font-medium">Order <span>#{{ info().orderNumber }}</span></h1>
+        @if(info().dealNumber){
+          <h1 class="ms-3 font-body-md text-on-surface font-medium">Deal <span>#{{ info().dealNumber }}</span></h1>
+        }
         <span class="material-symbols-outlined text-secondary text-[20px] ms-rally-xs">verified</span>
       </div>
     </div>

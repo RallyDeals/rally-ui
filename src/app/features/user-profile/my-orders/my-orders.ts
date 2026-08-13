@@ -1,42 +1,60 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MyOrderCard } from './my-order-card/my-order-card';
-import { MyOrder } from '../interfaces/my-order';
+import { BriefOrderResponse } from '../../orders/interfaces/brief-order-response';
+import { OrderService } from '../../orders/order.service';
+import { ApiError } from '../../../shared/models/api-error';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { ErrorState } from '../../../shared/components/error-state/error-state';
+import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
+
+const PAGE_SIZE = 2;
 
 @Component({
   selector: 'app-my-orders',
-  imports: [MyOrderCard],
+  imports: [MyOrderCard, ErrorState, ErrorModal, RouterLink],
   templateUrl: './my-orders.html',
 })
 export class MyOrders {
-  orders: MyOrder[] = [
-    {
-      id: '#ORD-2993-8472',
-      datePlaced: 'Oct 24, 2023',
-      total: '$349.50',
-      itemsLabel: '1 Item',
-      orderType: 'NORMAL',
-      orderStatus: 'CONFIRMED',
-      shippingStatus: 'delivered',
-      isMuted: false,
-    },
-    {
-      id: '#ORD-9921-4451',
-      datePlaced: 'Oct 18, 2023',
-      total: '$129.00',
-      itemsLabel: '1 Item',
-      orderType: 'DEAL',
-      orderStatus: 'CONFIRMED',
-      shippingStatus: 'shipped',
-      isMuted: false,
-    },
-    {
-      id: '#ORD-1102-3394',
-      datePlaced: 'Sep 05, 2023',
-      total: '$89.99',
-      itemsLabel: '3 Items',
-      orderType: 'NORMAL',
-      orderStatus: 'CANCELLED',
-      isMuted: true,
-    },
-  ];
+  private orderService = inject(OrderService);
+
+  orders = signal<BriefOrderResponse[]>([]);
+  isLoading = signal(false);
+  loadError = signal<ApiError | null>(null);
+  loadMoreError = signal<ApiError | null>(null);
+  private total = signal(0);
+  private page = signal(1);
+
+  hasMore = computed(() => this.orders().length < this.total());
+
+  constructor() {
+    this.loadPage();
+  }
+
+  loadMore(): void {
+    this.page.update((page) => page + 1);
+    this.loadPage();
+  }
+
+  private loadPage(): void {
+    const isFirstPage = this.page() === 1;
+    this.isLoading.set(true);
+    this.orderService.getMyOrders(this.page(), PAGE_SIZE).subscribe({
+      error: (err) => {
+        this.isLoading.set(false);
+        const apiError = toApiError(err);
+        if (isFirstPage) {
+          this.loadError.set(apiError);
+        } else {
+          this.page.update((page) => page - 1);
+          this.loadMoreError.set(apiError);
+        }
+      },
+      next: (response) => {
+        this.orders.update((orders) => [...orders, ...response.orders]);
+        this.total.set(response.total);
+        this.isLoading.set(false);
+      },
+    });
+  }
 }

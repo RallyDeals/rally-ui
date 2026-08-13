@@ -1,9 +1,8 @@
 export interface OrderSummary {
-  subtotal: string;
+  subtotal: number;
   shippingLabel: string;
-  shippingCost: string;
-  estimatedTaxes: string;
-  total: string;
+  shippingCost: number;
+  estimatedTaxes: number;
+  total: number;
   totalNote: string;
-  estimatedDeliveryRange: string;
 }

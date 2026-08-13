@@ -1,1 +1,1 @@
-export type ShippingStatus = 'processing' | 'shipped' | 'delivered';
+export type ShippingStatus = 'PROCESSING' | 'SHIPPED' | 'DELIVERED';
