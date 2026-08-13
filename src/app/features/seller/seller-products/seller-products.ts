@@ -270,7 +270,7 @@ export class SellerProducts implements OnInit {
     }
     return {
       title: `Restore "${product.name}"?`,
-      message: 'The product will be visible in your store again.',
+      message: 'The product will be resubmitted for approval before it becomes visible in your store again.',
       icon: 'restore',
       iconTone: 'primary',
       confirmTone: 'primary',
