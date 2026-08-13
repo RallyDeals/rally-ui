@@ -18,9 +18,11 @@
         <app-product-filters
           [categories]="categories()"
           [selectedCategoryId]="selectedCategoryId()"
+          [selectedTag]="selectedTag()"
           [minPrice]="minPrice()"
           [maxPrice]="maxPrice()"
           (categoryChange)="onCategoryChange($event)"
+          (tagChange)="onTagChange($event)"
           (priceApply)="onPriceApply($event)"
           (reset)="resetFilters()"
         />
@@ -70,6 +72,67 @@
             <option value="name:asc">Name A-Z</option>
           </select>
         </div>
+
+        @if (activeFilterCount() > 0) {
+          <div class="flex flex-wrap items-center gap-rally-xs mb-rally-md">
+            <span class="font-body-md text-body-md text-on-surface-variant"
+              >Active filters:</span
+            >
+            @if (selectedCategory(); as category) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                {{ category.name }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove category filter"
+                  (click)="onCategoryChange(null)"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            @if (selectedTag(); as tag) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Tag: {{ tag }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove tag filter"
+                  (click)="onTagChange(null)"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            @if (minPrice() !== null || maxPrice() !== null) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Price: {{ priceLabel() }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove price filter"
+                  (click)="clearPrice()"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            <button
+              type="button"
+              class="inline-flex items-center gap-rally-xs font-body-md text-body-md text-primary hover:text-on-primary hover:bg-primary transition-colors px-2 py-1 rounded-md hover:cursor-pointer"
+              (click)="resetFilters()"
+            >
+              <span class="icon-md">filter_alt_off</span>
+              Clear all
+            </button>
+          </div>
+        }
 
         @if (loadError(); as loadError) {
           <app-error-state [error]="loadError" />

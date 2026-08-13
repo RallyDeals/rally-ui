@@ -7,6 +7,7 @@ import { Product } from '../../shared/models/product';
 
 export interface ProductQueryParams {
   q?: string;
+  tag?: string;
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
@@ -43,6 +44,7 @@ export class ProductsService {
         page: params.page ?? 1,
         limit: params.limit ?? 12,
         ...(params.q && { q: params.q }),
+        ...(params.tag && { tag: params.tag }),
         ...(params.categoryId && { categoryId: params.categoryId }),
         ...(params.minPrice !== undefined && { minPrice: params.minPrice }),
         ...(params.maxPrice !== undefined && { maxPrice: params.maxPrice }),
