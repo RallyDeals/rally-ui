@@ -70,6 +70,22 @@
             <p class="font-body-md text-on-surface-variant mt-rally-sm">
               {{ product.description }}
             </p>
+            @if (product.sku) {
+              <p class="font-label-sm text-label-sm text-on-surface-variant mt-rally-xs">
+                SKU: <span class="font-semibold text-on-surface">{{ product.sku }}</span>
+              </p>
+            }
+            @if (product.tags?.length) {
+              <div class="flex flex-wrap gap-rally-xs mt-rally-sm">
+                @for (tag of product.tags; track tag) {
+                  <span
+                    class="bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+                  >
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            }
           </div>
 
           <div class="flex flex-col gap-rally-md">
