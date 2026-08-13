@@ -2,11 +2,15 @@ import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
-import { ProductCard } from '../../../shared/components/product-card/product-card';
-import { Pagination } from '../../../shared/components/pagination/pagination';
-import { ProductFilters, PriceRange } from '../product-filters/product-filters';
+import { ProductCard } from '../components/product-card/product-card';
+import { Pagination } from './pagination/pagination';
+import { ProductFilters, PriceRange } from '../components/product-filters/product-filters';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService } from '../products.service';
+import { ApiError } from '../../../shared/models/api-error';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { ErrorState } from '../../../shared/components/error-state/error-state';
+import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 
 const DEFAULT_SORT = 'createdAt:desc';
 
@@ -20,7 +24,7 @@ function parseOptionalNumber(value: unknown): number | null {
 
 @Component({
   selector: 'app-browse-products',
-  imports: [ProductCard, Pagination, ProductFilters],
+  imports: [ProductCard, Pagination, ProductFilters, ErrorState, ErrorModal],
   templateUrl: './browse-products.html',
   styleUrl: './browse-products.css',
 })
@@ -31,7 +35,10 @@ export class BrowseProducts implements OnInit {
   page = signal(1);
   limit = 12;
   loading = signal(true);
-  error = signal<string | null>(null);
+  loadError = signal<ApiError | null>(null);
+  reloadError = signal<ApiError | null>(null);
+  private hasLoadedOnce = false;
+  private lastSuccessfulPage = 1;
   searchQuery = signal('');
   selectedCategoryId = signal<string | null>(null);
   minPrice = signal<number | null>(null);
@@ -70,7 +77,7 @@ export class BrowseProducts implements OnInit {
 
   loadProducts() {
     this.loading.set(true);
-    this.error.set(null);
+    this.loadError.set(null);
     this.productsService
       .getProducts({
         q: this.searchQuery().trim() || undefined,
@@ -86,10 +93,18 @@ export class BrowseProducts implements OnInit {
           this.products.set(response.items);
           this.total.set(response.total);
           this.loading.set(false);
+          this.hasLoadedOnce = true;
+          this.lastSuccessfulPage = this.page();
         },
-        error: () => {
-          this.error.set('Failed to load products. Please try again later.');
+        error: (err) => {
           this.loading.set(false);
+          const apiError = toApiError(err);
+          if (this.hasLoadedOnce) {
+            this.page.set(this.lastSuccessfulPage);
+            this.reloadError.set(apiError);
+          } else {
+            this.loadError.set(apiError);
+          }
         },
       });
   }

@@ -1,16 +1,19 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
-import { Accordion } from '../../../shared/components/accordion/accordion';
-import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
-import { ProductCard } from '../../../shared/components/product-card/product-card';
-import { CartService } from '../../../shared/services/cart.service';
+import { Accordion } from './accordion/accordion';
+import { Breadcrumbs, BreadcrumbItem } from './breadcrumbs/breadcrumbs';
+import { ProductCard } from '../components/product-card/product-card';
+import { CartService } from '../../cart/cart.service';
 import { Product } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
+import { ApiError } from '../../../shared/models/api-error';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { ErrorState } from '../../../shared/components/error-state/error-state';
 
 @Component({
   selector: 'app-product-details',
-  imports: [RouterLink, Breadcrumbs, Accordion, ProductCard],
+  imports: [RouterLink, Breadcrumbs, Accordion, ProductCard, ErrorState],
   templateUrl: './product-details.html',
   styleUrl: './product-details.css',
 })
@@ -18,7 +21,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
   loading = signal(true);
-  error = signal<string | null>(null);
+  error = signal<ApiError | null>(null);
   quantity = signal(1);
   added = signal(false);
   private addTimer: ReturnType<typeof setTimeout> | undefined;
@@ -67,8 +70,8 @@ export class ProductDetails implements OnInit, OnDestroy {
         this.loading.set(false);
         this.loadRelatedProducts(product);
       },
-      error: () => {
-        this.error.set('Failed to load product. Please try again later.');
+      error: (err) => {
+        this.error.set(toApiError(err));
         this.loading.set(false);
       },
     });

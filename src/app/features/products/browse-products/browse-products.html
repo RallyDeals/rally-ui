@@ -1,10 +1,10 @@
-<section class="bg-surface py-rally-xl md:py-24 min-h-screen">
+<section class="bg-surface py-rally-xl md:pb-24 min-h-screen">
   <div class="max-w-rally-container-max mx-auto px-rally-gutter">
     @let category = selectedCategory();
 
     <div class="mb-8">
       <h1
-        class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mb-2"
+        class="font-display-lg text-display-lg-mobile md:text-display-md font-bold text-on-surface mb-2"
       >
         {{ category ? category.name : 'All Products' }}
       </h1>
@@ -71,7 +71,9 @@
           </select>
         </div>
 
-        @if (loading()) {
+        @if (loadError(); as loadError) {
+          <app-error-state [error]="loadError" />
+        } @else if (loading()) {
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
             @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
               <div class="card-surface overflow-hidden animate-pulse">
@@ -83,11 +85,6 @@
                 </div>
               </div>
             }
-          </div>
-        } @else if (error()) {
-          <div class="text-center py-16">
-            <span class="material-symbols-outlined text-5xl text-error mb-4 block">error</span>
-            <p class="font-body-md text-on-surface">{{ error() }}</p>
           </div>
         } @else if (products().length === 0) {
           <div class="text-center py-16">
@@ -122,3 +119,4 @@
     </div>
   </div>
 </section>
+<app-error-modal [error]="reloadError()" (closed)="reloadError.set(null)" />

@@ -1,8 +1,8 @@
 import { Component, OnDestroy, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { PLACEHOLDER_IMAGE } from '../../constants/placeholder';
-import { Product } from '../../models/product';
-import { CartService } from '../../services/cart.service';
+import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
+import { Product } from '../../../../shared/models/product';
+import { CartService } from '../../../cart/cart.service';
 
 @Component({
   selector: 'app-product-card',

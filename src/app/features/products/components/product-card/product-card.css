@@ -65,6 +65,6 @@
 }
 .product-card__add-added,
 .product-card__add-added:hover {
-  background-color: var(--color-secondary-container);
-  color: var(--color-on-secondary-container);
+  background-color: var(--color-primary-fixed);
+  color: var(--color-on-primary-fixed);
 }

@@ -18,15 +18,15 @@
     >
       {{ product().category.name }}
     </span>
-    <h3 class="product-card__title font-headline-md text-headline-md leading-tight line-clamp-2">
+    <h3 class="product-card__title font-headline-md text-lg leading-tight line-clamp-2">
       {{ product().name }}
     </h3>
     <div class="mt-auto flex items-center justify-between gap-rally-sm">
-      <p class="product-card__price font-display-lg-mobile text-display-lg-mobile font-black">
+      <p class="product-card__price font-display-lg text-xl font-black min-w-0 truncate">
         ${{ product().basePrice }}
       </p>
       <button
-        class="product-card__add"
+        class="product-card__add shrink-0"
         [class.product-card__add-added]="added()"
         (click)="addToCart($event)"
       >

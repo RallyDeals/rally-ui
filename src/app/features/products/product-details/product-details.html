@@ -1,8 +1,8 @@
-<section class="bg-surface py-rally-xl md:py-24 min-h-screen">
+<section class="bg-surface py-rally-xl md:pb-24 min-h-screen">
   <div class="max-w-rally-container-max mx-auto px-rally-gutter">
     @if (loading()) {
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-rally-lg">
-        <div class="animate-pulse aspect-[4/5] bg-surface-container rounded-xl"></div>
+        <div class="animate-pulse aspect-4/5 bg-surface-container rounded-xl"></div>
         <div class="space-y-4">
           <div class="animate-pulse bg-surface-container rounded-lg h-5 w-24"></div>
           <div class="animate-pulse bg-surface-container rounded-lg h-8 w-3/4"></div>
@@ -12,18 +12,9 @@
           <div class="animate-pulse bg-surface-container rounded-lg h-12 w-full mt-8"></div>
         </div>
       </div>
-    } @else if (error()) {
-      <div class="product-details__error text-center py-24">
-        <span class="material-symbols-outlined text-5xl text-on-surface-variant block mb-4">
-          error_outline
-        </span>
-        <p class="font-body-md text-on-surface-variant mb-6">{{ error() }}</p>
-        <button
-          class="btn-ghost border border-outline rounded-lg px-6 py-3 font-label-sm text-label-sm hover:cursor-pointer"
-          (click)="retry()"
-        >
-          Try Again
-        </button>
+    } @else if (error(); as error) {
+      <div class="product-details__error py-24">
+        <app-error-state [error]="error" [showRetry]="true" (retry)="retry()" />
       </div>
     } @else if (product(); as product) {
       <app-breadcrumbs [items]="breadcrumbs()" />
@@ -31,16 +22,13 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg items-start mt-6">
         <div class="lg:col-span-7">
           <div
-            class="product-details__image relative aspect-[4/5] overflow-hidden rounded-xl group"
+            class="product-details__image relative aspect-4/5 overflow-hidden rounded-xl group"
           >
             <img
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
               [src]="imageSrc"
               [alt]="product.name"
             />
-            <button class="product-details__favorite absolute top-rally-md right-rally-md">
-              <span class="material-symbols-outlined">favorite</span>
-            </button>
           </div>
         </div>
 
