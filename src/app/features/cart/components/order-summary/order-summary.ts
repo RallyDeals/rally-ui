@@ -10,4 +10,5 @@ export class OrderSummary {
   subtotal = input.required<number>();
   tax = input.required<number>();
   total = input.required<number>();
+  checkoutDisabled = input(false);
 }
