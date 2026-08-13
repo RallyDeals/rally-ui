@@ -1,0 +1,18 @@
+<div
+  class="relative flex flex-col bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 active:scale-95 cursor-pointer"
+>
+  <span
+    class="material-symbols-outlined text-primary-container absolute top-rally-md right-rally-md"
+    >{{ symbol() }}</span
+  >
+  <p class="label-caps pr-10">{{ label() }}</p>
+  <h3 class="section-title mt-rally-sm">{{ value() }}</h3>
+  @if (trendLabel()) {
+    <p class="text-label-sm font-label-sm mt-1 flex items-center gap-1" [class]="trendClass()">
+      @if (trendSymbol()) {
+        <span class="material-symbols-outlined text-[16px]">{{ trendSymbol() }}</span>
+      }
+      {{ trendLabel() }}
+    </p>
+  }
+</div>
