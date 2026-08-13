@@ -11,6 +11,7 @@ import { DEALS_ROUTES } from './features/deals/deals.routes';
 import { Cart } from './features/cart/cart';
 import { USER_PROFILE_ROUTES } from './features/user-profile/user-profile.routes';
 import { OrderDetails } from './features/orders/order-details/order-details';
+import { authGuard } from './core/guards/auth.guard';
 
 
 export const routes: Routes = [
@@ -54,6 +55,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate: [authGuard],
         children: USER_PROFILE_ROUTES,
       },
       {
