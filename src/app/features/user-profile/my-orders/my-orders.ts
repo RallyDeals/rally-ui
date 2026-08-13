@@ -1,10 +1,11 @@
 import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { MyOrderCard } from './my-order-card/my-order-card';
 import { MyOrder } from '../interfaces/my-order';
 
 @Component({
   selector: 'app-my-orders',
-  imports: [MyOrderCard],
+  imports: [MyOrderCard, RouterLink],
   templateUrl: './my-orders.html',
 })
 export class MyOrders {

@@ -1,11 +1,29 @@
-<div class="flex flex-col gap-rally-md">
-  @for (order of orders; track order.id) {
-    <app-my-order-card [order]="order" />
-  }
-</div>
-<div class="w-full flex justify-center mt-rally-md">
-  <button
-    class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-2 rounded-lg font-semibold transition-colors text-sm">
-    Load More Orders
-  </button>
-</div>
+@if (orders.length === 0) {
+  <div
+    class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl bg-surface-container-lowest rounded-lg border border-outline-variant"
+  >
+    <span class="material-symbols-outlined text-on-surface-variant text-[40px]">shopping_bag</span>
+    <h2 class="font-headline-md text-headline-md text-on-surface">No orders yet</h2>
+    <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+      When you place an order, it will show up here.
+    </p>
+    <a
+      routerLink="/products"
+      class="btn-primary mt-rally-xs px-rally-lg py-2 rounded-lg font-label-sm text-label-sm"
+    >
+      Browse Products
+    </a>
+  </div>
+} @else {
+  <div class="flex flex-col gap-rally-md">
+    @for (order of orders; track order.id) {
+      <app-my-order-card [order]="order" />
+    }
+  </div>
+  <div class="w-full flex justify-center mt-rally-md">
+    <button
+      class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-2 rounded-lg font-semibold transition-colors text-sm">
+      Load More Orders
+    </button>
+  </div>
+}
