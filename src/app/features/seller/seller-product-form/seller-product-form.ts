@@ -49,7 +49,7 @@ export class SellerProductForm implements OnInit {
   name = signal('');
   description = signal('');
   categoryId = signal('');
-  brand = signal('');
+
   basePrice = signal('');
   stockQuantity = signal('');
   sku = signal('');

@@ -116,19 +116,6 @@
                   }
                 </select>
               </div>
-              <div>
-                <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-brand">
-                  Brand (Optional)
-                </label>
-                <input
-                  id="product-brand"
-                  type="text"
-                  class="product-form__input"
-                  placeholder="e.g. Steelcase"
-                  [value]="brand()"
-                  (input)="brand.set($any($event.target).value)"
-                />
-              </div>
             </div>
           </div>
         </section>
