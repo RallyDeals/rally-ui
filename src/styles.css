@@ -127,6 +127,60 @@ body {
   display: none;
 }
 
+/*
+ * Shared UI patterns.
+ * Used across multiple components, so they live here globally.
+ * Screen-specific variants should go in the owning component's stylesheet instead.
+ */
+
+.icon-lg,
+.icon-md,
+.icon-sm {
+  font-family: 'Material Symbols Outlined';
+  font-weight: normal;
+  font-style: normal;
+  display: inline-block;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+}
+.icon-lg {
+  font-size: 18px;
+}
+.icon-md {
+  font-size: 16px;
+}
+.icon-sm {
+  font-size: 14px;
+}
+
+.label-caps {
+  @apply font-label-sm text-on-surface-variant uppercase tracking-wider;
+}
+
+.label-caps-plain {
+  @apply font-label-sm uppercase tracking-wider;
+}
+
+.section-title {
+  @apply font-headline-md text-headline-md font-bold text-on-surface;
+}
+
+.section-title-plain {
+  @apply font-headline-md text-headline-md text-on-surface;
+}
+
+.body-subtle {
+  @apply font-body-md text-on-surface-variant;
+}
+
+.body-text {
+  @apply font-body-md text-on-surface;
+}
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }

@@ -8,7 +8,7 @@
       >
         {{ category ? category.name : 'All Products' }}
       </h1>
-      <p class="font-body-md text-on-surface-variant">
+      <p class="body-subtle">
         Browse admin-approved products ready for group deals.
       </p>
     </div>
@@ -50,7 +50,7 @@
                 (mousedown)="$event.preventDefault()"
                 (click)="clearSearch()"
               >
-                <span class="material-symbols-outlined text-[18px]">close</span>
+                <span class="icon-lg">close</span>
               </button>
             }
           </div>
@@ -91,10 +91,10 @@
             <span class="material-symbols-outlined text-5xl text-primary mb-4 block"
               >search_off</span
             >
-            <h2 class="font-headline-md text-headline-md font-bold text-on-surface mb-1">
+            <h2 class="section-title mb-1">
               No products found
             </h2>
-            <p class="font-body-md text-on-surface-variant">
+            <p class="body-subtle">
               Try adjusting your filters or search.
             </p>
           </div>

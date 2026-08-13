@@ -5,7 +5,7 @@
       <div class="mb-2">
         <app-breadcrumbs [items]="breadcrumbs()" />
       </div>
-      <h2 class="font-headline-md text-headline-md text-on-surface font-bold">
+      <h2 class="section-title-plain font-bold">
         {{ isEdit() ? 'Edit Product' : 'New Product' }}
       </h2>
       <p class="text-on-surface-variant mt-1 font-body-md text-body-md">
@@ -74,7 +74,7 @@
           </div>
           <div class="space-y-rally-md">
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-name">
+              <label class="field-label" for="product-name">
                 Product Name
               </label>
               <input
@@ -87,7 +87,7 @@
               />
             </div>
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-description">
+              <label class="field-label" for="product-description">
                 Description
               </label>
               <textarea
@@ -101,7 +101,7 @@
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-md">
               <div>
-                <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-category">
+                <label class="field-label" for="product-category">
                   Category
                 </label>
                 <select
@@ -127,7 +127,7 @@
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-rally-md">
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-price">
+              <label class="field-label" for="product-price">
                 Original Price ($)
               </label>
               <div class="relative">
@@ -144,7 +144,7 @@
               </div>
             </div>
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-stock">
+              <label class="field-label" for="product-stock">
                 Stock Quantity
               </label>
               <input
@@ -158,7 +158,7 @@
               />
             </div>
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-sku">
+              <label class="field-label" for="product-sku">
                 SKU
               </label>
               <input
@@ -210,7 +210,7 @@
           />
           @if (imageError()) {
             <p class="text-sm font-semibold text-error mb-rally-sm flex items-center gap-1">
-              <span class="material-symbols-outlined text-[18px]">error</span>
+              <span class="icon-lg">error</span>
               {{ imageError() }}
             </p>
           }
@@ -224,7 +224,7 @@
                   (click)="removeImage(image.id)"
                   aria-label="Remove image"
                 >
-                  <span class="material-symbols-outlined text-[16px]">close</span>
+                  <span class="icon-md">close</span>
                 </button>
               </div>
             }
@@ -262,7 +262,7 @@
               </label>
             </div>
             <div>
-              <label class="block font-label-sm text-label-sm text-on-surface-variant mb-1.5 ml-1" for="product-tags">
+              <label class="field-label" for="product-tags">
                 Tags
               </label>
               <input
@@ -303,7 +303,7 @@
             </p>
             <button type="button" class="mt-rally-md text-xs font-bold text-primary-fixed hover:underline flex items-center gap-1">
               Read Seller Guide
-              <span class="material-symbols-outlined text-[14px]">north_east</span>
+              <span class="icon-sm">north_east</span>
             </button>
           </div>
           <div class="absolute -bottom-10 -right-10 w-32 h-32 bg-primary/20 rounded-full blur-2xl"></div>

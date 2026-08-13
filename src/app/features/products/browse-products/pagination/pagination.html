@@ -7,7 +7,7 @@
       [disabled]="page() <= 1"
       aria-label="Previous page"
     >
-      <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+      <span class="icon-lg">chevron_left</span>
     </button>
     <button
       type="button"
@@ -16,7 +16,7 @@
       [disabled]="page() >= totalPages()"
       aria-label="Next page"
     >
-      <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+      <span class="icon-lg">chevron_right</span>
     </button>
   </div>
 } @else {
@@ -27,7 +27,7 @@
     [disabled]="page() <= 1"
     aria-label="Previous page"
   >
-    <span class="material-symbols-outlined text-[18px]">chevron_left</span>
+    <span class="icon-lg">chevron_left</span>
   </button>
 
   @for (item of pages(); track $index) {
@@ -50,7 +50,7 @@
     [disabled]="page() >= totalPages()"
     aria-label="Next page"
   >
-    <span class="material-symbols-outlined text-[18px]">chevron_right</span>
+    <span class="icon-lg">chevron_right</span>
   </button>
 </nav>
 }

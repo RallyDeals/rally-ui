@@ -67,7 +67,7 @@
             <p class="product-details__price font-body-lg text-3xl font-bold mt-1">
               ${{ product.basePrice }}
             </p>
-            <p class="font-body-md text-on-surface-variant mt-rally-sm">
+            <p class="body-subtle mt-rally-sm">
               {{ product.description }}
             </p>
             @if (product.sku) {
@@ -110,7 +110,7 @@
               <p
                 class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-rally-xs"
               >
-                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span class="icon-md">check_circle</span>
                 Approved &amp; Ready for Group Deals
               </p>
             </div>
@@ -159,12 +159,12 @@
       <div class="mt-rally-xl py-rally-xl border-t border-outline-variant/20">
         <div class="max-w-3xl mx-auto flex flex-col">
           <app-accordion title="Product Description" [open]="true">
-            <p class="font-body-md text-on-surface-variant leading-relaxed">
+            <p class="body-subtle leading-relaxed">
               {{ product.description }}
             </p>
           </app-accordion>
           <app-accordion title="Shipping &amp; Returns">
-            <p class="font-body-md text-on-surface-variant leading-relaxed">
+            <p class="body-subtle leading-relaxed">
               We provide complimentary express shipping on all orders. Your item will be processed
               within 24 hours and typically arrives in 2-3 business days. If you're not completely
               satisfied, we offer a hassle-free 30-day return policy for a full refund or exchange.
@@ -186,7 +186,7 @@
               routerLink="/products"
             >
               View All
-              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              <span class="icon-md">arrow_forward</span>
             </a>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md">
