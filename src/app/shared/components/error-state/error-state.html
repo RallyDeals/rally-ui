@@ -1,0 +1,13 @@
+<div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl px-rally-gutter">
+  <span class="material-symbols-outlined text-error text-[40px]">{{ display().icon }}</span>
+  <h2 class="font-headline-md text-headline-md text-on-surface">{{ display().title }}</h2>
+  <p class="font-body-md text-body-md text-on-surface-variant max-w-md">{{ display().message }}</p>
+  @if (display().actionLabel && display().actionLink) {
+    <a
+      [routerLink]="display().actionLink"
+      class="btn-primary mt-rally-xs px-rally-lg py-2 rounded-lg font-label-sm text-label-sm"
+    >
+      {{ display().actionLabel }}
+    </a>
+  }
+</div>
