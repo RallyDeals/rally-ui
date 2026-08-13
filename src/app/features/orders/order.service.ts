@@ -4,6 +4,8 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BriefOrderPageResponse } from './interfaces/brief-order-page-response';
 import { DetailedOrderResponse } from './interfaces/detailed-order-response';
+import { CheckoutOrderRequest } from './interfaces/checkout-order-request';
+import { CheckoutOrderResponse } from './interfaces/checkout-order-response';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -17,5 +19,12 @@ export class OrderService {
 
   getOrderById(id: string): Observable<DetailedOrderResponse>{
     return this.http.get<DetailedOrderResponse>(`${environment.apiUrl}/api/orders/${id}`);
+  }
+
+  checkout(request: CheckoutOrderRequest): Observable<CheckoutOrderResponse> {
+    return this.http.post<CheckoutOrderResponse>(
+      `${environment.apiUrl}/api/orders/checkout`,
+      request,
+    );
   }
 }

@@ -24,11 +24,12 @@
   </div>
   <button
     type="button"
-    [disabled]="checkoutDisabled()"
+    [disabled]="checkoutDisabled() || isProcessing()"
+    (click)="checkout.emit()"
     class="w-full bg-primary-container hover:bg-primary text-on-primary font-headline-md py-4 rounded-lg flex justify-center items-center gap-2 transition-all duration-300 shadow-md active:scale-[0.98] hover:cursor-pointer disabled:opacity-50 disabled:pointer-events-none disabled:hover:bg-primary-container"
   >
-    <span class="material-symbols-outlined">lock</span>
-    Secure Checkout
+    <span class="material-symbols-outlined">{{ isProcessing() ? 'progress_activity' : 'lock' }}</span>
+    {{ isProcessing() ? 'Placing Order...' : 'Secure Checkout' }}
   </button>
   <div class="mt-4 flex justify-center gap-4 text-outline opacity-60">
     <span class="material-symbols-outlined">credit_card</span>
