@@ -5,7 +5,7 @@ import { RouterLink } from '@angular/router';
 import { ProductsService } from '../../products/products.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
-import { Pagination } from '../../../shared/components/pagination/pagination';
+import { Pagination } from '../../products/browse-products/pagination/pagination';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { StatCard } from '../../../shared/components/stat-card/stat-card';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
