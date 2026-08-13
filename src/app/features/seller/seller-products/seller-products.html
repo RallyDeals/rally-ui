@@ -70,7 +70,7 @@
 
   <!-- Products Table -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
-    <div class="overflow-x-auto overflow-y-auto custom-scrollbar max-h-[calc(100vh-320px)]">
+    <div class="overflow-x-auto no-scrollbar">
       @if (loading()) {
         <div class="p-rally-xl space-y-rally-sm">
           @for (skeleton of [1, 2, 3, 4]; track skeleton) {
@@ -137,7 +137,7 @@
                       <p class="font-bold text-on-surface group-hover:text-primary transition-colors truncate">
                         {{ product.name }}
                       </p>
-                      <p class="text-xs text-on-surface-variant">{{ product.id }}</p>
+                      <p class="text-xs text-on-surface-variant truncate">{{ product.id }}</p>
                     </div>
                   </div>
                 </td>

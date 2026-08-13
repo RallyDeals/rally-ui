@@ -119,6 +119,14 @@ body {
   height: 6px;
 }
 
+.no-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
 .custom-scrollbar::-webkit-scrollbar-track {
   background: transparent;
 }
