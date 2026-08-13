@@ -1,5 +1,5 @@
 import { Component, effect, input, output } from '@angular/core';
-import { Category } from '../../../shared/models/category';
+import { Category } from '../../../../shared/models/category';
 
 export interface PriceRange {
   minPrice: number | null;
