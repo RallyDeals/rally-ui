@@ -23,7 +23,7 @@
       <button
         type="button"
         class="px-6 py-2.5 rounded-xl bg-primary-container text-on-primary hover:shadow-lg hover:scale-[1.02] transition-all font-semibold disabled:opacity-60 disabled:hover:scale-100"
-        [disabled]="saving()"
+        [disabled]="saving() || isFormDisabled()"
         (click)="save()"
       >
         @if (saving()) {
@@ -84,6 +84,7 @@
             class="w-full flex items-center gap-rally-sm p-rally-sm rounded-xl border bg-surface-container-low mb-rally-md hover:border-primary/50 transition-colors text-left group"
             [class.border-error!]="submitted() && !productId()"
             (click)="openPicker()"
+            [disabled]="isFormDisabled()"
           >
             <div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
               <img
@@ -132,6 +133,7 @@
                   placeholder="0.00"
                   [value]="dealPrice()"
                   (input)="dealPrice.set($any($event.target).value)"
+                  [disabled]="isFormDisabled()"
                 />
               </div>
             </div>
@@ -185,6 +187,7 @@
                 placeholder="e.g. 200"
                 [value]="dealStock()"
                 (input)="dealStock.set($any($event.target).value)"
+                [disabled]="isFormDisabled()"
               />
               <p class="text-xs text-on-surface-variant mt-1">Max number of units available at the deal price.</p>
             </div>
@@ -198,6 +201,7 @@
                 placeholder="e.g. 40"
                 [value]="minParticipants()"
                 (input)="minParticipants.set($any($event.target).value)"
+                [disabled]="isFormDisabled()"
               />
               <p class="text-xs text-on-surface-variant mt-1">The deal succeeds once this many buyers join.</p>
             </div>
@@ -208,7 +212,9 @@
                 type="datetime-local"
                 class="product-form__input"
                 [class.border-error!]="submitted() && startAtError() !== null"
-                (input)="startAt.set($any($event.target).value)"
+                [value]="startAt()"
+                (input)="onStartAtInput($any($event.target).value)"
+                [disabled]="isFormDisabled()"
               />
               @if (submitted() && startAtError()) {
                 <p class="text-xs text-error font-semibold mt-1 flex items-center gap-1">
@@ -246,21 +252,30 @@
                 class="product-form__input disabled:opacity-60"
                 placeholder="0"
                 [value]="currentParticipants()"
-                [disabled]="!isEdit()"
+                [disabled]="!isEdit() || isFormDisabled()"
                 (input)="currentParticipants.set(+$any($event.target).value || 0)"
               />
               <p class="text-xs text-on-surface-variant mt-1">Updated live as buyers join.</p>
             </div>
           </div>
-          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex items-start gap-3 border border-outline-variant/20">
+          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex flex-col sm:flex-row items-start gap-3 border border-outline-variant/20">
             <span class="material-symbols-outlined text-secondary text-[20px]">schedule</span>
-            <p class="text-sm text-on-surface-variant">
-              Duration:
-              <strong class="text-on-surface">
-                {{ durationMinutes() === null ? 'set a start and end time' : formatDuration(durationMinutes() ?? 0) }}
-              </strong>
-              (converted automatically, stored in minutes).
-            </p>
+            <div class="flex-1">
+              <p class="text-sm text-on-surface-variant mb-2">Duration (minutes)</p>
+              <div class="flex gap-3 items-center">
+                <input
+                  id="deal-duration"
+                  type="number"
+                  min="1"
+                  class="product-form__input w-36"
+                  [value]="durationMinutesInput() ?? durationMinutes() ?? ''"
+                  (input)="onDurationInput($any($event.target).value)"
+                  [disabled]="isFormDisabled()"
+                />
+                <p class="text-sm text-on-surface-variant">{{ durationMinutes() === null ? 'Set a start and end time to compute duration' : formatDuration(durationMinutes() ?? 0) }}</p>
+              </div>
+              <p class="text-xs text-on-surface-variant mt-2">Duration is stored in minutes. Changing duration (when a start time exists) will update the end time automatically.</p>
+            </div>
           </div>
           @if (isEdit() && minParticipants() && dealStock() && +minParticipants() > +dealStock()) {
             <p class="mt-rally-md text-sm text-error font-semibold flex items-center gap-1">
@@ -456,7 +471,7 @@
     <button
       type="button"
       class="flex-1 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-semibold disabled:opacity-60"
-      [disabled]="saving()"
+      [disabled]="saving() || isFormDisabled()"
       (click)="save()"
     >
       @if (saving()) {

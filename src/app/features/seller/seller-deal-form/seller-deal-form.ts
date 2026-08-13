@@ -209,8 +209,26 @@ export class SellerDealForm implements OnInit {
     this.dealStock.set(String(deal.dealStock));
     this.minParticipants.set(String(deal.minParticipants));
     this.currentParticipants.set(deal.currentParticipants);
-    this.startAt.set('');
-    this.endAt.set('');
+
+    // Initialize startAt/endAt and duration from deal data when available.
+    // Convert deal.startTime (ISO) to datetime-local format (no seconds) for inputs.
+    const startDate = deal.startTime ? new Date(deal.startTime) : null;
+    if (startDate && !Number.isNaN(startDate.getTime())) {
+      this.startAt.set(this.formatToDatetimeLocal(startDate));
+      if (typeof deal.durationMinutes === 'number' && deal.durationMinutes > 0) {
+        const endDate = new Date(startDate.getTime() + deal.durationMinutes * 60000);
+        this.endAt.set(this.formatToDatetimeLocal(endDate));
+        this.durationMinutesInput.set(deal.durationMinutes);
+      } else {
+        this.endAt.set('');
+        this.durationMinutesInput.set(null);
+      }
+    } else {
+      this.startAt.set('');
+      this.endAt.set('');
+      this.durationMinutesInput.set(null);
+    }
+
     this.submitted.set(false);
     this.loading.set(false);
   }
@@ -229,6 +247,52 @@ export class SellerDealForm implements OnInit {
 
   cancel = () => {
     this.router.navigate(['/seller/deals']);
+  };
+
+  // Helpers to keep duration <-> start/end in sync
+  private formatToDatetimeLocal(d: Date): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    const mm = pad(d.getMonth() + 1);
+    const dd = pad(d.getDate());
+    const hh = pad(d.getHours());
+    const min = pad(d.getMinutes());
+    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
+  }
+
+  private updateDurationFromDates() {
+    const dm = this.durationMinutes;
+    this.durationMinutesInput.set(dm === null ? null : dm);
+  }
+
+  onStartAtInput = (value: string) => {
+    this.startAt.set(value);
+    const minutes = this.durationMinutesInput();
+    if (minutes && value) {
+      const end = new Date(Date.parse(value) + minutes * 60000);
+      this.endAt.set(this.formatToDatetimeLocal(end));
+    } else {
+      this.updateDurationFromDates();
+    }
+  };
+
+  onEndAtInput = (value: string) => {
+    this.endAt.set(value);
+    this.updateDurationFromDates();
+  };
+
+  onDurationInput = (value: string) => {
+    const minutes = Number(value);
+    if (!value || Number.isNaN(minutes) || minutes <= 0) {
+      this.durationMinutesInput.set(null);
+      return;
+    }
+    this.durationMinutesInput.set(minutes);
+    const start = this.startAt();
+    if (start) {
+      const end = new Date(Date.parse(start) + minutes * 60000);
+      this.endAt.set(this.formatToDatetimeLocal(end));
+    }
   };
 
   pickerOpen = signal(false);

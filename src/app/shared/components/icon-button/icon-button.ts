@@ -5,7 +5,9 @@ export type IconButtonTone = 'default' | 'primary' | 'error';
 
 const TONE_CLASSES: Record<IconButtonTone, string> = {
   default: 'hover:bg-surface-container-high text-on-surface-variant',
-  primary: 'hover:bg-primary/10 hover:text-primary text-on-surface-variant',
+  // primary tone should use the primary-container color (orange) by default so edit icons and similar
+  // match the orange theme used elsewhere (e.g., product edit). Keep hover state to text-primary.
+  primary: 'text-primary-container hover:bg-primary/10 hover:text-primary',
   error: 'hover:bg-error/10 hover:text-error text-on-surface-variant',
 };
 
