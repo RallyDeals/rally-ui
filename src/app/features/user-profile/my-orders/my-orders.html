@@ -1,11 +1,20 @@
-<div class="flex flex-col gap-rally-md">
-  @for (order of orders; track order.id) {
-    <app-my-order-card [order]="order" />
+@if (loadError(); as loadError) {
+  <app-error-state [error]="loadError" />
+} @else {
+  <div class="flex flex-col gap-rally-md">
+    @for (order of orders(); track order.orderId) {
+      <app-my-order-card [order]="order" />
+    }
+  </div>
+  @if (hasMore()) {
+    <div class="w-full flex justify-center mt-rally-md">
+      <button
+        (click)="loadMore()"
+        [disabled]="isLoading()"
+        class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-2 rounded-lg font-semibold transition-colors text-sm disabled:opacity-50 disabled:pointer-events-none">
+        {{ isLoading() ? 'Loading...' : 'Load More Orders' }}
+      </button>
+    </div>
   }
-</div>
-<div class="w-full flex justify-center mt-rally-md">
-  <button
-    class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-2 rounded-lg font-semibold transition-colors text-sm">
-    Load More Orders
-  </button>
-</div>
+}
+<app-error-modal [error]="loadMoreError()" (closed)="loadMoreError.set(null)" />

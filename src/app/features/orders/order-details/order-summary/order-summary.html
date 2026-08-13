@@ -5,15 +5,15 @@
   <div class="space-y-rally-sm font-body-md mb-rally-md">
     <div class="flex justify-between items-center">
       <span class="opacity-80">Subtotal</span>
-      <span>{{ summary().subtotal }}</span>
+      <span>{{ summary().subtotal | currency:'USD' }}</span>
     </div>
     <div class="flex justify-between items-center">
       <span class="opacity-80">{{ summary().shippingLabel }}</span>
-      <span>{{ summary().shippingCost }}</span>
+      <span>{{ summary().shippingCost | currency:'USD' }}</span>
     </div>
     <div class="flex justify-between items-center">
       <span class="opacity-80">Estimated Taxes</span>
-      <span>{{ summary().estimatedTaxes }}</span>
+      <span>{{ summary().estimatedTaxes | currency:'USD' }}</span>
     </div>
   </div>
   <div class="pt-rally-sm mt-rally-sm relative">
@@ -23,11 +23,7 @@
         <span class="font-headline-md text-lg">Total</span>
         <div class="text-xs opacity-60">{{ summary().totalNote }}</div>
       </div>
-      <span class="font-display-lg-mobile text-primary-fixed-dim">{{ summary().total }}</span>
+      <span class="font-display-lg-mobile text-primary-fixed-dim">{{ summary().total | currency:'USD' }}</span>
     </div>
-  </div>
-  <div class="mt-rally-lg text-center">
-    <p class="font-body-md text-xs opacity-60">Estimated delivery between</p>
-    <p class="font-body-md text-xs font-medium">{{ summary().estimatedDeliveryRange }}</p>
   </div>
 </section>

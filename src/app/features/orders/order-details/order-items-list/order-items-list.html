@@ -4,7 +4,7 @@
     <span class="font-body-md text-on-surface">Order Items ({{ itemCount() }})</span>
   </div>
   <div class="flex flex-col">
-    @for (item of items(); track item.name) {
+    @for (item of items(); track item.productName) {
       <app-order-item-row [item]="item" />
     }
   </div>

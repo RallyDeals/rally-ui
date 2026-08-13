@@ -1,27 +1,31 @@
 <div
   class="bg-surface-container-lowest rounded-lg p-rally-md soft-shadow hover-lift border border-outline-variant transition-shadow group relative overflow-hidden"
-  [ngClass]="{ 'opacity-75': order().isMuted }"
+  [ngClass]="{ 'opacity-75': isMuted() }"
 >
   <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-rally-md">
     <div class="grid grid-cols-2 md:grid-cols-5 gap-rally-md flex-1">
       <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Order ID</p>
-        <p class="font-body-md font-semibold text-on-surface">{{ order().id }}</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Order
+          ID</p>
+        <p class="font-body-md font-semibold text-on-surface">{{ orderIdLabel() }}</p>
       </div>
       <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Date Placed</p>
-        <p class="font-body-md text-on-surface">{{ order().datePlaced }}</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Date
+          Placed</p>
+        <p class="font-body-md text-on-surface">{{ order().createdAt | date:'MMM dd, y' }}</p>
       </div>
       <div>
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Total Amount</p>
-        <p class="font-body-md font-semibold text-on-surface">{{ order().total }}</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Total
+          Amount</p>
+        <p class="font-body-md font-semibold text-on-surface">{{ order().totalPrice | currency:'USD' }}</p>
       </div>
       <div>
         <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Items</p>
-        <p class="font-body-md text-on-surface">{{ order().itemsLabel }}</p>
+        <p class="font-body-md text-on-surface">{{ itemsLabel() }}</p>
       </div>
       <div class="col-span-2 md:col-span-1">
-        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Order Type</p>
+        <p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-rally-base">Order
+          Type</p>
         <p class="font-body-md text-on-surface">{{ orderTypeLabel() }}</p>
       </div>
     </div>
@@ -29,9 +33,10 @@
       @if (order().shippingStatus; as status) {
         <app-shipping-status-badge [status]="status" />
       } @else {
-        <app-order-status-badge [status]="order().orderStatus" />
+        <app-order-status-badge [status]="order().status" />
       }
       <button
+        [routerLink]="['/orders', order().orderId]"
         class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-rally-sm rounded-lg font-semibold transition-colors text-sm">
         View Details
       </button>
