@@ -21,7 +21,7 @@ function hash(value: string): number {
 export function toProductRow(product: Product): ProductRow {
   return {
     ...product,
-    sku: `SKU-${product.id.slice(0, 8).toUpperCase()}`,
+    sku: product.sku ?? `SKU-${product.id.slice(0, 8).toUpperCase()}`,
     stockStatus: STOCK_STATUSES[hash(product.id) % STOCK_STATUSES.length],
     groupPrice: Math.round(product.basePrice * 0.83 * 100) / 100,
   };
