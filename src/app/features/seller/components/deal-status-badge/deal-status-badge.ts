@@ -1,19 +1,21 @@
 import { Component, input } from '@angular/core';
 
-export type DealStatus = 'active' | 'completed' | 'scheduled' | 'expired';
+export type DealStatus = 'pending' | 'active' | 'succeeded' | 'failed' | 'cancelled';
 
 const PILL_CLASSES: Record<DealStatus, string> = {
+  pending: 'bg-surface-container text-on-surface-variant',
   active: 'bg-surface-container-highest text-primary',
-  completed: 'bg-secondary-container text-on-secondary-container',
-  scheduled: 'bg-surface-container text-on-surface-variant',
-  expired: 'bg-error-container text-on-error-container',
+  succeeded: 'bg-secondary-container text-on-secondary-container',
+  failed: 'bg-error-container text-on-error-container',
+  cancelled: 'bg-surface-container-high text-on-surface-variant',
 };
 
 const DOT_CLASSES: Record<DealStatus, string> = {
+  pending: 'bg-outline',
   active: 'bg-primary',
-  completed: 'bg-secondary',
-  scheduled: 'bg-outline',
-  expired: 'bg-error',
+  succeeded: 'bg-secondary',
+  failed: 'bg-error',
+  cancelled: 'bg-outline-variant',
 };
 
 @Component({
