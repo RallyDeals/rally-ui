@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-order-summary',
@@ -11,4 +11,6 @@ export class OrderSummary {
   tax = input.required<number>();
   total = input.required<number>();
   checkoutDisabled = input(false);
+  isProcessing = input(false);
+  checkout = output<void>();
 }

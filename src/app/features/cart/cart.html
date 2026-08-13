@@ -44,8 +44,11 @@
           [tax]="estimatedTax()"
           [total]="total()"
           [checkoutDisabled]="checkoutDisabled()"
+          [isProcessing]="isCheckingOut()"
+          (checkout)="checkout()"
         />
       </aside>
     </div>
   }
 </main>
+<app-error-modal [error]="checkoutError()" (closed)="checkoutError.set(null)" />

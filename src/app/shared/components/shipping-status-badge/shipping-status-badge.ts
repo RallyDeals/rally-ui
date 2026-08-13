@@ -13,8 +13,8 @@ const SHIPPING_STATUS_META: Record<ShippingStatus, ShippingStatusMeta> = {
     icon: 'sync',
     badgeClass: 'bg-surface-container-high text-on-surface-variant',
   },
-  SHIPPED: {
-    label: 'Shipped',
+  SHIPPING: {
+    label: 'Shipping',
     icon: 'local_shipping',
     badgeClass: 'bg-secondary-container text-on-secondary-container',
   },
