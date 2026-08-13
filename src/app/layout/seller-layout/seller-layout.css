@@ -8,10 +8,10 @@
 }
 
 :host ::-webkit-scrollbar-thumb {
-  background: #e0c0b1;
+  background: var(--color-outline-variant);
   border-radius: 4px;
 }
 
 :host ::-webkit-scrollbar-thumb:hover {
-  background: #8c7164;
+  background: var(--color-outline);
 }

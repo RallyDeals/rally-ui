@@ -30,6 +30,26 @@
               [alt]="product.name"
             />
           </div>
+          @if (galleryImages().length > 1) {
+            <div class="flex gap-rally-sm mt-rally-sm">
+              @for (image of galleryImages(); track image; let i = $index) {
+                <button
+                  type="button"
+                  class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0"
+                  [class.border-primary]="resolveImageUrl(image) === imageSrc"
+                  [class.border-outline-variant]="resolveImageUrl(image) !== imageSrc"
+                  (click)="selectImage(image)"
+                  [attr.aria-label]="'View image ' + (i + 1)"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    [src]="resolveImageUrl(image)"
+                    [alt]="product.name + ' image ' + (i + 1)"
+                  />
+                </button>
+              }
+            </div>
+          }
         </div>
 
         <div class="lg:col-span-5 flex flex-col gap-rally-lg">

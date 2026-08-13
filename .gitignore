@@ -46,6 +46,6 @@ Thumbs.db
 # Environment files with local secrets
 /src/environments/environment.development.ts
 
-# Local session notes
-/SESSION.md
-/AGENTS.md
+# Local session & agent notes (not part of the repo)
+SESSION.md
+AGENTS.md

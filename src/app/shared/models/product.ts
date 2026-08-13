@@ -10,6 +10,7 @@ export interface Product {
   category: Category;
   basePrice: number;
   imageUrl: string | null;
+  images?: string[];
   status: ProductStatus;
   rejectionReason: string | null;
   createdAt: string;
