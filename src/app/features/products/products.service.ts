@@ -57,16 +57,26 @@ export class ProductsService {
 
   getSellerProducts(
     sellerId: string,
-    params: { status?: string; sort?: string; page?: number; limit?: number } = {},
+    params: {
+      status?: string;
+      deleted?: boolean;
+      includeDeleted?: boolean;
+      sort?: string;
+      page?: number;
+      limit?: number;
+    } = {},
   ): Observable<PageResponse<Product>> {
     return this.http.get<PageResponse<Product>>(
       `${this.apiUrl}/products/sellers/${sellerId}`,
       {
         params: {
-          includeDeleted: false,
           page: params.page ?? 1,
           limit: params.limit ?? 20,
           ...(params.status && { status: params.status }),
+          ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
+          ...(params.includeDeleted !== undefined && {
+            includeDeleted: String(params.includeDeleted),
+          }),
           ...(params.sort && { sort: params.sort }),
         },
       },
@@ -75,6 +85,10 @@ export class ProductsService {
 
   deleteProduct(id: string): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/products/${id}`);
+  }
+
+  restoreProduct(id: string): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/products/${id}/restore`, {});
   }
 
   createProduct(request: UpsertProductRequest): Observable<Product> {

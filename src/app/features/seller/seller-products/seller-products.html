@@ -77,22 +77,17 @@
             <div class="h-16 bg-surface-container-low rounded-lg animate-pulse"></div>
           }
         </div>
-      } @else if (error()) {
-        <div class="text-center py-16">
-          <span class="material-symbols-outlined text-5xl text-error mb-4 block">error</span>
-          <p class="font-body-md text-on-surface">{{ error() }}</p>
-        </div>
       } @else if (visibleProducts().length === 0) {
         <div class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-primary mb-4 block">inventory_2</span>
-          <h3 class="font-headline-md text-headline-md font-bold text-on-surface mb-1">No products yet</h3>
-          <p class="font-body-md text-on-surface-variant">Create your first product to get started.</p>
+          <h3 class="section-title mb-1">No products yet</h3>
+          <p class="body-subtle">Create your first product to get started.</p>
         </div>
       } @else {
         <table class="w-full text-left border-collapse">
           <thead>
             <tr class="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant w-8">
+              <th class="table-head-cell w-8">
                 <input
                   class="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
                   type="checkbox"
@@ -100,20 +95,20 @@
                   (change)="toggleSelectAll()"
                 />
               </th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Product</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">SKU</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant text-center">Category</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant text-right">Price</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant text-center">Status</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant text-center">Stock Status</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant">Created</th>
-              <th class="px-4 py-3 font-bold text-xs uppercase tracking-widest text-on-surface-variant text-center">Actions</th>
+              <th class="table-head-cell">Product</th>
+              <th class="table-head-cell">SKU</th>
+              <th class="table-head-cell text-center">Category</th>
+              <th class="table-head-cell text-right">Price</th>
+              <th class="table-head-cell text-center">Status</th>
+              <th class="table-head-cell text-center">Stock Status</th>
+              <th class="table-head-cell">Created</th>
+              <th class="table-head-cell text-center">Actions</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-outline-variant/30">
             @for (product of visibleProducts(); track product.id) {
               <tr class="product-row-hover group">
-                <td class="px-4 py-3">
+                <td class="table-cell">
                   <input
                     class="rounded border-outline-variant text-primary focus:ring-primary cursor-pointer"
                     type="checkbox"
@@ -121,7 +116,7 @@
                     (change)="toggleSelect(product.id)"
                   />
                 </td>
-                <td class="px-4 py-3">
+                <td class="table-cell">
                   <div class="flex items-center gap-4">
                     <div
                       class="w-14 h-14 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/50 flex-shrink-0"
@@ -141,27 +136,31 @@
                     </div>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-sm font-label-sm text-on-surface-variant">{{ product.sku }}</td>
-                <td class="px-4 py-3 text-center">
+                <td class="table-cell text-sm font-label-sm text-on-surface-variant">{{ product.sku }}</td>
+                <td class="table-cell text-center">
                   <span
                     class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"
                   >
                     {{ product.category.name }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-right">
+                <td class="table-cell text-right">
                   <p class="font-bold text-on-surface">${{ product.basePrice.toFixed(2) }}</p>
                   <p class="text-[10px] text-secondary font-bold">Group Price: ${{ product.groupPrice.toFixed(2) }}</p>
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="table-cell text-center">
                   <span
                     class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold capitalize"
-                    [ngClass]="statusBadgeClasses[product.status]"
+                    [ngClass]="
+                      product.deleted
+                        ? 'bg-surface-container text-on-surface-variant'
+                        : statusBadgeClasses[product.status]
+                    "
                   >
-                    {{ product.status.replace('_', ' ').toLowerCase() }}
+                    {{ product.deleted ? 'deleted' : product.status.replace('_', ' ').toLowerCase() }}
                   </span>
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="table-cell text-center">
                   <div class="flex items-center justify-center gap-2">
                     <span class="w-2 h-2 rounded-full" [class]="stockStatusConfig[product.stockStatus].dot"></span>
                     <span class="text-sm font-semibold" [class]="stockStatusConfig[product.stockStatus].text">
@@ -169,23 +168,32 @@
                     </span>
                   </div>
                 </td>
-                <td class="px-4 py-3 text-sm text-on-surface-variant">
+                <td class="table-cell text-sm text-on-surface-variant">
                   {{ product.createdAt | date: 'mediumDate' }}
                 </td>
-                <td class="px-4 py-3 text-center">
+                <td class="table-cell text-center">
                   <div class="flex justify-center gap-2">
-                    <app-icon-button
-                      symbol="edit"
-                      label="Edit product"
-                      tone="primary"
-                      [routerLink]="['/seller/products', product.id, 'edit']"
-                    />
-                    <app-icon-button
-                      symbol="delete"
-                      label="Delete product"
-                      tone="error"
-                      (click)="deleteProduct(product)"
-                    />
+                    @if (product.deleted) {
+                      <app-icon-button
+                        symbol="restore"
+                        label="Restore product"
+                        tone="primary"
+                        (click)="restoreProduct(product)"
+                      />
+                    } @else {
+                      <app-icon-button
+                        symbol="edit"
+                        label="Edit product"
+                        tone="primary"
+                        [routerLink]="['/seller/products', product.id, 'edit']"
+                      />
+                      <app-icon-button
+                        symbol="delete"
+                        label="Delete product"
+                        tone="error"
+                        (click)="deleteProduct(product)"
+                      />
+                    }
                   </div>
                 </td>
               </tr>
@@ -230,4 +238,19 @@
       tone="inverse"
     />
   </div>
+
+  <app-confirm-dialog
+    [confirm]="deleteRequest()"
+    (confirmed)="onDeleteConfirmed()"
+    (closed)="closeDeleteDialog()"
+  />
+
+  <app-confirm-dialog
+    [confirm]="restoreRequest()"
+    (confirmed)="onRestoreConfirmed()"
+    (closed)="closeRestoreDialog()"
+  />
+
+  <app-error-modal [error]="loadError()" (closed)="closeLoadError()" />
+  <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
 </section>

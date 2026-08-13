@@ -1,10 +1,13 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { DatePipe } from '@angular/common';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { ProductsService } from '../../products/products.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
+import { ApiError } from '../../../shared/models/api-error';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { Pagination } from '../../products/browse-products/pagination/pagination';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { StatCard } from '../../../shared/components/stat-card/stat-card';
@@ -13,11 +16,12 @@ import { SearchInput } from '../../../shared/components/search-input/search-inpu
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { InsightCard } from '../../../shared/components/insight-card/insight-card';
 import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
+import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { ProductRow, StockStatus, toProductRow } from './product-row';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 
-type StatusFilter = 'ALL' | Product['status'];
+type StatusFilter = 'ALL' | Product['status'] | 'DELETED';
 
 @Component({
   selector: 'app-seller-products',
@@ -33,12 +37,16 @@ type StatusFilter = 'ALL' | Product['status'];
     IconButton,
     InsightCard,
     ImageFallbackDirective,
+    ConfirmDialog,
+    ErrorModal,
   ],
   templateUrl: './seller-products.html',
+  styleUrl: './seller-products.css',
 })
 export class SellerProducts implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly tokenService = inject(TokenService);
+  private readonly router = inject(Router);
 
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   searchQuery = signal('');
@@ -48,7 +56,8 @@ export class SellerProducts implements OnInit {
   page = signal(1);
   limit = 10;
   loading = signal(true);
-  error = signal<string | null>(null);
+  loadError = signal<ApiError | null>(null);
+  actionError = signal<ApiError | null>(null);
   statusFilter = signal<StatusFilter>('ALL');
   selectedIds = signal<Set<string>>(new Set());
 
@@ -57,6 +66,7 @@ export class SellerProducts implements OnInit {
     { value: 'PENDING_APPROVAL', label: 'Pending Approval' },
     { value: 'APPROVED', label: 'Approved' },
     { value: 'REJECTED', label: 'Rejected' },
+    { value: 'DELETED', label: 'Deleted' },
   ];
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
@@ -89,11 +99,14 @@ export class SellerProducts implements OnInit {
   readonly resolveImageUrl = resolveImageUrl;
 
   readonly pendingCount = computed(
-    () => this.products().filter((product) => product.status === 'PENDING_APPROVAL').length,
+    () =>
+      this.products().filter(
+        (product) => !product.deleted && product.status === 'PENDING_APPROVAL',
+      ).length,
   );
 
   readonly lowStockCount = computed(
-    () => this.products().filter((product) => product.stockStatus !== 'IN_STOCK').length,
+    () => this.products().filter((product) => !product.deleted && product.stockStatus !== 'IN_STOCK').length,
   );
 
   readonly allSelected = computed(() => {
@@ -116,17 +129,25 @@ export class SellerProducts implements OnInit {
   loadProducts() {
     const sellerId = this.tokenService.getSellerId();
     if (!sellerId) {
-      this.error.set('Seller account not found.');
+      this.loadError.set({
+        message: 'Seller account not found.',
+        path: '/seller/products',
+        status: 401,
+        timestamp: new Date().toISOString(),
+        title: 'Seller account missing',
+      });
       this.loading.set(false);
       return;
     }
 
     this.loading.set(true);
-    this.error.set(null);
+    this.loadError.set(null);
     this.selectedIds.set(new Set());
     this.productsService
       .getSellerProducts(sellerId, {
-        status: this.statusFilter() === 'ALL' ? undefined : this.statusFilter(),
+        status: this.statusFilter() === 'ALL' || this.statusFilter() === 'DELETED' ? undefined : this.statusFilter(),
+        deleted: this.statusFilter() === 'DELETED',
+        includeDeleted: this.statusFilter() !== 'DELETED' ? false : undefined,
         page: this.page(),
         limit: this.limit,
       })
@@ -136,12 +157,21 @@ export class SellerProducts implements OnInit {
           this.total.set(response.total);
           this.loading.set(false);
         },
-        error: () => {
-          this.error.set('Failed to load products. Please try again later.');
+        error: (err) => {
+          this.loadError.set(toApiError(err));
           this.loading.set(false);
         },
       });
   }
+
+  closeLoadError = () => {
+    this.loadError.set(null);
+    this.router.navigate(['/seller']);
+  };
+
+  closeActionError = () => {
+    this.actionError.set(null);
+  };
 
   onStatusChange = (status: string) => {
     this.statusFilter.set(status as StatusFilter);
@@ -189,8 +219,33 @@ export class SellerProducts implements OnInit {
 
   isSelected = (id: string): boolean => this.selectedIds().has(id);
 
+  deleteTarget = signal<Product | null>(null);
+
+  readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
+    const product = this.deleteTarget();
+    if (!product) {
+      return null;
+    }
+    return {
+      title: `Delete "${product.name}"?`,
+      message: 'The product will be hidden from your store. You can restore it at any time.',
+      icon: 'delete',
+      confirmLabel: 'Delete',
+    };
+  });
+
   deleteProduct = (product: Product) => {
-    if (!window.confirm(`Delete "${product.name}"? This cannot be undone.`)) {
+    this.deleteTarget.set(product);
+  };
+
+  closeDeleteDialog = () => {
+    this.deleteTarget.set(null);
+  };
+
+  onDeleteConfirmed = () => {
+    const product = this.deleteTarget();
+    this.deleteTarget.set(null);
+    if (!product) {
       return;
     }
     this.productsService.deleteProduct(product.id).subscribe({
@@ -200,8 +255,47 @@ export class SellerProducts implements OnInit {
         this.selectedIds.set(next);
         this.loadProducts();
       },
-      error: () => {
-        window.alert('Failed to delete product. Please try again later.');
+      error: (err) => {
+        this.actionError.set(toApiError(err));
+      },
+    });
+  };
+
+  restoreTarget = signal<Product | null>(null);
+
+  readonly restoreRequest = computed<ConfirmDialogRequest | null>(() => {
+    const product = this.restoreTarget();
+    if (!product) {
+      return null;
+    }
+    return {
+      title: `Restore "${product.name}"?`,
+      message: 'The product will be visible in your store again.',
+      icon: 'restore',
+      iconTone: 'primary',
+      confirmTone: 'primary',
+      confirmLabel: 'Restore',
+    };
+  });
+
+  restoreProduct = (product: Product) => {
+    this.restoreTarget.set(product);
+  };
+
+  closeRestoreDialog = () => {
+    this.restoreTarget.set(null);
+  };
+
+  onRestoreConfirmed = () => {
+    const product = this.restoreTarget();
+    this.restoreTarget.set(null);
+    if (!product) {
+      return;
+    }
+    this.productsService.restoreProduct(product.id).subscribe({
+      next: () => this.loadProducts(),
+      error: (err) => {
+        this.actionError.set(toApiError(err));
       },
     });
   };
