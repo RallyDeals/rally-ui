@@ -10,4 +10,13 @@
       {{ display().actionLabel }}
     </a>
   }
+  @if (showRetry()) {
+    <button
+      type="button"
+      (click)="retry.emit()"
+      class="btn-ghost mt-rally-xs border border-outline rounded-lg px-rally-lg py-2 font-label-sm text-label-sm hover:cursor-pointer"
+    >
+      Try Again
+    </button>
+  }
 </div>

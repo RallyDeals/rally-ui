@@ -1,0 +1,19 @@
+<nav class="breadcrumbs flex items-center gap-rally-xs flex-wrap" aria-label="Breadcrumb">
+  @for (item of items(); track item.label; let index = $index, last = $last) {
+    @if (index > 0) {
+      <span class="breadcrumbs__separator material-symbols-outlined">chevron_right</span>
+    }
+    @if (last || !item.link) {
+      <span class="breadcrumbs__current font-label-sm text-label-sm uppercase tracking-widest">
+        {{ item.label }}
+      </span>
+    } @else {
+      <a
+        class="breadcrumbs__link font-label-sm text-label-sm uppercase tracking-widest"
+        [routerLink]="item.link"
+      >
+        {{ item.label }}
+      </a>
+    }
+  }
+</nav>

@@ -1,0 +1,221 @@
+<section>
+  <!-- Page Header -->
+  <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-rally-md mb-rally-lg">
+    <div>
+      <h2 class="font-display-lg text-display-lg text-on-surface font-bold tracking-tighter">Dashboard Overview</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-2">
+        Welcome back, here's what's happening with your deals today.
+      </p>
+    </div>
+    <div class="flex gap-rally-sm w-full sm:w-auto">
+      <button
+        type="button"
+        class="flex-1 sm:flex-none px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-2 bg-surface-container-lowest"
+      >
+        <span class="material-symbols-outlined text-sm">calendar_month</span>
+        Last 30 Days
+      </button>
+      <button
+        type="button"
+        class="flex-1 sm:flex-none px-rally-md py-2 bg-primary-container text-on-primary rounded-lg font-label-sm font-semibold hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-2"
+      >
+        <span class="material-symbols-outlined text-sm">add</span>
+        Create Deal
+      </button>
+    </div>
+  </div>
+
+  <!-- Key Metrics -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md mb-rally-lg">
+    <!-- Revenue -->
+    <div
+      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
+    >
+      <div class="flex justify-between items-start">
+        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Total Revenue</p>
+        <span class="material-symbols-outlined text-primary bg-primary-fixed p-1.5 rounded-lg">payments</span>
+      </div>
+      <div>
+        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">$45.2k</h3>
+        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
+          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          12.5% vs last month
+        </p>
+      </div>
+    </div>
+    <!-- Participants -->
+    <div
+      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
+    >
+      <div class="flex justify-between items-start">
+        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Active Participants</p>
+        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">groups</span>
+      </div>
+      <div>
+        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">1,204</h3>
+        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
+          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          8.2% vs last month
+        </p>
+      </div>
+    </div>
+    <!-- Success Rate -->
+    <div
+      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
+    >
+      <div class="flex justify-between items-start">
+        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Success Rate</p>
+        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">check_circle</span>
+      </div>
+      <div>
+        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">92%</h3>
+        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
+          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          2.1% vs last month
+        </p>
+      </div>
+    </div>
+    <!-- Pending -->
+    <div
+      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
+    >
+      <div class="flex justify-between items-start">
+        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Pending Orders</p>
+        <span class="material-symbols-outlined text-tertiary bg-tertiary-container p-1.5 rounded-lg">pending_actions</span>
+      </div>
+      <div>
+        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">18</h3>
+        <p class="font-label-sm text-on-surface-variant mt-1">Needs attention</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Main Charts Row -->
+  <div class="grid grid-cols-1 xl:grid-cols-3 gap-rally-md mb-rally-lg">
+    <!-- Performance Chart -->
+    <div class="xl:col-span-2 bg-surface-container-lowest rounded-xl border border-outline-variant p-rally-md flex flex-col shadow-sm">
+      <div class="flex justify-between items-center mb-rally-md">
+        <h3 class="font-body-lg text-body-lg font-semibold text-on-surface">Active Deals Performance</h3>
+        <button type="button" class="p-rally-base text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined">more_horiz</span>
+        </button>
+      </div>
+      <div
+        class="flex-1 min-h-[300px] w-full bg-surface-container-low rounded-lg border border-outline-variant/50 relative overflow-hidden flex items-end"
+      >
+        <div class="w-full h-full flex items-end gap-2 px-rally-md pt-rally-lg pb-rally-md">
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[30%] hover:bg-primary-container/40 transition-colors"></div>
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[45%] hover:bg-primary-container/40 transition-colors"></div>
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[25%] hover:bg-primary-container/40 transition-colors"></div>
+          <div class="flex-1 bg-primary-container/60 rounded-t-lg h-[60%] hover:bg-primary-container transition-colors"></div>
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[40%] hover:bg-primary-container/40 transition-colors"></div>
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[75%] hover:bg-primary-container/40 transition-colors"></div>
+          <div class="flex-1 bg-surface-container-highest rounded-t-lg h-[55%] hover:bg-primary-container/40 transition-colors"></div>
+        </div>
+        <svg class="absolute inset-0 w-full h-full pointer-events-none" preserveAspectRatio="none" viewBox="0 0 100 100">
+          <path
+            d="M 0 70 Q 20 60, 30 80 T 50 40 T 70 60 T 100 25"
+            fill="none"
+            stroke="#9d4300"
+            stroke-linecap="round"
+            stroke-width="2"
+          ></path>
+          <path
+            d="M 0 70 Q 20 60, 30 80 T 50 40 T 70 60 T 100 25 L 100 100 L 0 100 Z"
+            fill="url(#chartGrad)"
+            opacity="0.1"
+          ></path>
+          <defs>
+            <linearGradient id="chartGrad" x1="0" x2="0" y1="0" y2="1">
+              <stop offset="0%" stop-color="#9d4300" stop-opacity="1"></stop>
+              <stop offset="100%" stop-color="#9d4300" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Activity Feed -->
+    <div class="bg-surface-container-lowest rounded-xl border border-outline-variant p-rally-md flex flex-col h-[400px] shadow-sm">
+      <div class="flex justify-between items-center mb-rally-md">
+        <h3 class="font-body-lg text-body-lg font-semibold text-on-surface">Recent Activity</h3>
+      </div>
+      <div class="flex-1 overflow-y-auto pr-rally-xs space-y-rally-md">
+        @for (item of activity; track item.title; let last = $last) {
+          <div class="flex gap-rally-sm relative">
+            <div class="flex flex-col items-center">
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 border border-outline-variant"
+                [ngClass]="toneClasses[item.tone]"
+              >
+                <span class="material-symbols-outlined text-[16px]" [ngClass]="item.filled ? 'filled-icon' : ''">
+                  {{ item.icon }}
+                </span>
+              </div>
+              @if (!last) {
+                <div class="w-px h-full bg-outline-variant absolute top-8 left-4 -translate-x-1/2"></div>
+              }
+            </div>
+            <div class="pb-rally-sm">
+              <p class="font-label-sm font-semibold text-on-surface">{{ item.title }}</p>
+              <p class="text-[12px] text-on-surface-variant mt-0.5 leading-relaxed">{{ item.text }}</p>
+              <p class="text-[10px] text-outline mt-1 font-medium uppercase tracking-tighter">{{ item.time }}</p>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <!-- Top Performing Deals Table -->
+  <div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+    <div class="px-rally-md py-rally-md border-b border-outline-variant flex justify-between items-center">
+      <h3 class="font-body-lg text-body-lg font-semibold text-on-surface">Top Performing Deals</h3>
+      <button type="button" class="font-label-sm text-primary hover:underline font-semibold">View All</button>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="bg-surface-container-low border-b border-outline-variant">
+            <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium">Product</th>
+            <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium">Status</th>
+            <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium">Joined / Required</th>
+            <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium">Progress</th>
+            <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium text-right">Revenue</th>
+          </tr>
+        </thead>
+        <tbody class="font-body-md text-on-surface divide-y divide-outline-variant/30">
+          @for (deal of deals; track deal.name) {
+            <tr class="hover:bg-surface-container/30 transition-colors">
+              <td class="px-rally-md py-4">
+                <div class="flex items-center gap-rally-sm">
+                  <div class="w-10 h-10 rounded border border-outline-variant overflow-hidden bg-surface-container-low">
+                    <img alt="Product" class="w-full h-full object-cover" [src]="productImage" />
+                  </div>
+                  <span class="font-medium">{{ deal.name }}</span>
+                </div>
+              </td>
+              <td class="px-rally-md py-4">
+                <span
+                  class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold"
+                  [ngClass]="statusClasses[deal.status]"
+                >
+                  {{ deal.statusLabel }}
+                </span>
+              </td>
+              <td class="px-rally-md py-4">
+                <span class="font-semibold">{{ deal.joined }}</span> / {{ deal.required }}
+              </td>
+              <td class="px-rally-md py-4 w-48">
+                <div class="w-full bg-surface-container rounded-full h-2">
+                  <div class="h-2 rounded-full" [ngClass]="barClasses[deal.status]" [style.width.%]="deal.progress"></div>
+                </div>
+              </td>
+              <td class="px-rally-md py-4 text-right font-semibold">{{ deal.revenue }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>

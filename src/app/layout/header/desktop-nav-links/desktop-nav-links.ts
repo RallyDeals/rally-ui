@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { NgClass } from '@angular/common';
+import { NavLink } from '../interfaces/navLink';
 
 @Component({
   selector: 'app-desktop-nav-links',

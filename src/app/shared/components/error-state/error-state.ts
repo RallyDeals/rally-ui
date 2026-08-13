@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { ApiError } from '../../models/api-error';
 import { getErrorDisplay } from '../../utils/error-display.util';
@@ -10,6 +10,8 @@ import { getErrorDisplay } from '../../utils/error-display.util';
 })
 export class ErrorState {
   error = input.required<ApiError>();
+  showRetry = input(false);
+  retry = output<void>();
 
   display = computed(() => getErrorDisplay(this.error()));
 }

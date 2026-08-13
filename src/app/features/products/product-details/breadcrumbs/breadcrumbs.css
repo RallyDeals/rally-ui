@@ -1,0 +1,16 @@
+.breadcrumbs__link {
+  color: var(--color-on-surface-variant);
+  transition: color 0.2s ease;
+}
+.breadcrumbs__link:hover {
+  color: var(--color-primary);
+}
+
+.breadcrumbs__current {
+  color: var(--color-on-surface);
+}
+
+.breadcrumbs__separator {
+  font-size: 14px;
+  color: var(--color-outline);
+}

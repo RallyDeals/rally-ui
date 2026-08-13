@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { NavLink } from '../interfaces/navLink';
 
 @Component({
   selector: 'app-mobile-nav-links',

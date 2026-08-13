@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { ProfileSummary } from './profile-summary/profile-summary';
-import { ProfileTabs } from './profile-tabs/profile-tabs';
+import { ProfileSummary } from './components/profile-summary/profile-summary';
+import { ProfileTabs } from './components/profile-tabs/profile-tabs';
 import { ProfileTab } from './interfaces/profile-tab';
 
 @Component({

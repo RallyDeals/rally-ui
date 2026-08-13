@@ -1,3 +1,10 @@
 export const environment = {
-  gatewayUrl: 'http://localhost:8090',
+  production: true,
+  apiUrl: 'http://localhost:8090',
+  devToken: '',
+  devTokens: {
+    seller: '',
+    buyer: '',
+    admin: '',
+  },
 };

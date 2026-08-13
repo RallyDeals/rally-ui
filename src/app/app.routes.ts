@@ -8,8 +8,10 @@ import { Categories } from './features/categories/categories';
 import { AUTH_ROUTES } from './features/auth/auth.routes';
 import { PRODUCTS_ROUTES } from './features/products/products.routes';
 import { DEALS_ROUTES } from './features/deals/deals.routes';
+import { SELLER_ROUTES } from './features/seller/seller.routes';
 import { Cart } from './features/cart/cart';
 import { USER_PROFILE_ROUTES } from './features/user-profile/user-profile.routes';
+import { SellerLayout } from './layout/seller-layout/seller-layout';
 import { OrderDetails } from './features/orders/order-details/order-details';
 import { authGuard } from './core/guards/auth.guard';
 
@@ -67,5 +69,10 @@ export const routes: Routes = [
         children: DEALS_ROUTES
       }
     ],
+  },
+  {
+    path: 'seller',
+    component: SellerLayout,
+    children: SELLER_ROUTES
   },
 ];

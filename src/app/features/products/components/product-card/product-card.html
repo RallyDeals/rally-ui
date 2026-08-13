@@ -1,0 +1,40 @@
+<div
+  [class]="'product-card flex flex-col group ' + extraClasses()"
+  (click)="openDetails()"
+  (keydown.enter)="openDetails()"
+  role="link"
+  tabindex="0"
+>
+  <div class="relative w-full aspect-square overflow-hidden rounded-lg bg-surface-container-low">
+    <img
+      class="product-card__img w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      [src]="imageSrc"
+      [alt]="product().name"
+    />
+  </div>
+  <div class="product-card__body flex flex-col flex-grow">
+    <span
+      class="product-card__category font-label-sm text-label-sm uppercase tracking-wider font-semibold"
+    >
+      {{ product().category.name }}
+    </span>
+    <h3 class="product-card__title font-headline-md text-lg leading-tight line-clamp-2">
+      {{ product().name }}
+    </h3>
+    <div class="mt-auto flex items-center justify-between gap-rally-sm">
+      <p class="product-card__price font-display-lg text-xl font-black min-w-0 truncate">
+        ${{ product().basePrice }}
+      </p>
+      <button
+        class="product-card__add shrink-0"
+        [class.product-card__add-added]="added()"
+        (click)="addToCart($event)"
+      >
+        <span class="material-symbols-outlined text-[16px]">
+          {{ added() ? 'check' : 'add_shopping_cart' }}
+        </span>
+        {{ added() ? 'Added' : 'Add' }}
+      </button>
+    </div>
+  </div>
+</div>

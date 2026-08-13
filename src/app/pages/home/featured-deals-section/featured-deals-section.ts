@@ -1,6 +1,6 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DealCard } from '../../../shared/components/deal-card/deal-card';
+import { DealCard } from './deal-card/deal-card';
 import { Deal } from '../../../shared/models/deal';
 
 @Component({

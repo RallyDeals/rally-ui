@@ -1,0 +1,92 @@
+.product-details__category {
+  color: var(--color-primary);
+}
+
+.product-details__price {
+  color: var(--color-primary);
+}
+
+.product-details__image {
+  background-color: var(--color-surface-container-low);
+}
+
+.product-details__favorite {
+  width: 3rem;
+  height: 3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 9999px;
+  background-color: color-mix(in srgb, var(--color-surface) 80%, transparent);
+  backdrop-filter: blur(8px);
+  color: var(--color-on-surface);
+  box-shadow: 0 1px 3px rgba(19, 27, 46, 0.1);
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+.product-details__favorite:hover {
+  color: var(--color-primary);
+}
+.product-details__favorite:active {
+  transform: scale(0.9);
+}
+
+.product-details__add-to-cart {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-primary);
+  border: none;
+  border-radius: 0.75rem;
+  color: var(--color-on-primary);
+  font-family: var(--font-body-md);
+  font-size: var(--text-body-md);
+  font-weight: 600;
+  box-shadow: 0 10px 25px rgba(157, 67, 0, 0.2);
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    transform 0.15s ease;
+}
+.product-details__add-to-cart:hover {
+  background-color: transparent;
+  color: var(--color-on-primary-fixed);
+  border: 2px solid var(--color-on-primary-fixed);
+}
+.product-details__add-to-cart:active {
+  transform: scale(0.98);
+}
+.product-details__add-to-cart-added,
+.product-details__add-to-cart-added:hover {
+  background-color: var(--color-secondary-container);
+  color: var(--color-on-secondary-container);
+  box-shadow: none;
+}
+
+.product-details__buy-now {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  background-color: var(--color-on-surface);
+  border-radius: 0.75rem;
+  color: var(--color-surface);
+  font-family: var(--font-body-md);
+  font-size: var(--text-body-md);
+  font-weight: 600;
+  transition:
+    opacity 0.2s ease,
+    transform 0.15s ease;
+}
+.product-details__buy-now:hover {
+  opacity: 0.9;
+}
+.product-details__buy-now:active {
+  transform: scale(0.98);
+}
