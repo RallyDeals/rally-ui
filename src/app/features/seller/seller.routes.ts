@@ -2,11 +2,16 @@ import { Routes } from '@angular/router';
 import { SellerDashboard } from './seller-dashboard/seller-dashboard';
 import { SellerProducts } from './seller-products/seller-products';
 import { SellerProductForm } from './seller-product-form/seller-product-form';
+import { SellerDeals } from './seller-deals/seller-deals';
 
 export const SELLER_ROUTES: Routes = [
   {
     path: '',
     component: SellerDashboard,
+  },
+  {
+    path: 'deals',
+    component: SellerDeals,
   },
   {
     path: 'products',

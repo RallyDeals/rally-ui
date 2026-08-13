@@ -1,0 +1,160 @@
+<section class="flex-1 space-y-rally-md">
+  <!-- Page Top Bar (search + actions) -->
+  <header
+    class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
+  >
+    <div class="w-full max-w-xs">
+      <app-search-input
+        placeholder="Search deals..."
+        [value]="searchQuery()"
+        (valueChange)="onSearchInput($event)"
+        (clear)="clearSearch()"
+      />
+    </div>
+    <div class="flex items-center gap-1 sm:gap-rally-sm">
+      <app-icon-button symbol="notifications" label="Notifications" />
+      <app-icon-button symbol="chat_bubble" label="Messages" />
+      <div class="h-6 w-px bg-outline-variant/50 mx-2 hidden sm:block"></div>
+      <button
+        type="button"
+        class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
+      >
+        <span class="material-symbols-outlined text-lg sm:text-xl">add</span>
+        <span class="hidden sm:inline">New Deal</span>
+        <span class="sm:hidden text-xs">New</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Quick Stats Bento Grid -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
+    <app-metric-card label="Active Deals" value="12" symbol="bolt" trend="positive" trendLabel="+2 this week" />
+    <app-metric-card label="Total Revenue" value="$42,890.00" symbol="payments" trend="positive" trendLabel="14% growth" />
+    <app-metric-card label="Participants" value="1,402" symbol="groups" trendLabel="Across all campaigns" />
+    <app-metric-card label="Avg. Completion" value="88.4%" symbol="verified" trend="positive" trendLabel="Success rate" />
+  </div>
+
+  <!-- Filter Bar -->
+  <div
+    class="bg-surface-container-lowest p-rally-sm rounded-2xl border border-outline-variant shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-rally-sm"
+  >
+    <div class="flex items-center gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+      <div
+        class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
+      >
+        <span class="material-symbols-outlined text-body-md">filter_list</span>
+        <span class="font-bold text-sm">Filters</span>
+      </div>
+      <div class="h-6 w-px bg-outline-variant/30 flex-shrink-0"></div>
+      <app-filter-pills
+        [options]="statusOptions"
+        [selected]="statusFilter()"
+        (selectedChange)="onStatusChange($event)"
+      />
+    </div>
+    <div class="flex items-center gap-rally-sm self-end sm:self-auto">
+      <p class="text-xs text-on-surface-variant hidden md:block">
+        Showing {{ fromIndex }}-{{ toIndex }} of {{ visibleDeals().length }}
+      </p>
+      <app-pagination
+        [page]="page()"
+        [totalPages]="totalPages()"
+        (pageChange)="goToPage($event)"
+        [compact]="true"
+      />
+    </div>
+  </div>
+
+  <!-- Deals Table -->
+  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+    <div class="overflow-x-auto no-scrollbar">
+      @if (pagedDeals().length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-5xl text-primary mb-4 block">group_off</span>
+          <h3 class="section-title mb-1">No deals found</h3>
+          <p class="body-subtle">Try adjusting your search or status filter.</p>
+        </div>
+      } @else {
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant">
+              <th class="table-head-cell">Deal Product</th>
+              <th class="table-head-cell">Status</th>
+              <th class="table-head-cell">Participants</th>
+              <th class="table-head-cell">Deal Price</th>
+              <th class="table-head-cell">Time Remaining</th>
+              <th class="table-head-cell text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/30">
+            @for (deal of pagedDeals(); track deal.id) {
+              <tr class="product-row-hover">
+                <td class="table-cell">
+                  <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === 'expired'">
+                    <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
+                      <img
+                        alt="Deal Product"
+                        class="w-full h-full object-cover"
+                        [class.grayscale]="deal.status === 'expired'"
+                        [src]="deal.image"
+                      />
+                    </div>
+                    <div>
+                      <p class="font-bold text-on-surface">{{ deal.name }}</p>
+                      <p class="text-label-sm text-on-surface-variant">ID: {{ deal.id }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="table-cell">
+                  <app-deal-status-badge [status]="deal.status" />
+                </td>
+                <td class="table-cell w-64">
+                  <app-deal-progress
+                    [joined]="deal.joined"
+                    [required]="deal.required"
+                    [tone]="progressToneFor(deal.status)"
+                    [pulse]="deal.status === 'active'"
+                  />
+                </td>
+                <td class="table-cell">
+                  <p class="font-bold" [class]="deal.status === 'active' ? 'text-primary' : 'text-on-surface'">
+                    ${{ deal.price }}
+                  </p>
+                  <p class="text-label-sm text-on-surface-variant line-through">${{ deal.originalPrice }}</p>
+                </td>
+                <td class="table-cell">
+                  <div
+                    class="flex items-center gap-1"
+                    [class]="
+                      deal.urgent
+                        ? 'font-semibold text-tertiary'
+                        : 'text-on-surface-variant text-label-sm font-medium'
+                    "
+                  >
+                    @if (deal.urgent) {
+                      <span class="material-symbols-outlined text-[18px]">timer</span>
+                    }
+                    {{ deal.time }}
+                  </div>
+                </td>
+                <td class="table-cell text-right">
+                  <app-icon-button symbol="more_vert" label="Deal actions" />
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div
+      class="bg-surface-container-low px-4 py-3 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-4"
+    >
+      <p class="text-xs text-on-surface-variant text-center sm:text-left">
+        Showing {{ fromIndex }}-{{ toIndex }} of {{ visibleDeals().length }} campaigns
+      </p>
+      <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
+    </div>
+  </div>
+</section>
