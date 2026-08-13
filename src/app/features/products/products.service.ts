@@ -20,6 +20,9 @@ export interface UpsertProductRequest {
   description: string;
   categoryId?: string;
   basePrice: number;
+  sku?: string;
+  visible?: boolean;
+  tags?: string[];
   imageUrl?: string;
   images?: string[];
 }
