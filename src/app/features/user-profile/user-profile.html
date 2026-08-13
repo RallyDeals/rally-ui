@@ -1,0 +1,17 @@
+<!-- Main Content -->
+<main class="flex-1 p-rally-gutter pt-10 max-w-rally-container-max mx-auto w-full">
+  <!-- Header Section -->
+  <header class="mb-rally-lg flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div>
+      <h2 class="font-display-lg text-[22px] md:text-[38px] font-bold text-on-surface tracking-tighter">
+        My Dashboard</h2>
+      <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Manage your active group deals and recent
+        purchases.</p>
+    </div>
+    <app-profile-summary [avatarUrl]="avatarUrl" avatarAlt="User Profile" [name]="userName" />
+  </header>
+
+  <app-profile-tabs [tabs]="tabs" />
+
+  <router-outlet />
+</main>

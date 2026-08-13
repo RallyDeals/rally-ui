@@ -1,0 +1,18 @@
+<section class="bg-surface-container-low rounded-xl p-rally-md h-full flex flex-col justify-between">
+  <div>
+    <div class="flex items-center gap-rally-xs mb-rally-sm text-on-surface-variant">
+      <span class="material-symbols-outlined text-[18px]">credit_card</span>
+      <h2 class="font-label-sm uppercase tracking-wider">Payment Method</h2>
+    </div>
+    <div class="flex items-center gap-rally-sm mb-rally-md">
+      <div class="bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs font-bold tracking-wider">
+        {{ method().brand }}
+      </div>
+      <div>
+        <div class="font-body-md text-sm font-bold text-on-surface">•••• {{ method().lastFourDigits }}</div>
+        <div class="font-body-md text-xs text-on-surface-variant">Expires {{ method().expiry }}</div>
+      </div>
+    </div>
+  </div>
+  <p class="font-body-md text-xs text-on-surface-variant">{{ method().note }}</p>
+</section>

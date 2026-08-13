@@ -1,0 +1,112 @@
+<!-- Split Screen Layout -->
+<main class="flex-1 flex flex-col md:flex-row w-full min-h-screen">
+  <!-- Left Side: Lifestyle Image Canvas (Hidden on mobile) -->
+  <div
+    class="hidden md:flex md:w-1/2 relative bg-surface-container-low overflow-hidden items-center justify-center"
+  >
+    <div
+      class="absolute inset-0 bg-cover bg-center z-0"
+      style="
+        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcpUFJG3rsvg-jCpOdQ7A1mwQJLyB4Ab-nB1-ZsKo4I3_vD9MnDxX29nDQu7I9d_KVGR51_SxBa7DoHB4Ez7mFho6aV4iq5USDZuddVPXKMy9jX1ngvrl1vkWa0n2EGLRyAyOSsu1b7y4e_vqzxPtfpzsPf4I6ZWcHMyItRmLwhSe959idZ3MwxI0x_9kUYNA5atImAOkA9QPLyChHHB4yOz7rmIlJatOQ8DpdyhN9st6hk6ZGlcSW3zVrX48tBh9ATAHQ8MKwWqw');
+      "
+    ></div>
+    <!-- Atmospheric overlay to ensure text legibility and brand tone -->
+    <div
+      class="absolute inset-0 bg-linear-to-t from-on-surface/80 via-on-surface/20 to-transparent z-10"
+    ></div>
+    <div
+      class="relative z-20 p-rally-xl flex flex-col justify-end h-full w-full text-surface-bright"
+    >
+      <h1 class="font-display-lg text-display-lg font-bold mb-rally-sm">
+        Shop Together.<br />Save More.
+      </h1>
+      <p class="font-body-lg text-body-lg max-w-md opacity-90">
+        Join the Rally community to unlock exclusive group-buy discounts on premium brands. The
+        power of collective purchasing.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Side: Registration Form -->
+  <div class="w-full md:w-1/2 flex items-center justify-center p-gutter bg-surface">
+    <div class="w-full max-w-md bg-white rounded-xl shadow-sm p-rally-md glass-panel relative">
+      <!-- Brand Logo Anchor -->
+      <div class="mb-rally-sm">
+        <app-logo />
+      </div>
+      <div class="mb-rally-sm">
+        <h2 class="font-headline-md text-headline-md mb-rally-xs">Create your account</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Start unlocking community deals today.
+        </p>
+      </div>
+
+      <!-- Registration Form -->
+      <form class="space-y-rally-xs">
+        <app-txt-input
+          label="Full Name"
+          symbol="person"
+          id="name"
+          name="name"
+          placeholder="John Doe"
+          type="text"
+        />
+        <app-txt-input
+          label="Email Address"
+          symbol="mail"
+          id="email"
+          name="email"
+          placeholder="jane@example.com"
+          type="email"
+        />
+        <app-txt-input
+          label="Password"
+          symbol="lock"
+          id="password"
+          name="password"
+          placeholder="••••••••"
+          type="password"
+        />
+        <div>
+          <label class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+          >I want to be</label
+          >
+          <div class="grid grid-cols-2 gap-rally-xs" role="radiogroup" aria-label="Account type">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="role() === 'buyer'"
+              (click)="selectRole('buyer')"
+              class="role-btn flex flex-col items-center justify-center gap-1 py-3 rounded-lg border font-label-sm text-label-sm transition-all"
+              [class.role-btn-selected]="role() === 'buyer'"
+            >
+              <span class="material-symbols-outlined" style="font-size: 20px">shopping_bag</span>
+              Buyer
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="role() === 'seller'"
+              (click)="selectRole('seller')"
+              class="role-btn flex flex-col items-center justify-center gap-1 py-3 rounded-lg border font-label-sm text-label-sm transition-all"
+              [class.role-btn-selected]="role() === 'seller'"
+            >
+              <span class="material-symbols-outlined" style="font-size: 20px">storefront</span>
+              Seller
+            </button>
+          </div>
+        </div>
+        <div class="pt-rally-sm">
+          <app-primary-btn content="Create Account" type="submit" bgClass="bg-primary-container" />
+        </div>
+      </form>
+
+      <app-auth-switch-link
+        prompt="Already have an account?"
+        linkText="Sign in"
+        linkPath="/auth/login"
+        wrapperClass="mt-rally-sm"
+      />
+    </div>
+  </div>
+</main>

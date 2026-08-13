@@ -1,0 +1,57 @@
+<div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl relative">
+  <!-- Left Column: Visual/Avatar side -->
+  <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
+    <div
+      class="w-full max-w-70 aspect-square rounded-2xl bg-surface-container-high relative overflow-hidden shadow-xl transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-1">
+      <img
+        [src]="profile.avatarUrl"
+        [alt]="profile.avatarAlt"
+        class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-700 group-hover:scale-105"
+      />
+    </div>
+    <div class="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-70">
+      <p class="font-body-md text-on-surface-variant text-sm">{{ profile.joinedLabel }}</p>
+      <div class="w-full h-px bg-linear-to-r from-outline-variant/50 via-outline-variant to-transparent my-rally-sm"></div>
+      <div class="flex justify-between w-full font-label-sm text-on-surface-variant uppercase tracking-wider">
+        <span>Total Deals Joined</span>
+        <span class="text-on-surface font-bold">{{ profile.totalDealsJoined }}</span>
+      </div>
+      <div class="flex justify-between w-full font-label-sm text-on-surface-variant uppercase tracking-wider mt-rally-xs">
+        <span>Total Orders Made</span>
+        <span class="text-primary font-bold">{{ profile.totalOrdersMade }}</span>
+      </div>
+    </div>
+    <!-- Decorative element -->
+    <div class="absolute -left-rally-lg -bottom-rally-lg w-32 h-32 opacity-10 pointer-events-none mix-blend-overlay">
+      <svg class="w-full h-full fill-current text-primary animate-spin-slow" style="animation: spin 60s linear infinite;"
+           viewbox="0 0 100 100">
+        <defs>
+          <path d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" id="circlePath"></path>
+        </defs>
+        <text font-family="monospace" font-size="12" letter-spacing="3">
+          <textpath href="#circlePath">MEMBER PROFILE • RALLY ACCOUNT •</textpath>
+        </text>
+      </svg>
+    </div>
+  </div>
+  <!-- Right Column: Form -->
+  <div
+    class="lg:col-span-8 bg-surface-container-lowest rounded-2xl soft-shadow hover-lift border border-outline-variant p-rally-lg lg:p-rally-xl relative overflow-hidden">
+    <div class="absolute top-0 right-0 w-full h-full opacity-[0.02] pointer-events-none mix-blend-multiply"></div>
+    <div class="flex flex-col gap-rally-xl relative z-10">
+      <div class="flex flex-col gap-rally-lg">
+        <div class="flex items-center gap-rally-sm">
+          <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <span class="material-symbols-outlined text-[18px]">person</span>
+          </div>
+          <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+          @for (field of profile.fields; track field.label) {
+            <app-info-field [field]="field" />
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

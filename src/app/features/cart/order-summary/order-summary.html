@@ -1,0 +1,31 @@
+<div
+  class="bg-surface-container-lowest rounded-lg soft-shadow p-rally-md border border-outline-variant/30 relative overflow-hidden backdrop-blur-xl"
+>
+  <h2 class="font-headline-md text-on-surface mb-rally-md">Order Summary</h2>
+  <div class="space-y-3 mb-rally-md font-body-md">
+    <div class="flex justify-between text-on-surface-variant">
+      <span>Subtotal ({{ itemsCount() }} items)</span>
+      <span class="text-on-surface font-semibold">${{ subtotal().toFixed(2) }}</span>
+    </div>
+    <div class="flex justify-between text-on-surface-variant">
+      <span>Estimated Taxes</span>
+      <span class="text-on-surface">${{ tax().toFixed(2) }}</span>
+    </div>
+  </div>
+  <div class="border-t border-outline-variant/30 pt-4 mb-rally-lg">
+    <div class="flex justify-between items-center">
+      <span class="font-headline-md text-on-surface">Total</span>
+      <span class="font-display-lg-mobile text-primary">${{ total().toFixed(2) }}</span>
+    </div>
+  </div>
+  <button
+    class="w-full bg-primary-container hover:bg-primary text-on-primary font-headline-md py-4 rounded-lg flex justify-center items-center gap-2 transition-all duration-300 shadow-md active:scale-[0.98] hover:cursor-pointer"
+  >
+    <span class="material-symbols-outlined">lock</span>
+    Secure Checkout
+  </button>
+  <div class="mt-4 flex justify-center gap-4 text-outline opacity-60">
+    <span class="material-symbols-outlined">credit_card</span>
+    <span class="material-symbols-outlined">verified</span>
+  </div>
+</div>

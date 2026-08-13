@@ -1,0 +1,7 @@
+<div class="hidden md:flex items-center gap-8 h-full mx-rally-lg">
+  @for (link of navLinks(); track link.name) {
+    <a class="text-on-surface-variant hover:text-primary transition-colors duration-200"
+       [ngClass]="{ 'text-primary font-bold border-b-2 border-primary': selectedLink() === link.name }"
+       (click)="setSelectedLink()(link.name)" [routerLink]="link.path">{{ link.name }}</a>
+  }
+</div>

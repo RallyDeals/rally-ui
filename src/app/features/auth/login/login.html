@@ -1,0 +1,75 @@
+<div
+  class="bg-pattern min-h-screen flex items-center justify-center p-gutter font-sans antialiased text-on-surface"
+>
+  <main class="w-full max-w-110 relative z-10">
+    <!-- Logo -->
+    <div class="text-center mb-rally-lg">
+      <app-logo/>
+      <p class="font-body-md text-body-md text-on-surface-variant mt-xs">
+        Shop Together, Save More
+      </p>
+    </div>
+    <!-- Login Card -->
+    <div
+      class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(19,27,46,0.05)] border border-outline-variant/30 overflow-hidden relative"
+    >
+      <!-- Brand Accent Line -->
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary-fixed-dim to-primary-container"
+      ></div>
+      <div class="p-rally-lg">
+        <h2 class="font-headline-md text-headline-md text-on-surface mb-rally-sm">Sign In</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant mb-rally-lg">
+          Welcome back! Please enter your details.
+        </p>
+        <form class="space-y-md">
+          <!-- Email Input -->
+          <app-txt-input
+            label="Email Address"
+            symbol="mail"
+            id="email"
+            name="email"
+            placeholder="jane@example.com"
+            type="email"
+          />
+          <app-txt-input
+            label="Password"
+            symbol="lock"
+            id="password"
+            name="password"
+            placeholder="••••••••"
+            type="password"
+          />
+          <!-- Options Row -->
+          <div class="flex items-center justify-between pt-rally-xs pb-rally-sm">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input
+                class="w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container/20"
+                type="checkbox"
+              />
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors"
+                >Remember me</span
+              >
+            </label>
+            <a
+              class="font-label-sm text-label-sm text-primary hover:text-primary-container font-semibold transition-colors"
+              href="#"
+              >Forgot Password?</a
+            >
+          </div>
+          <!-- Primary CTA -->
+          <app-primary-btn content="Sign In" type="submit" bgClass="bg-primary-container" />
+        </form>
+      </div>
+      <!-- Card Footer -->
+      <div class="bg-surface-container-low p-rally-md border-t border-outline-variant/30 text-center">
+        <app-auth-switch-link
+          prompt="Don't have an account?"
+          linkText="Sign up"
+          linkPath="/auth/register"
+        />
+      </div>
+    </div>
+  </main>
+</div>

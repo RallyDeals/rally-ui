@@ -1,0 +1,13 @@
+<div class="bg-surface-container-lowest p-rally-md rounded-lg soft-shadow hover-lift border border-outline-variant w-full">
+  <div class="flex items-center justify-between mb-rally-sm">
+    <h3 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">{{ stat().label }}</h3>
+    <span class="material-symbols-outlined" [ngClass]="stat().iconColorClass">{{ stat().icon }}</span>
+  </div>
+  <p class="font-headline-md text-headline-md font-bold">{{ stat().value }}</p>
+  <p class="text-sm mt-1 flex items-center gap-1" [ngClass]="stat().noteColorClass || 'text-on-surface-variant'">
+    @if (stat().noteIcon) {
+      <span class="material-symbols-outlined text-xs">{{ stat().noteIcon }}</span>
+    }
+    {{ stat().note }}
+  </p>
+</div>

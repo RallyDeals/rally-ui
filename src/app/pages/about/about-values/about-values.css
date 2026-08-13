@@ -1,0 +1,8 @@
+.bento-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 0.5rem; /* lg token equivalent */
+}
+.bento-card:hover {
+  transform: scale(1.01);
+  box-shadow: 0px 8px 30px rgba(19, 27, 46, 0.08);
+}
