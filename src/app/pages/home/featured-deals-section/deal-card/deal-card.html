@@ -3,12 +3,12 @@
     <img class="w-full h-full object-contain group-hover:scale-110 transition-transform duration-500"
          [src]="deal().image" [alt]="deal().imageAlt" />
     <div
-      [class]="'absolute top-4 left-4 px-3 py-1 rounded-full font-label-sm text-xs font-bold flex items-center gap-1 backdrop-blur-md ' + deal().badge.bgClass + ' ' + deal().badge.textClass">
-      <span class="icon-sm">{{ deal().badge.icon }}</span> {{ deal().badge.text }}
+      [class]="'absolute top-4 left-4 px-3 py-1 rounded-full font-label-sm text-xs font-bold flex items-center gap-1 backdrop-blur-md ' + badge().bgClass + ' ' + badge().textClass">
+      <span class="icon-sm">{{ badge().icon }}</span> {{ badge().text }}
     </div>
     <div
       class="absolute top-4 right-4 bg-surface-container-lowest text-primary px-2 py-1 rounded-full font-label-sm text-xs font-bold shadow-sm">
-      {{ deal().joined }}/{{ deal().totalSpots }} Joined
+      {{ deal().currentParticipants }}/{{ deal().dealStock }} Joined
     </div>
   </div>
   <div class="p-6 flex-1 flex flex-col">
@@ -27,13 +27,13 @@
       </div>
       <div class="bg-surface-container-low -mx-6 -mb-6 px-6 py-4 border-t border-outline-variant/10 mt-4">
         <div class="flex justify-between font-label-sm text-xs mb-2">
-          <span class="text-on-surface-variant font-medium">Min. to Unlock: {{ deal().minimum_participants }}</span>
-          <span class="text-primary font-bold">{{ deal().neededCount }} needed</span>
+          <span class="text-on-surface-variant font-medium">Min. to Unlock: {{ deal().minParticipants }}</span>
+          <span class="text-primary font-bold">{{ needed() }} needed</span>
         </div>
         <div class="w-full h-2 bg-surface-container rounded-full overflow-hidden">
           <div
             class="h-full bg-linear-to-r from-orange-400 to-primary-container rounded-full relative transition-all duration-1000 ease-in-out"
-            [style.width.%]="deal().progressPercent"></div>
+            [style.width.%]="progress()"></div>
         </div>
         <a [routerLink]="['/deals', deal().id]"
            class="w-full mt-4 py-2 text-sm border border-outline text-on-surface font-semibold rounded-lg hover:bg-surface-container-high transition-colors flex items-center justify-center">

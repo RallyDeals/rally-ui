@@ -1,29 +1,26 @@
 <article
-  class="group bg-surface-container-lowest rounded-xl soft-shadow hover-lift overflow-hidden flex flex-col relative border border-outline-variant/10"
+  [routerLink]="['/deals', deal().id]"
+  class="group bg-surface-container-lowest rounded-xl soft-shadow hover-lift overflow-hidden flex flex-col relative border border-outline-variant/10 hover:border-primary-container/60 transition-colors cursor-pointer"
 >
   <div class="h-48 relative bg-surface-container-low overflow-hidden">
-    <a [routerLink]="['/deals', deal().id]" class="block w-full h-full">
-      <img
-        class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-        [src]="deal().image"
-        [alt]="deal().imageAlt"
-      />
-    </a>
+    <img
+      class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
+      [src]="deal().image"
+      [alt]="deal().imageAlt"
+    />
     <div
-      [class]="'absolute top-4 left-4 z-10 flex gap-2 px-2 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm ' + deal().badge.bgClass + ' ' + deal().badge.textClass"
+      [class]="'absolute top-4 left-4 z-10 flex gap-2 px-2 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm ' + badge().bgClass + ' ' + badge().textClass"
     >
-      <span class="material-symbols-outlined icon-sm">{{ deal().badge.icon }}</span>
-      {{ deal().badge.text }}
+      <span class="material-symbols-outlined icon-sm">{{ badge().icon }}</span>
+      {{ badge().text }}
     </div>
   </div>
 
   <div class="p-rally-md flex-1 flex flex-col">
     <h3
-      class="font-headline-md text-[20px] leading-[28px] text-on-surface mb-2 line-clamp-1"
+      class="font-headline-md text-[20px] leading-[28px] text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors"
     >
-      <a [routerLink]="['/deals', deal().id]" class="hover:text-primary transition-colors">
-        {{ deal().title }}
-      </a>
+      {{ deal().title }}
     </h3>
 
     <div class="mb-4">
@@ -58,16 +55,8 @@
         <span class="font-body-md text-[14px] text-on-surface-variant">
           <strong class="text-on-surface">{{ spotsLeft() }}</strong> spots left
         </span>
-        <app-countdown [endAt]="deal().endsAt" />
+        <app-countdown [endAt]="deal().endTime ?? ''" />
       </div>
     </div>
-
-    <a
-      [routerLink]="['/deals', deal().id]"
-      class="btn-primary bg-primary mt-rally-md w-full inline-flex items-center justify-center gap-rally-xs rounded-lg py-2.5 font-label-sm text-label-sm"
-    >
-      View Deal
-      <span class="material-symbols-outlined icon-md">arrow_forward</span>
-    </a>
   </div>
 </article>

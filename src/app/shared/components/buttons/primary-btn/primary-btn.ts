@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
@@ -12,4 +12,8 @@ export class PrimaryBtn {
   type = input<'button' | 'submit'>('button');
   bgClass = input('bg-primary');
   routerLink = input<string>();
+  icon = input<string>();
+  extraClasses = input('');
+  disabled = input(false);
+  clicked = output<void>();
 }
