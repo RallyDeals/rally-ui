@@ -2,29 +2,32 @@ import { Injectable } from '@angular/core';
 import { Observable, catchError, forkJoin, map, of } from 'rxjs';
 import { ProductsService } from '../products/products.service';
 import { Product } from '../../shared/models/product';
-import { Category } from '../../shared/models/category';
-import { Deal } from '../../pages/home/featured-deals-section/deal';
-import { MOCK_ACTIVE_DEALS } from './mock-deals';
+import { DealView } from '../../shared/models/deal';
+import { getDealById, joinDeal, listActiveDeals } from '../../shared/mocks/deals';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 import { PLACEHOLDER_IMAGE } from '../../shared/constants/placeholder';
 
-export interface DealView extends Deal {
-  productId: string;
-  endsAt: string;
-  createdAt: string;
-  category?: Category | null;
-}
+export type { DealView, DealStatus } from '../../shared/models/deal';
 
 @Injectable({ providedIn: 'root' })
 export class DealsService {
   constructor(private readonly productsService: ProductsService) {}
 
   getActiveDeals(): Observable<DealView[]> {
-    return forkJoin(MOCK_ACTIVE_DEALS.map((deal) => this.mergeProduct(deal)));
+    return forkJoin(listActiveDeals().map((deal) => this.mergeProduct(deal)));
   }
 
-  getActiveDeal(id: string | number): Observable<DealView | null> {
-    const deal = MOCK_ACTIVE_DEALS.find((item) => String(item.id) === String(id));
+  getActiveDeal(id: string): Observable<DealView | null> {
+    const deal = getDealById(id);
+    if (!deal) {
+      return of(null);
+    }
+    return this.mergeProduct(deal);
+  }
+
+  /** Mocks a buyer joining a deal so its participant count updates everywhere. */
+  joinDeal(id: string): Observable<DealView | null> {
+    const deal = joinDeal(id);
     if (!deal) {
       return of(null);
     }
@@ -47,11 +50,13 @@ function mergeRealProduct(deal: DealView, product: Product): DealView {
   );
   return {
     ...deal,
+    product,
     image,
     imageAlt: product.name,
     title: product.name,
     description: product.description,
     originalPrice: product.basePrice,
     category: product.category,
+    images: product.images ?? [],
   };
 }

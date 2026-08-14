@@ -132,7 +132,7 @@
                     </div>
                     <div>
                       <p class="font-bold text-on-surface">{{ deal.name }}</p>
-                      <p class="text-label-sm text-on-surface-variant">ID: {{ deal.id }}</p>
+                      <p class="text-label-sm text-on-surface-variant">ID: {{ deal.code }}</p>
                     </div>
                   </div>
                 </td>
@@ -150,7 +150,7 @@
                 </td>
                 <td class="table-cell">
                   <p class="font-bold" [class]="deal.status === 'active' ? 'text-primary' : 'text-on-surface'">
-                    ${{ deal.price }}
+                    ${{ deal.dealPrice }}
                   </p>
                   <p class="text-label-sm text-on-surface-variant line-through">${{ deal.originalPrice }}</p>
                 </td>
