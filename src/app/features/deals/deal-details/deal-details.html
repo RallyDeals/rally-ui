@@ -115,9 +115,18 @@
               (click)="joinDeal()"
             >
               <span class="material-symbols-outlined">
-                {{ joined() ? 'check_circle' : 'groups' }}
+                {{ joined() ? 'check_circle' : 'rocket_launch' }}
               </span>
-              {{ joined() ? 'You joined this deal!' : 'Join Group Deal' }}
+              {{ joined() ? 'You joined this rally!' : 'Join this Rally' }}
+            </button>
+            <button
+              class="w-full inline-flex items-center justify-center gap-rally-xs rounded-lg py-3 font-label-sm text-label-sm border border-primary text-primary font-semibold hover:bg-primary-container/40 transition-colors hover:cursor-pointer"
+              (click)="inviteFriends()"
+            >
+              <span class="material-symbols-outlined">
+                {{ copied() ? 'check' : 'ios_share' }}
+              </span>
+              {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
             </button>
             <a
               [routerLink]="['/products', deal.productId]"
