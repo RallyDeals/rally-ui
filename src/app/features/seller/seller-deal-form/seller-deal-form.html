@@ -23,7 +23,7 @@
       <button
         type="button"
         class="px-6 py-2.5 rounded-xl bg-primary-container text-on-primary hover:shadow-lg hover:scale-[1.02] transition-all font-semibold disabled:opacity-60 disabled:hover:scale-100"
-        [disabled]="saving() || isFormDisabled()"
+        [disabled]="saving()"
         (click)="save()"
       >
         @if (saving()) {
@@ -40,6 +40,13 @@
     <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-error-container text-on-error-container font-semibold">
       <span class="material-symbols-outlined">error</span>
       <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (lockMessage()) {
+    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-surface-container-high text-on-surface font-semibold border border-outline-variant">
+      <span class="material-symbols-outlined">lock</span>
+      <span>{{ lockMessage() }}</span>
     </div>
   }
 
@@ -232,6 +239,7 @@
                 type="datetime-local"
                 class="product-form__input"
                 [class.border-error!]="submitted() && endAtError() !== null"
+                [value]="endAt()"
                 (input)="endAt.set($any($event.target).value)"
               />
               @if (submitted() && endAtError()) {
@@ -258,24 +266,21 @@
               <p class="text-xs text-on-surface-variant mt-1">Updated live as buyers join.</p>
             </div>
           </div>
-          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex flex-col sm:flex-row items-start gap-3 border border-outline-variant/20">
+          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex items-center gap-3 border border-outline-variant/20">
             <span class="material-symbols-outlined text-secondary text-[20px]">schedule</span>
-            <div class="flex-1">
-              <p class="text-sm text-on-surface-variant mb-2">Duration (minutes)</p>
-              <div class="flex gap-3 items-center">
-                <input
-                  id="deal-duration"
-                  type="number"
-                  min="1"
-                  class="product-form__input w-36"
-                  [value]="durationMinutesInput() ?? durationMinutes() ?? ''"
-                  (input)="onDurationInput($any($event.target).value)"
-                  [disabled]="isFormDisabled()"
-                />
-                <p class="text-sm text-on-surface-variant">{{ durationMinutes() === null ? 'Set a start and end time to compute duration' : formatDuration(durationMinutes() ?? 0) }}</p>
-              </div>
-              <p class="text-xs text-on-surface-variant mt-2">Duration is stored in minutes. Changing duration (when a start time exists) will update the end time automatically.</p>
-            </div>
+            <p class="text-sm text-on-surface flex flex-wrap items-baseline gap-x-2">
+              <span class="font-bold">Duration:</span>
+              <span class="font-semibold">
+                {{
+                  durationMinutes() === null
+                    ? 'Set a start and end time'
+                    : formatDuration(durationMinutes() ?? 0)
+                }}
+              </span>
+              <span class="text-xs text-on-surface-variant">
+                Auto-calculated from the start &amp; end times.
+              </span>
+            </p>
           </div>
           @if (isEdit() && minParticipants() && dealStock() && +minParticipants() > +dealStock()) {
             <p class="mt-rally-md text-sm text-error font-semibold flex items-center gap-1">

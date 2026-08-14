@@ -14,19 +14,28 @@ import {
   ConfirmDialog,
   ConfirmDialogRequest,
 } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { DealView } from '../../../shared/models/deal';
+import { deleteDeal, listDeals } from '../../../shared/mocks/deals';
 
 export interface DealRow {
   id: string;
+  code: string;
+  productId: string;
+  sellerId: string;
   name: string;
   image: string;
   status: DealStatus;
   currentParticipants: number;
+  authorizedCount: number;
   dealStock: number;
   minParticipants: number;
   durationMinutes: number;
   startTime: string;
-  price: string;
-  originalPrice: string;
+  endTime: string;
+  dealPrice: number;
+  originalPrice: number;
+  timeRemainingSeconds: number | null;
+  createdAt: string;
   time: string;
   urgent: boolean;
 }
@@ -48,98 +57,83 @@ const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
   cancelled: 'neutral',
 };
 
-export const DEALS: DealRow[] = [
-  {
-    id: 'GD-9402',
-    name: 'Artisan Ceramic Brew Set',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDSGkOu2tweFMl4s3ixgYD5Q2-gIzYt3WNvn3sJKDRFXRhCgb_XCTPoGbMspTbBu3sISO2ldSINv62qtessJlzvwOglK_cdJiNJsopUA-MFNmmOxR57AqoqHNC-pbY_Arx8sh2pvE-gjDRzTGMYM4QYvbg4LdlJkLTNP5nwBUF2NaGhwaPQG2hzAOWFjS0VVFlYPl_f0UlCl6hKd690Hq0U6BTY9oK4tfBek9EJFhte6Oxl98cNUXhcKOVz9ANdO-4HyXH9G4y5CwE',
-    status: 'active',
-    currentParticipants: 142,
-    dealStock: 200,
-    minParticipants: 40,
-    durationMinutes: 2880,
-    startTime: '2026-08-11T09:00:00',
-    price: '34.99',
-    originalPrice: '49.99',
-    time: '14:22:05',
-    urgent: true,
-  },
-  {
-    id: 'GD-8812',
-    name: 'Sonic Pro Wireless',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBwUCxSF-_QRIwIV2buXvV9w90sb7E4VDit2cGcMWMpQ-ntIOypgE1uOgxBWky-11Kyfj2626OfQ3RLftzl032QrFxFm5NQtgK-7jcbUKgsqIJtgFCx4QZrLH9vi3cxMjvpsqtySdpAYX-IygEzvJd4xweayGHNmgA9nCPmOiEubP7L2a4l3kTeqF9xB68WdR3CRAwDv_LS_VoVtoh7ajAgJDijm-rX_Hn0lSYv8Nl3-nX2fzit42S4STLWdi8935or6VJjIfTW-e4',
-    status: 'succeeded',
-    currentParticipants: 500,
-    dealStock: 500,
-    minParticipants: 100,
-    durationMinutes: 10080,
-    startTime: '2026-08-04T10:00:00',
-    price: '129.00',
-    originalPrice: '199.00',
-    time: 'Ended 2 days ago',
-    urgent: false,
-  },
-  {
-    id: 'GD-7734',
-    name: 'AquaSmart Hydration',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBdum2tVVRwEgwEWwqrdWvCFaQ18f32GUkCr1O69zLXM6H1eCabBS_brs81RRYd54giYLj9iHwE45mweyusCcd8zdq6aMe2waSf8ThKpgAoKBAnL2RZnzobMoq05BpD0aBXK3o9Dow9ZrhBoSpwSY_3C0t47FnxP0icnOA9kLcTO7QYux1w7Du_7xSIEGCt_olhmbsSzJ1wp1kAakor2jpdjWT21RK_jo3-Fpphtg1v0bx_y-Nnsprn2Q7nk6ANAAAk16IJDzSca-Q',
-    status: 'pending',
-    currentParticipants: 0,
-    dealStock: 150,
-    minParticipants: 60,
-    durationMinutes: 1440,
-    startTime: '2026-08-13T21:30:00',
-    price: '22.50',
-    originalPrice: '30.00',
-    time: 'Starts in 3h 15m',
-    urgent: false,
-  },
-  {
-    id: 'GD-6651',
-    name: 'EcoTech Tech Pouch',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCDSmxS5Ux__--cPa3idO0LDpBMCzclCXsfH9YZpuq_qCY68xq2e2a5Mz05VS-9EuHJUK6_JNKPatVi-ar2aj_bN1XgCOUsIggbsuEOxjd_rsbrt-qE4IHOxZffbAyrlWLH2jt9kKuHALmtsCh437hYj6uH1Bl4dEjxG_woOwSM10AfytRrBvS-uB6d2rHOZBohrs29-S8ydsNfot9BGb6EbNl_AJ2SPaxm1K9rogyNlU_qgvuGsHu_4mVXjVxTU1z_lUAXhS2aAEg',
-    status: 'failed',
-    currentParticipants: 42,
-    dealStock: 100,
-    minParticipants: 80,
-    durationMinutes: 4320,
-    startTime: '2026-08-02T09:00:00',
-    price: '15.00',
-    originalPrice: '25.00',
-    time: 'Failed 1w ago',
-    urgent: false,
-  },
-  {
-    id: 'GD-7210',
-    name: 'Summit Trail Backpack',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDt0vfHKyf-KWvrp3ab2lYy2T643Sjjl6sT_KcbSeqNzT-3k62dj5SQuaD4BjptmB35Zs9uSy5rdM1T9LN6iPeVW4xZYSrQjGctukrGc3-raf7dqF7unX_UN60G-LVJ1P7llFmGmXhLpV2ZBVHmShTFvWyMPpRkPEDNRxarGN2oKKcA3BFZaEqLh63N1gjaaCqBWn27oxodcDLG5koAADfFQZI4tpWq2bqll05fmsR1Nq_X81WrOOZ1wXqM1B8HCEw7MfpR8Gbmgo4',
-    status: 'active',
-    currentParticipants: 78,
-    dealStock: 120,
-    minParticipants: 50,
-    durationMinutes: 1440,
-    startTime: '2026-08-12T09:30:00',
-    price: '45.00',
-    originalPrice: '70.00',
-    time: '06:45:12',
-    urgent: true,
-  },
-  {
-    id: 'GD-6902',
-    name: 'Lumen Desk Lamp',
-    image: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCgxNrJsmbVdEsMq9E2yT7qkWEDEhhtW1gAlQKbdD0W-FyPJK6rhVuRLNUh9IoxlximM6CpdwvZOyQ1MoQN2VGx5p-DMDTeKHbvQXUCNRZfsHK0jhwVysf-7Y-4TY3PoqcRbignibynp97Ye0XNL7SwYGZ-ZVlnDFm1WiFLebxwJASm6kEoR3G_INAwp-yITH8yMr6wQiaU_6I_HaMM7t5X2LWa2P_h2-K2XspnTlMP2x5YYN5x4Qs106T9lYaK8wbwqGZg8vDtXMA',
-    status: 'cancelled',
-    currentParticipants: 0,
-    dealStock: 200,
-    minParticipants: 80,
-    durationMinutes: 2880,
-    startTime: '2026-08-05T11:00:00',
-    price: '18.75',
-    originalPrice: '32.00',
-    time: 'Cancelled 2d ago',
-    urgent: false,
-  },
-];
+function formatCountdown(endTime: string): string {
+  const end = new Date(endTime).getTime();
+  if (Number.isNaN(end)) {
+    return '—';
+  }
+  const seconds = Math.max(0, Math.floor((end - Date.now()) / 1000));
+  if (seconds === 0) {
+    return 'Ended';
+  }
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  const pad = (n: number) => String(n).padStart(2, '0');
+  if (h > 99) {
+    return `${Math.floor(h / 24)}d ${pad(h % 24)}h`;
+  }
+  return `${pad(h)}:${pad(m)}:${pad(s)}`;
+}
+
+function timeLabel(deal: DealView): string {
+  switch (deal.status) {
+    case 'active':
+      return deal.endTime ? formatCountdown(deal.endTime) : 'Live';
+    case 'pending': {
+      const start = deal.startTime ? new Date(deal.startTime).getTime() : NaN;
+      if (Number.isNaN(start)) {
+        return 'Starting soon';
+      }
+      const minutes = Math.round((start - Date.now()) / 60000);
+      if (minutes <= 0) {
+        return 'Starting soon';
+      }
+      const h = Math.floor(minutes / 60);
+      const m = minutes % 60;
+      return h > 0 ? `Starts in ${h}h ${m}m` : `Starts in ${m}m`;
+    }
+    case 'succeeded':
+      return 'Ended';
+    case 'failed':
+      return 'Failed';
+    case 'cancelled':
+      return 'Cancelled';
+  }
+}
+
+function urgentLabel(deal: DealView): boolean {
+  if (deal.status !== 'active' || !deal.endTime) {
+    return false;
+  }
+  const remaining = new Date(deal.endTime).getTime() - Date.now();
+  return Number.isFinite(remaining) && remaining > 0 && remaining < 6 * 3600 * 1000;
+}
+
+function toDealRow(deal: DealView): DealRow {
+  return {
+    id: deal.id,
+    code: `GD-${deal.id.slice(-4).toUpperCase()}`,
+    productId: deal.productId,
+    sellerId: deal.sellerId,
+    name: deal.title,
+    image: deal.image,
+    status: deal.status,
+    currentParticipants: deal.currentParticipants,
+    authorizedCount: deal.authorizedCount,
+    dealStock: deal.dealStock,
+    minParticipants: deal.minParticipants,
+    durationMinutes: deal.durationMinutes,
+    startTime: deal.startTime ?? '',
+    endTime: deal.endTime ?? '',
+    dealPrice: deal.dealPrice,
+    originalPrice: deal.originalPrice,
+    timeRemainingSeconds: deal.timeRemainingSeconds,
+    createdAt: deal.createdAt,
+    time: timeLabel(deal),
+    urgent: urgentLabel(deal),
+  };
+}
 
 const VALID_STATUSES: Array<'ALL' | DealStatus> = [
   'ALL',
@@ -181,7 +175,7 @@ export class SellerDeals implements OnInit {
   searchQuery = signal('');
   page = signal(1);
   limit = 5;
-  deals = signal<DealRow[]>(DEALS);
+  deals = signal<DealRow[]>(listDeals().map(toDealRow));
   menu = signal<DealMenu | null>(null);
   deleteTarget = signal<DealRow | null>(null);
 
@@ -365,6 +359,7 @@ export class SellerDeals implements OnInit {
     if (!deal) {
       return;
     }
-    this.deals.set(this.deals().filter((item) => item.id !== deal.id));
+    deleteDeal(deal.id);
+    this.deals.set(listDeals().map(toDealRow));
   };
 }

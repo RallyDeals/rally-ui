@@ -4,7 +4,7 @@ import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcru
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { DealStatus, DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
-import { DEALS } from '../seller-deals/seller-deals';
+import { createDeal, getDealById, updateDeal, SELLER_ID } from '../../../shared/mocks/deals';
 import { ProductsService } from '../../products/products.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
@@ -53,13 +53,12 @@ export class SellerDealForm implements OnInit {
   startAt = signal('');
   endAt = signal('');
 
-  // User-editable duration input (minutes). Kept in sync with startAt/endAt.
-  durationMinutesInput = signal<number | null>(null);
-
   readonly isEdit = computed(() => this.dealId() !== null);
 
-  // Disable the form when deal is not pending or when there are no buyers joined
-  readonly isFormDisabled = computed(() => this.status() !== 'pending' || this.currentParticipants() === 0);
+  // Only an editable deal (new, or still pending with no participants joined) can be modified.
+  readonly isFormDisabled = computed(
+    () => this.isEdit() && (this.status() !== 'pending' || this.currentParticipants() > 0),
+  );
 
   readonly statusHint = computed(() => {
     switch (this.status()) {
@@ -73,6 +72,28 @@ export class SellerDealForm implements OnInit {
         return 'Ended before reaching the minimum participants. Buyers were not charged.';
       case 'cancelled':
         return 'Cancelled before it started. Only possible while no one has joined yet.';
+    }
+  });
+
+  /** Explains why the form is locked, based on the deal's status. */
+  readonly lockMessage = computed<string | null>(() => {
+    if (!this.isFormDisabled()) {
+      return null;
+    }
+    if (this.currentParticipants() > 0) {
+      return 'This deal already has participants joined, so it cannot be edited.';
+    }
+    switch (this.status()) {
+      case 'active':
+        return 'This deal is live — buyers can join right now. It cannot be edited while active.';
+      case 'succeeded':
+        return 'This deal has ended — all deal stock was sold. It can no longer be edited.';
+      case 'failed':
+        return 'This deal ended without reaching the minimum participants. It can no longer be edited.';
+      case 'cancelled':
+        return 'This deal was cancelled and can no longer be edited.';
+      default:
+        return 'This deal is locked and cannot be edited.';
     }
   });
 
@@ -187,59 +208,125 @@ export class SellerDealForm implements OnInit {
       this.dealId.set(id ?? null);
       if (id) {
         this.loadDeal(id);
+      } else {
+        this.resetForm();
+        this.initDefaults();
       }
     });
+  }
+
+  /** Pre-fill the schedule for a new deal: starts next hour, runs for 24h. */
+  private initDefaults() {
+    const durationMinutes = 1440;
+    const start = new Date();
+    start.setHours(start.getHours() + 1, 0, 0, 0);
+    this.startAt.set(this.formatToDatetimeLocal(start));
+    this.endAt.set(this.formatToDatetimeLocal(new Date(start.getTime() + durationMinutes * 60000)));
+  }
+
+  /** Clears every form field so a new deal never shows a previously loaded deal's data. */
+  private resetForm() {
+    this.productId.set(null);
+    this.productName.set('');
+    this.sku.set('');
+    this.image.set('');
+    this.status.set('pending');
+    this.dealPrice.set('');
+    this.originalPrice.set('');
+    this.dealStock.set('');
+    this.minParticipants.set('');
+    this.currentParticipants.set(0);
+    this.startAt.set('');
+    this.endAt.set('');
+    this.error.set(null);
+    this.submitted.set(false);
   }
 
   loadDeal(id: string) {
     this.loading.set(true);
     this.error.set(null);
-    const deal = DEALS.find((d) => d.id === id);
+    this.resetForm();
+    const deal = getDealById(id);
     if (!deal) {
       this.error.set('Deal not found. It may have been removed.');
       this.loading.set(false);
       return;
     }
-    this.productId.set(deal.id);
-    this.productName.set(deal.name);
+    this.productId.set(deal.productId);
+    this.productName.set(deal.title);
     this.image.set(deal.image);
     this.status.set(deal.status);
-    this.dealPrice.set(deal.price);
-    this.originalPrice.set(deal.originalPrice);
+    this.dealPrice.set(String(deal.dealPrice));
+    this.originalPrice.set(String(deal.originalPrice));
     this.dealStock.set(String(deal.dealStock));
     this.minParticipants.set(String(deal.minParticipants));
     this.currentParticipants.set(deal.currentParticipants);
 
-    // Initialize startAt/endAt and duration from deal data when available.
-    // Convert deal.startTime (ISO) to datetime-local format (no seconds) for inputs.
+    // Populate the schedule from the contract fields (startTime, endTime, durationMinutes).
     const startDate = deal.startTime ? new Date(deal.startTime) : null;
-    if (startDate && !Number.isNaN(startDate.getTime())) {
-      this.startAt.set(this.formatToDatetimeLocal(startDate));
-      if (typeof deal.durationMinutes === 'number' && deal.durationMinutes > 0) {
-        const endDate = new Date(startDate.getTime() + deal.durationMinutes * 60000);
-        this.endAt.set(this.formatToDatetimeLocal(endDate));
-        this.durationMinutesInput.set(deal.durationMinutes);
-      } else {
-        this.endAt.set('');
-        this.durationMinutesInput.set(null);
-      }
+    const startOk = !!startDate && !Number.isNaN(startDate.getTime());
+    const endDate = deal.endTime ? new Date(deal.endTime) : null;
+    const endOk = !!endDate && !Number.isNaN(endDate.getTime());
+
+    this.startAt.set(startOk ? this.formatToDatetimeLocal(startDate!) : '');
+
+    if (endOk) {
+      this.endAt.set(this.formatToDatetimeLocal(endDate!));
+    } else if (startOk && deal.durationMinutes > 0) {
+      this.endAt.set(
+        this.formatToDatetimeLocal(new Date(startDate!.getTime() + deal.durationMinutes * 60000)),
+      );
     } else {
-      this.startAt.set('');
       this.endAt.set('');
-      this.durationMinutesInput.set(null);
     }
 
-    this.submitted.set(false);
     this.loading.set(false);
   }
 
   save = () => {
+    if (this.isFormDisabled()) {
+      return;
+    }
     this.submitted.set(true);
     if (this.validationError()) {
       return;
     }
+    const payload = {
+      productId: this.productId(),
+      dealPrice: Number(this.dealPrice()),
+      dealStock: Number(this.dealStock()),
+      minParticipants: Number(this.minParticipants()),
+      durationMinutes: this.durationMinutes() ?? 0,
+    };
     this.saving.set(true);
     setTimeout(() => {
+      const dealId = this.dealId();
+      const startAt = this.startAt();
+      const endAt = this.endAt();
+      if (dealId) {
+        updateDeal(dealId, {
+          dealPrice: payload.dealPrice,
+          dealStock: payload.dealStock,
+          minParticipants: payload.minParticipants,
+          durationMinutes: payload.durationMinutes,
+          startTime: startAt ? new Date(startAt).toISOString() : null,
+          endTime: endAt ? new Date(endAt).toISOString() : null,
+          timeRemainingSeconds: payload.durationMinutes > 0 ? payload.durationMinutes * 60 : null,
+        });
+      } else {
+        createDeal({
+          sellerId: this.tokenService.getSellerId() ?? SELLER_ID,
+          productId: payload.productId ?? '',
+          productName: this.productName(),
+          image: this.image(),
+          originalPrice: Number(this.originalPrice()) || 0,
+          dealPrice: payload.dealPrice,
+          dealStock: payload.dealStock,
+          minParticipants: payload.minParticipants,
+          durationMinutes: payload.durationMinutes,
+          startAt,
+        });
+      }
       this.saving.set(false);
       this.router.navigate(['/seller/deals']);
     }, 800);
@@ -260,38 +347,17 @@ export class SellerDealForm implements OnInit {
     return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
   }
 
-  private updateDurationFromDates() {
-    this.durationMinutesInput.set(this.durationMinutes());
-  }
-
   onStartAtInput = (value: string) => {
+    const minutes = this.durationMinutes();
     this.startAt.set(value);
-    const minutes = this.durationMinutesInput();
     if (minutes && value) {
       const end = new Date(Date.parse(value) + minutes * 60000);
       this.endAt.set(this.formatToDatetimeLocal(end));
-    } else {
-      this.updateDurationFromDates();
     }
   };
 
   onEndAtInput = (value: string) => {
     this.endAt.set(value);
-    this.updateDurationFromDates();
-  };
-
-  onDurationInput = (value: string) => {
-    const minutes = Number(value);
-    if (!value || Number.isNaN(minutes) || minutes <= 0) {
-      this.durationMinutesInput.set(null);
-      return;
-    }
-    this.durationMinutesInput.set(minutes);
-    const start = this.startAt();
-    if (start) {
-      const end = new Date(Date.parse(start) + minutes * 60000);
-      this.endAt.set(this.formatToDatetimeLocal(end));
-    }
   };
 
   pickerOpen = signal(false);
