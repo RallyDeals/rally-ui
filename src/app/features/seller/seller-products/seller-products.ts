@@ -8,7 +8,7 @@ import { Product } from '../../../shared/models/product';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
-import { Pagination } from '../../products/browse-products/pagination/pagination';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { StatCard } from '../../../shared/components/stat-card/stat-card';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
