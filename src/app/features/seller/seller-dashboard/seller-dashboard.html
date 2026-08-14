@@ -32,13 +32,13 @@
       class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
     >
       <div class="flex justify-between items-start">
-        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Total Revenue</p>
+        <p class="label-caps">Total Revenue</p>
         <span class="material-symbols-outlined text-primary bg-primary-fixed p-1.5 rounded-lg">payments</span>
       </div>
       <div>
-        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">$45.2k</h3>
+        <h3 class="section-title">$45.2k</h3>
         <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          <span class="icon-sm">arrow_upward</span>
           12.5% vs last month
         </p>
       </div>
@@ -48,13 +48,13 @@
       class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
     >
       <div class="flex justify-between items-start">
-        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Active Participants</p>
+        <p class="label-caps">Active Participants</p>
         <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">groups</span>
       </div>
       <div>
-        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">1,204</h3>
+        <h3 class="section-title">1,204</h3>
         <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          <span class="icon-sm">arrow_upward</span>
           8.2% vs last month
         </p>
       </div>
@@ -64,13 +64,13 @@
       class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
     >
       <div class="flex justify-between items-start">
-        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Success Rate</p>
+        <p class="label-caps">Success Rate</p>
         <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">check_circle</span>
       </div>
       <div>
-        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">92%</h3>
+        <h3 class="section-title">92%</h3>
         <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="material-symbols-outlined text-[14px]">arrow_upward</span>
+          <span class="icon-sm">arrow_upward</span>
           2.1% vs last month
         </p>
       </div>
@@ -80,11 +80,11 @@
       class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
     >
       <div class="flex justify-between items-start">
-        <p class="font-label-sm text-on-surface-variant uppercase tracking-wider">Pending Orders</p>
+        <p class="label-caps">Pending Orders</p>
         <span class="material-symbols-outlined text-tertiary bg-tertiary-container p-1.5 rounded-lg">pending_actions</span>
       </div>
       <div>
-        <h3 class="font-headline-md text-headline-md font-bold text-on-surface">18</h3>
+        <h3 class="section-title">18</h3>
         <p class="font-label-sm text-on-surface-variant mt-1">Needs attention</p>
       </div>
     </div>
@@ -148,7 +148,7 @@
                 class="w-8 h-8 rounded-full flex items-center justify-center shrink-0 z-10 border border-outline-variant"
                 [ngClass]="toneClasses[item.tone]"
               >
-                <span class="material-symbols-outlined text-[16px]" [ngClass]="item.filled ? 'filled-icon' : ''">
+                <span class="icon-md" [ngClass]="item.filled ? 'filled-icon' : ''">
                   {{ item.icon }}
                 </span>
               </div>
@@ -184,13 +184,13 @@
             <th class="px-rally-md py-3 font-label-sm text-on-surface-variant font-medium text-right">Revenue</th>
           </tr>
         </thead>
-        <tbody class="font-body-md text-on-surface divide-y divide-outline-variant/30">
+        <tbody class="body-text divide-y divide-outline-variant/30">
           @for (deal of deals; track deal.name) {
             <tr class="hover:bg-surface-container/30 transition-colors">
               <td class="px-rally-md py-4">
                 <div class="flex items-center gap-rally-sm">
                   <div class="w-10 h-10 rounded border border-outline-variant overflow-hidden bg-surface-container-low">
-                    <img alt="Product" class="w-full h-full object-cover" [src]="productImage" />
+                    <img alt="Product" class="w-full h-full object-cover" [src]="resolveImageUrl(deal.image, productImage)" />
                   </div>
                   <span class="font-medium">{{ deal.name }}</span>
                 </div>

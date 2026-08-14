@@ -1,0 +1,20 @@
+<div
+  class="p-8 rounded-2xl border shadow-sm hover:shadow-md transition-all flex flex-col justify-between group cursor-pointer"
+  [class]="cardClass()"
+  (click)="ctaClick.emit()"
+>
+  <div>
+    <div
+      class="w-12 h-12 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform"
+      [class]="iconClass()"
+    >
+      <span class="material-symbols-outlined">{{ symbol() }}</span>
+    </div>
+    <h4 class="font-bold text-xl" [class]="titleClass()">{{ title() }}</h4>
+    <p class="text-sm text-on-surface-variant mt-2 leading-relaxed">{{ body() }}</p>
+  </div>
+  <div class="mt-8 flex items-center gap-2 text-sm font-bold" [class]="ctaClass()">
+    <span>{{ cta() }}</span>
+    <span class="material-symbols-outlined text-base">arrow_forward</span>
+  </div>
+</div>

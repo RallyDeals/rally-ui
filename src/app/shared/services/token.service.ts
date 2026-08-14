@@ -11,6 +11,20 @@ export class TokenService {
     return environment.devTokens[this.activeRole()] ?? environment.devToken ?? '';
   }
 
+  getSellerId(): string | null {
+    const token = this.getToken();
+    if (!token) {
+      return null;
+    }
+    try {
+      const payload = token.split('.')[1];
+      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
+      return (decoded['sub'] as string | undefined) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
   setRole(role: DevRole) {
     this.activeRole.set(role);
   }

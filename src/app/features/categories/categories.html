@@ -6,7 +6,7 @@
       >
         Browse Categories
       </h1>
-      <p class="font-body-md text-on-surface-variant">
+      <p class="body-subtle">
         Explore our product range and find what fits your group deal.
       </p>
     </div>
@@ -37,7 +37,7 @@
               {{ categoryIcon(category.name) }}
             </span>
             <h2
-              class="font-headline-md text-headline-md font-bold text-on-surface mb-1 group-hover:text-primary transition-colors"
+              class="section-title mb-1 group-hover:text-primary transition-colors"
             >
               {{ category.name }}
             </h2>
@@ -48,11 +48,11 @@
               class="mt-auto inline-flex items-center gap-1 text-primary font-semibold group-hover:gap-2 transition-all"
             >
               Browse products
-              <span class="material-symbols-outlined text-[18px]">arrow_forward</span>
+              <span class="icon-lg">arrow_forward</span>
             </span>
           </a>
         } @empty {
-          <p class="font-body-md text-on-surface-variant">No categories found.</p>
+          <p class="body-subtle">No categories found.</p>
         }
       </div>
     }

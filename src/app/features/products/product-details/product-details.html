@@ -30,6 +30,26 @@
               [alt]="product.name"
             />
           </div>
+          @if (galleryImages().length > 1) {
+            <div class="flex gap-rally-sm mt-rally-sm">
+              @for (image of galleryImages(); track image; let i = $index) {
+                <button
+                  type="button"
+                  class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0"
+                  [class.border-primary]="resolveImageUrl(image) === imageSrc"
+                  [class.border-outline-variant]="resolveImageUrl(image) !== imageSrc"
+                  (click)="selectImage(image)"
+                  [attr.aria-label]="'View image ' + (i + 1)"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    [src]="resolveImageUrl(image)"
+                    [alt]="product.name + ' image ' + (i + 1)"
+                  />
+                </button>
+              }
+            </div>
+          }
         </div>
 
         <div class="lg:col-span-5 flex flex-col gap-rally-lg">
@@ -47,9 +67,25 @@
             <p class="product-details__price font-body-lg text-3xl font-bold mt-1">
               ${{ product.basePrice }}
             </p>
-            <p class="font-body-md text-on-surface-variant mt-rally-sm">
+            <p class="body-subtle mt-rally-sm">
               {{ product.description }}
             </p>
+            @if (product.sku) {
+              <p class="font-label-sm text-label-sm text-on-surface-variant mt-rally-xs">
+                SKU: <span class="font-semibold text-on-surface">{{ product.sku }}</span>
+              </p>
+            }
+            @if (product.tags?.length) {
+              <div class="flex flex-wrap gap-rally-xs mt-rally-sm">
+                @for (tag of product.tags; track tag) {
+                  <span
+                    class="bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+                  >
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            }
           </div>
 
           <div class="flex flex-col gap-rally-md">
@@ -74,7 +110,7 @@
               <p
                 class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-rally-xs"
               >
-                <span class="material-symbols-outlined text-[16px]">check_circle</span>
+                <span class="icon-md">check_circle</span>
                 Approved &amp; Ready for Group Deals
               </p>
             </div>
@@ -123,12 +159,12 @@
       <div class="mt-rally-xl py-rally-xl border-t border-outline-variant/20">
         <div class="max-w-3xl mx-auto flex flex-col">
           <app-accordion title="Product Description" [open]="true">
-            <p class="font-body-md text-on-surface-variant leading-relaxed">
+            <p class="body-subtle leading-relaxed">
               {{ product.description }}
             </p>
           </app-accordion>
           <app-accordion title="Shipping &amp; Returns">
-            <p class="font-body-md text-on-surface-variant leading-relaxed">
+            <p class="body-subtle leading-relaxed">
               We provide complimentary express shipping on all orders. Your item will be processed
               within 24 hours and typically arrives in 2-3 business days. If you're not completely
               satisfied, we offer a hassle-free 30-day return policy for a full refund or exchange.
@@ -150,7 +186,7 @@
               routerLink="/products"
             >
               View All
-              <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              <span class="icon-md">arrow_forward</span>
             </a>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md">

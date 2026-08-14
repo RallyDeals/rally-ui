@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
 import { ProductCard } from '../components/product-card/product-card';
-import { Pagination } from './pagination/pagination';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ProductFilters, PriceRange } from '../components/product-filters/product-filters';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService } from '../products.service';
@@ -41,6 +41,7 @@ export class BrowseProducts implements OnInit {
   private lastSuccessfulPage = 1;
   searchQuery = signal('');
   selectedCategoryId = signal<string | null>(null);
+  selectedTag = signal<string | null>(null);
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal(DEFAULT_SORT);
@@ -49,6 +50,29 @@ export class BrowseProducts implements OnInit {
     () => this.categories().find((c) => c.id === this.selectedCategoryId()) ?? null,
   );
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
+
+  priceLabel = computed(() => {
+    const min = this.minPrice();
+    const max = this.maxPrice();
+    if (min !== null && max !== null) {
+      return `${min} – ${max}`;
+    }
+    if (min !== null) {
+      return `From ${min}`;
+    }
+    if (max !== null) {
+      return `Up to ${max}`;
+    }
+    return '';
+  });
+
+  activeFilterCount = computed(() => {
+    let count = 0;
+    if (this.selectedCategoryId()) count += 1;
+    if (this.selectedTag()) count += 1;
+    if (this.minPrice() !== null || this.maxPrice() !== null) count += 1;
+    return count;
+  });
 
   constructor(
     private readonly productsService: ProductsService,
@@ -68,6 +92,7 @@ export class BrowseProducts implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.selectedCategoryId.set((params['categoryId'] as string | undefined) ?? null);
+      this.selectedTag.set((params['tag'] as string | undefined) ?? null);
       this.minPrice.set(parseOptionalNumber(params['minPrice']));
       this.maxPrice.set(parseOptionalNumber(params['maxPrice']));
       this.loadProducts();
@@ -81,6 +106,7 @@ export class BrowseProducts implements OnInit {
     this.productsService
       .getProducts({
         q: this.searchQuery().trim() || undefined,
+        tag: this.selectedTag() ?? undefined,
         categoryId: this.selectedCategoryId() ?? undefined,
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
@@ -138,6 +164,13 @@ export class BrowseProducts implements OnInit {
     });
   };
 
+  onTagChange = (tag: string | null) => {
+    this.page.set(1);
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams({ tag: tag ?? undefined }),
+    });
+  };
+
   onPriceApply = ({ minPrice, maxPrice }: PriceRange) => {
     this.page.set(1);
     this.router.navigate(['/products'], {
@@ -146,6 +179,10 @@ export class BrowseProducts implements OnInit {
         maxPrice: maxPrice ?? undefined,
       }),
     });
+  };
+
+  clearPrice = () => {
+    this.onPriceApply({ minPrice: null, maxPrice: null });
   };
 
   onSortChange = (sort: string) => {
@@ -171,10 +208,14 @@ export class BrowseProducts implements OnInit {
   ): Record<string, string> {
     const params: Record<string, string> = {};
     const categoryId = this.selectedCategoryId();
+    const tag = this.selectedTag();
     const minPrice = this.minPrice();
     const maxPrice = this.maxPrice();
     if (categoryId) {
       params['categoryId'] = categoryId;
+    }
+    if (tag) {
+      params['tag'] = tag;
     }
     if (minPrice !== null) {
       params['minPrice'] = String(minPrice);

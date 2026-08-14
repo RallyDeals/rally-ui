@@ -10,6 +10,7 @@
       class="product-card__img w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
       [src]="imageSrc"
       [alt]="product().name"
+      fallbackSrc="/assets/placeholder.svg"
     />
   </div>
   <div class="product-card__body flex flex-col flex-grow">
@@ -30,7 +31,7 @@
         [class.product-card__add-added]="added()"
         (click)="addToCart($event)"
       >
-        <span class="material-symbols-outlined text-[16px]">
+        <span class="icon-md">
           {{ added() ? 'check' : 'add_shopping_cart' }}
         </span>
         {{ added() ? 'Added' : 'Add' }}

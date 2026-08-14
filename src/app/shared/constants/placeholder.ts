@@ -1,1 +1,1 @@
-export const PLACEHOLDER_IMAGE = '/assets/placeholder.png';
+export const PLACEHOLDER_IMAGE = '/assets/placeholder.svg';

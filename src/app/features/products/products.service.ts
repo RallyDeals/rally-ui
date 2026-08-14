@@ -7,12 +7,29 @@ import { Product } from '../../shared/models/product';
 
 export interface ProductQueryParams {
   q?: string;
+  tag?: string;
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: string;
   page?: number;
   limit?: number;
+}
+
+export interface UpsertProductRequest {
+  name: string;
+  description: string;
+  categoryId?: string;
+  basePrice: number;
+  sku?: string;
+  visible?: boolean;
+  tags?: string[];
+  imageUrl?: string;
+  images?: string[];
+}
+
+export interface ImageUploadResponse {
+  path: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -27,6 +44,7 @@ export class ProductsService {
         page: params.page ?? 1,
         limit: params.limit ?? 12,
         ...(params.q && { q: params.q }),
+        ...(params.tag && { tag: params.tag }),
         ...(params.categoryId && { categoryId: params.categoryId }),
         ...(params.minPrice !== undefined && { minPrice: params.minPrice }),
         ...(params.maxPrice !== undefined && { maxPrice: params.maxPrice }),
@@ -37,5 +55,55 @@ export class ProductsService {
 
   getProduct(id: string): Observable<Product> {
     return this.http.get<Product>(`${this.apiUrl}/products/${id}`);
+  }
+
+  getSellerProducts(
+    sellerId: string,
+    params: {
+      status?: string;
+      deleted?: boolean;
+      includeDeleted?: boolean;
+      sort?: string;
+      page?: number;
+      limit?: number;
+    } = {},
+  ): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(
+      `${this.apiUrl}/products/sellers/${sellerId}`,
+      {
+        params: {
+          page: params.page ?? 1,
+          limit: params.limit ?? 20,
+          ...(params.status && { status: params.status }),
+          ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
+          ...(params.includeDeleted !== undefined && {
+            includeDeleted: String(params.includeDeleted),
+          }),
+          ...(params.sort && { sort: params.sort }),
+        },
+      },
+    );
+  }
+
+  deleteProduct(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/products/${id}`);
+  }
+
+  restoreProduct(id: string): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/products/${id}/restore`, {});
+  }
+
+  createProduct(request: UpsertProductRequest): Observable<Product> {
+    return this.http.post<Product>(`${this.apiUrl}/products`, request);
+  }
+
+  updateProduct(id: string, request: UpsertProductRequest): Observable<Product> {
+    return this.http.patch<Product>(`${this.apiUrl}/products/${id}`, request);
+  }
+
+  uploadImage(file: File): Observable<ImageUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<ImageUploadResponse>(`${this.apiUrl}/products/images`, formData);
   }
 }

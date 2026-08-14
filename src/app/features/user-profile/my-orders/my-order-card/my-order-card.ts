@@ -10,6 +10,7 @@ import { OrderStatusBadge } from '../../../../shared/components/order-status-bad
   selector: 'app-my-order-card',
   imports: [NgClass, RouterLink, DatePipe, CurrencyPipe, ShippingStatusBadge, OrderStatusBadge],
   templateUrl: './my-order-card.html',
+  styleUrl: './my-order-card.css',
 })
 export class MyOrderCard {
   order = input.required<BriefOrderResponse>();

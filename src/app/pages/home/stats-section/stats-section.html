@@ -4,7 +4,7 @@
     @for (stat of stats; track stat.label) {
       <div class="flex flex-col items-center justify-center text-center p-4">
         <p [class]="'font-display-lg text-[40px] font-black tracking-tight mb-2 ' + stat.colorClass">{{ stat.value }}</p>
-        <p class="font-body-md text-on-surface-variant font-medium">{{ stat.label }}</p>
+        <p class="body-subtle font-medium">{{ stat.label }}</p>
       </div>
     }
   </div>

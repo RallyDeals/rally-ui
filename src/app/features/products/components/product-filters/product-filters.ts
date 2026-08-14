@@ -15,15 +15,18 @@ export interface PriceRange {
 export class ProductFilters {
   categories = input.required<Category[]>();
   selectedCategoryId = input<string | null>(null);
+  selectedTag = input<string | null>(null);
   minPrice = input<number | null>(null);
   maxPrice = input<number | null>(null);
 
   categoryChange = output<string | null>();
+  tagChange = output<string | null>();
   priceApply = output<PriceRange>();
   reset = output<void>();
 
   priceMin = '';
   priceMax = '';
+  tagInput = '';
 
   constructor() {
     effect(() => {
@@ -35,6 +38,23 @@ export class ProductFilters {
   onCategoryToggle = (categoryId: string, event: Event) => {
     const checked = (event.target as HTMLInputElement).checked;
     this.categoryChange.emit(checked ? categoryId : null);
+  };
+
+  onTagInput = (value: string) => {
+    this.tagInput = value;
+  };
+
+  applyTag = () => {
+    const tag = this.tagInput.trim();
+    this.tagInput = '';
+    if (tag) {
+      this.tagChange.emit(tag);
+    }
+  };
+
+  clearTag = () => {
+    this.tagInput = '';
+    this.tagChange.emit(null);
   };
 
   onPriceInput = (field: 'min' | 'max', event: Event) => {

@@ -4,7 +4,7 @@
   <div
     class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface-container-low border border-outline-variant/20"
   >
-    <img [src]="item().image" [alt]="item().imageAlt" class="w-full h-full object-cover" />
+    <img [src]="imageSrc()" [alt]="item().imageAlt" class="w-full h-full object-cover" />
   </div>
   <div
     class="grow flex flex-col sm:flex-row sm:items-center justify-between gap-rally-sm w-full min-w-0"
