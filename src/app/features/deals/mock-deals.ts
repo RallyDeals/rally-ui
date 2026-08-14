@@ -6,13 +6,21 @@ export interface MockDeal extends Deal {
   createdAt: string;
 }
 
+// productId maps to the seeded catalog products. The catalog rewrites seed ids
+// ('dummy-0078') to deterministic UUIDs (md5(id)::uuid) — see V3__convert_seed_ids_to_uuid.sql.
+const CATALOG_PRODUCT_IDS = {
+  'dummy-0078': '43326b0f-3f5a-7b34-1eb0-6e39aea121b7',
+  'dummy-0088': '23cb533f-d49b-1168-7f82-8ec86e656313',
+  'dummy-0001': '20689b6f-d578-784d-bb4a-525e24aa4c33',
+} as const;
+
 const hoursFromNow = (hours: number): string =>
   new Date(Date.now() + hours * 60 * 60 * 1000).toISOString();
 
 export const MOCK_ACTIVE_DEALS: MockDeal[] = [
   {
     id: 101,
-    productId: 'dummy-0078',
+    productId: CATALOG_PRODUCT_IDS['dummy-0078'],
     image:
       'https://cdn.dummyjson.com/product-images/laptops/apple-macbook-pro-14-inch-space-grey/thumbnail.webp',
     imageAlt: 'Apple MacBook Pro 14 Inch Space Grey',
@@ -37,7 +45,7 @@ export const MOCK_ACTIVE_DEALS: MockDeal[] = [
   },
   {
     id: 102,
-    productId: 'dummy-0088',
+    productId: CATALOG_PRODUCT_IDS['dummy-0088'],
     image:
       'https://cdn.dummyjson.com/product-images/mens-shoes/nike-air-jordan-1-red-and-black/thumbnail.webp',
     imageAlt: 'Nike Air Jordan 1 Red And Black',
@@ -62,7 +70,7 @@ export const MOCK_ACTIVE_DEALS: MockDeal[] = [
   },
   {
     id: 103,
-    productId: 'dummy-0001',
+    productId: CATALOG_PRODUCT_IDS['dummy-0001'],
     image:
       'https://cdn.dummyjson.com/product-images/beauty/essence-mascara-lash-princess/thumbnail.webp',
     imageAlt: 'Essence Mascara Lash Princess',
