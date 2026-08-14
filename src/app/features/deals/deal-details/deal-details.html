@@ -1,1 +1,142 @@
-<p>deal-details works!</p>
+<section class="bg-surface py-rally-xl md:pb-24 min-h-screen">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    @if (loading()) {
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg">
+        <div class="lg:col-span-7 animate-pulse aspect-4/5 bg-surface-container rounded-xl"></div>
+        <div class="lg:col-span-5 space-y-4 py-6">
+          <div class="animate-pulse bg-surface-container rounded-lg h-5 w-28"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-8 w-3/4"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-4 w-full"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-4 w-5/6"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-6 w-32"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-24 w-full mt-6"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-12 w-full mt-8"></div>
+        </div>
+      </div>
+    } @else if (error(); as error) {
+      <div class="py-24">
+        <app-error-state [error]="error" [showRetry]="true" (retry)="retry()" />
+      </div>
+    } @else if (deal(); as deal) {
+      <app-breadcrumbs [items]="breadcrumbs()" />
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg items-start mt-6">
+        <div class="lg:col-span-7">
+          <div class="relative aspect-4/5 overflow-hidden rounded-xl bg-surface-container-low">
+            <img
+              class="w-full h-full object-contain transition-transform duration-700 group-hover:scale-105"
+              [src]="deal.image"
+              [alt]="deal.imageAlt"
+            />
+            <div
+              [class]="'absolute top-4 left-4 z-10 flex items-center gap-rally-xs px-3 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm ' + deal.badge.bgClass + ' ' + deal.badge.textClass"
+            >
+              <span class="material-symbols-outlined icon-sm">{{ deal.badge.icon }}</span>
+              {{ deal.badge.text }}
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-5 flex flex-col gap-rally-lg">
+          <div class="flex flex-col gap-rally-xs">
+            <div class="flex items-center gap-rally-sm">
+              @if (deal.category) {
+                <p class="font-label-sm text-label-sm uppercase tracking-wider text-on-surface-variant">
+                  {{ deal.category.name }}
+                </p>
+              }
+              <span
+                class="inline-flex items-center gap-rally-xs font-label-sm text-label-sm text-on-surface-variant"
+              >
+                <app-countdown [endAt]="deal.endsAt" />
+              </span>
+            </div>
+            <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface leading-tight">
+              {{ deal.title }}
+            </h1>
+            <p class="body-subtle">{{ deal.description }}</p>
+          </div>
+
+          <div class="bg-surface-container-lowest rounded-xl soft-shadow p-rally-md border border-outline-variant/20 flex flex-col gap-rally-md">
+            <div>
+              <div class="flex items-center gap-rally-sm flex-wrap">
+                <span class="font-display-lg text-4xl font-bold text-primary">${{ deal.dealPrice }}</span>
+                @if (savingsPercent() > 0) {
+                  <span class="save-badge">
+                    Save {{ savingsPercent() }}%
+                  </span>
+                }
+              </div>
+              <p class="font-body-lg text-body-lg text-on-surface-variant line-through mt-1.5">
+                ${{ deal.originalPrice }}
+              </p>
+            </div>
+
+            <div>
+              <div class="flex justify-between items-center mb-2">
+                <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+                  Progress
+                </span>
+                <span class="font-label-sm text-label-sm text-on-surface font-semibold">
+                  {{ progress() }}% Full
+                </span>
+              </div>
+              <div class="progress-track">
+                <div class="h-full progress-gradient rounded-full relative" [style.width.%]="progress()">
+                  <div class="progress-tip"></div>
+                </div>
+              </div>
+              <div class="flex justify-between items-center mt-3 font-body-md text-body-md">
+                <span class="text-on-surface-variant">
+                  <strong class="text-on-surface">{{ deal.joined }}</strong>
+                  / {{ deal.totalSpots }} joined
+                </span>
+                <span class="text-on-surface-variant">
+                  <strong class="text-on-surface">{{ spotsLeft() }}</strong> spots left
+                </span>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-rally-sm border-t border-outline-variant/20 pt-rally-md">
+              <div class="flex items-center gap-rally-xs text-on-surface-variant font-body-md text-body-md">
+                <span class="material-symbols-outlined text-primary">groups</span>
+                <span>Min. {{ deal.minimum_participants }} to unlock</span>
+              </div>
+              <div class="flex items-center gap-rally-xs text-on-surface-variant font-body-md text-body-md">
+                <span class="material-symbols-outlined text-primary">flag</span>
+                <span>{{ deal.neededCount }} more needed</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-rally-sm">
+            <button
+              class="btn-primary w-full inline-flex items-center justify-center gap-rally-xs rounded-lg py-3 font-label-sm text-label-sm hover:cursor-pointer"
+              (click)="joinDeal()"
+            >
+              <span class="material-symbols-outlined">
+                {{ joined() ? 'check_circle' : 'groups' }}
+              </span>
+              {{ joined() ? 'You joined this deal!' : 'Join Group Deal' }}
+            </button>
+            <a
+              [routerLink]="['/products', deal.productId]"
+              class="w-full inline-flex items-center justify-center gap-rally-xs rounded-lg py-3 font-label-sm text-label-sm border border-outline text-on-surface font-semibold hover:bg-surface-container-high transition-colors"
+            >
+              View Product
+              <span class="material-symbols-outlined icon-md">arrow_forward</span>
+            </a>
+          </div>
+
+          <div class="flex items-center gap-rally-md p-rally-md bg-surface-container-low rounded-xl border border-outline-variant/20">
+            <span class="material-symbols-outlined text-primary">info</span>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Group deals unlock when the minimum participants are reached. Share this deal to help
+              it go live faster.
+            </p>
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</section>

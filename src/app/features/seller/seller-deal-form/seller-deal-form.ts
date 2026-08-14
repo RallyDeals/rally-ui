@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Breadcrumbs, BreadcrumbItem } from '../../products/product-details/breadcrumbs/breadcrumbs';
+import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { DealStatus, DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
@@ -261,8 +261,7 @@ export class SellerDealForm implements OnInit {
   }
 
   private updateDurationFromDates() {
-    const dm = this.durationMinutes;
-    this.durationMinutesInput.set(dm === null ? null : dm);
+    this.durationMinutesInput.set(this.durationMinutes());
   }
 
   onStartAtInput = (value: string) => {

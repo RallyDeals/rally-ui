@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom } from 'rxjs';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
-import { Breadcrumbs, BreadcrumbItem } from '../../products/product-details/breadcrumbs/breadcrumbs';
+import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService, UpsertProductRequest } from '../../products/products.service';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';

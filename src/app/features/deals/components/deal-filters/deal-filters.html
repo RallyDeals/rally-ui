@@ -9,8 +9,8 @@
           <input
             class="h-4 w-4 rounded border-outline text-primary focus:ring-primary"
             type="checkbox"
-            [checked]="selectedCategoryId() === category.id"
-            (change)="onCategoryToggle(category.id, $event)"
+            [checked]="selectedCategoryIds().includes(category.id)"
+            (change)="categoryToggle.emit(category.id)"
           />
           <span
             class="text-on-surface-variant group-hover:text-primary transition-colors font-body-md text-body-md"
@@ -49,30 +49,27 @@
   </div>
 
   <div class="filter-section">
-    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Tag</h3>
-    @if (selectedTag(); as tag) {
-      <span
-        class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium mb-rally-xs"
-      >
-        {{ tag }}
-        <button
-          type="button"
-          class="hover:text-error transition-colors hover:cursor-pointer"
-          aria-label="Clear tag"
-          (click)="clearTag()"
-        >
-          <span class="icon-md">close</span>
-        </button>
-      </span>
-    }
-    <input
-      class="filter-price-input w-full"
-      type="text"
-      placeholder="e.g. wireless"
-      [value]="tagInput"
-      (input)="onTagInput($any($event.target).value)"
-      (keyup.enter)="applyTag()"
-    />
+    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Status</h3>
+    <div class="flex flex-col gap-rally-xs">
+      @for (option of statusOptions; track option.key) {
+        <label class="flex items-center gap-rally-xs group hover:cursor-pointer">
+          <input
+            class="h-4 w-4 rounded-full border-outline text-primary focus:ring-primary"
+            type="radio"
+            name="deal-status"
+            [value]="option.key"
+            [checked]="status() === option.key"
+            (change)="statusChange.emit(option.key)"
+          />
+          <span
+            class="inline-flex items-center gap-rally-xs text-on-surface-variant group-hover:text-primary transition-colors font-body-md text-body-md"
+          >
+            <span class="material-symbols-outlined icon-sm">{{ option.icon }}</span>
+            {{ option.label }}
+          </span>
+        </label>
+      }
+    </div>
   </div>
 
   <button class="filter-clear-btn" (click)="reset.emit()">

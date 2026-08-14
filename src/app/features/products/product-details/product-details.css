@@ -68,25 +68,35 @@
   box-shadow: none;
 }
 
-.product-details__buy-now {
+.product-details__deal-cta {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1rem;
+  background-color: var(--color-surface-container-low);
+  border: 1px solid var(--color-outline-variant);
+  border-radius: 0.75rem;
+}
+
+.product-details__join-deal {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
   padding: 0.75rem 1.5rem;
-  background-color: var(--color-on-surface);
+  border: 1px solid var(--color-outline);
   border-radius: 0.75rem;
-  color: var(--color-surface);
+  color: var(--color-on-surface);
   font-family: var(--font-body-md);
   font-size: var(--text-body-md);
   font-weight: 600;
   transition:
-    opacity 0.2s ease,
+    background-color 0.2s ease,
     transform 0.15s ease;
 }
-.product-details__buy-now:hover {
-  opacity: 0.9;
+.product-details__join-deal:hover {
+  background-color: var(--color-surface-container-high);
 }
-.product-details__buy-now:active {
+.product-details__join-deal:active {
   transform: scale(0.98);
 }
