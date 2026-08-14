@@ -211,10 +211,12 @@ export class BrowseDeals implements OnInit {
         return copy.sort((a, b) => savingsOf(b) - savingsOf(a));
       case 'ending-soon':
         return copy.sort(
-          (a, b) => new Date(a.endsAt).getTime() - new Date(b.endsAt).getTime(),
+          (a, b) =>
+            (a.endTime ? new Date(a.endTime).getTime() : Number.POSITIVE_INFINITY) -
+            (b.endTime ? new Date(b.endTime).getTime() : Number.POSITIVE_INFINITY),
         );
       case 'most-joined':
-        return copy.sort((a, b) => b.joined - a.joined);
+        return copy.sort((a, b) => b.currentParticipants - a.currentParticipants);
       case 'newest':
         return copy.sort(
           (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
