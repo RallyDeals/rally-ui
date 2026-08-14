@@ -1,6 +1,7 @@
 import { Component, input } from '@angular/core';
+import { DealStatus } from '../../../../shared/models/deal';
 
-export type DealStatus = 'pending' | 'active' | 'succeeded' | 'failed' | 'cancelled';
+export type { DealStatus };
 
 const PILL_CLASSES: Record<DealStatus, string> = {
   pending: 'bg-surface-container text-on-surface-variant',
