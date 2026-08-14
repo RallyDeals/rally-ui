@@ -1,9 +1,10 @@
-import { Component, OnDestroy, input, signal } from '@angular/core';
+import { Component, OnDestroy, computed, input, signal } from '@angular/core';
 import { Router } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { Product } from '../../../../shared/models/product';
 import { CartService } from '../../../cart/cart.service';
+import { getActiveDealForProduct } from '../../../deals/mock-deals';
 
 @Component({
   selector: 'app-product-card',
@@ -16,6 +17,8 @@ export class ProductCard implements OnDestroy {
   extraClasses = input('');
   added = signal(false);
   private addTimer: ReturnType<typeof setTimeout> | undefined;
+
+  deal = computed(() => getActiveDealForProduct(this.product().id) ?? null);
 
   constructor(
     private readonly router: Router,

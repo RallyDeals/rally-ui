@@ -12,6 +12,12 @@
       [alt]="product().name"
       fallbackSrc="/assets/placeholder.svg"
     />
+    @if (deal(); as deal) {
+      <span class="deal-hint-badge absolute top-2 left-2 z-10">
+        <span class="material-symbols-outlined">groups</span>
+        Group Deal
+      </span>
+    }
   </div>
   <div class="product-card__body flex flex-col flex-grow">
     <span
