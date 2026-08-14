@@ -4,7 +4,7 @@ import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { Product } from '../../../../shared/models/product';
 import { CartService } from '../../../cart/cart.service';
-import { getActiveDealForProduct } from '../../../deals/mock-deals';
+import { getActiveDealForProduct } from '../../../../shared/mocks/deals';
 
 @Component({
   selector: 'app-product-card',

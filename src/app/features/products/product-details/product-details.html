@@ -22,7 +22,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg items-start mt-6">
         <div class="lg:col-span-7">
           <div
-            class="product-details__image relative aspect-4/5 overflow-hidden rounded-xl group"
+            class="product-details__image group relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-container-low"
           >
             <img
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -52,7 +52,7 @@
           }
         </div>
 
-        <div class="lg:col-span-5 flex flex-col gap-rally-lg">
+        <div class="lg:col-span-5 flex flex-col gap-rally-md">
           <div class="flex flex-col gap-rally-xs">
             <p
               class="product-details__category font-label-sm text-label-sm uppercase tracking-wider"
@@ -64,53 +64,54 @@
             >
               {{ product.name }}
             </h1>
-            <p class="product-details__price font-body-lg text-3xl font-bold mt-1">
-              ${{ product.basePrice }}
-            </p>
-            <p class="body-subtle mt-rally-sm">
-              {{ product.description }}
-            </p>
-            @if (product.sku) {
-              <p class="font-label-sm text-label-sm text-on-surface-variant mt-rally-xs">
-                SKU: <span class="font-semibold text-on-surface">{{ product.sku }}</span>
+            <div class="flex items-center gap-3 mt-1">
+              <p class="product-details__price font-body-lg text-3xl font-bold">
+                ${{ product.basePrice }}
               </p>
-            }
-            @if (product.tags?.length) {
-              <div class="flex flex-wrap gap-rally-xs mt-rally-sm">
-                @for (tag of product.tags; track tag) {
-                  <span
-                    class="bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
-                  >
-                    {{ tag }}
-                  </span>
-                }
-              </div>
-            }
+              @if (primaryDeal(); as deal) {
+                <span
+                  class="font-label-sm text-label-sm font-bold text-tertiary bg-tertiary/10 rounded-md px-2 py-1"
+                >
+                  Save {{ dealDiscount(deal) }}% with deal
+                </span>
+              }
+            </div>
           </div>
 
-          <div class="flex flex-col gap-rally-md">
-            <div class="flex items-center gap-rally-md flex-wrap">
-              <div class="flex items-center bg-surface-container rounded-lg px-rally-xs py-1">
-                <button
-                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
-                  (click)="decrementQuantity()"
-                  aria-label="Decrease quantity"
-                >
-                  <span class="material-symbols-outlined">remove</span>
-                </button>
-                <span class="px-rally-md font-body-md font-bold">{{ quantity() }}</span>
-                <button
-                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
-                  (click)="incrementQuantity()"
-                  aria-label="Increase quantity"
-                >
-                  <span class="material-symbols-outlined">add</span>
-                </button>
-              </div>
+          <div>
+            <p class="body-subtle leading-relaxed line-clamp-2">
+              {{ product.description }}
+            </p>
+            <button
+              type="button"
+              class="mt-1 font-label-sm text-label-sm text-primary font-bold hover:underline hover:cursor-pointer"
+              (click)="scrollToDescription()"
+            >
+              Read more
+            </button>
+          </div>
+
+          <div class="flex items-center gap-rally-md">
+            <div class="flex items-center bg-surface-container rounded-lg px-rally-xs py-1 shrink-0">
+              <button
+                class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                (click)="decrementQuantity()"
+                aria-label="Decrease quantity"
+              >
+                <span class="material-symbols-outlined">remove</span>
+              </button>
+              <span class="px-rally-md font-body-md font-bold">{{ quantity() }}</span>
+              <button
+                class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                (click)="incrementQuantity()"
+                aria-label="Increase quantity"
+              >
+                <span class="material-symbols-outlined">add</span>
+              </button>
             </div>
 
             <button
-              class="product-details__add-to-cart"
+              class="product-details__add-to-cart flex-1"
               [class.product-details__add-to-cart-added]="added()"
               (click)="addToCart()"
             >
@@ -119,54 +120,66 @@
               </span>
               {{ added() ? 'Added to Cart' : 'Add to Cart' }}
             </button>
-
-            @if (activeDeal(); as deal) {
-              <div class="product-details__deal-cta">
-                <div class="flex items-center justify-between">
-                  <p
-                    class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold flex items-center gap-rally-xs"
-                  >
-                    <span class="material-symbols-outlined text-[16px]">groups</span>
-                    Active Group Deal
-                  </p>
-                  <span class="font-label-sm text-label-sm text-on-surface-variant">
-                    <app-countdown [endAt]="deal.endsAt" />
-                  </span>
-                </div>
-                <div class="flex items-end justify-between">
-                  <div>
-                    <p class="text-[11px] text-on-surface-variant uppercase tracking-wider font-medium">
-                      Deal price
-                    </p>
-                    <p class="font-display-lg text-2xl font-bold text-primary">
-                      ${{ deal.dealPrice }}
-                    </p>
-                  </div>
-                  <p class="font-body-md text-sm text-on-surface-variant line-through">
-                    ${{ deal.originalPrice }}
-                  </p>
-                </div>
-                <div class="flex justify-between font-label-sm text-xs mb-1">
-                  <span class="text-on-surface-variant font-medium">
-                    {{ deal.joined }}/{{ deal.totalSpots }} joined
-                  </span>
-                  <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
-                </div>
-                <div class="progress-track">
-                  <div
-                    class="h-full progress-gradient rounded-full"
-                    [style.width.%]="deal.progressPercent"
-                  ></div>
-                </div>
-                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal">
-                  <span class="material-symbols-outlined">groups</span>
-                  Join Group Deal
-                </a>
-              </div>
-            }
           </div>
 
-          <div class="grid grid-cols-3 gap-rally-md mt-2">
+          @if (activeDeals().length > 1) {
+            <button
+              type="button"
+              class="w-full rounded-xl border border-tertiary/30 bg-tertiary/10 px-3 py-2 flex items-center justify-between gap-2 hover:cursor-pointer hover:bg-tertiary/20 transition-colors"
+              (click)="scrollToDeals()"
+            >
+              <p class="flex items-center gap-2 text-sm font-semibold text-on-surface">
+                <span class="material-symbols-outlined text-tertiary text-[18px]">groups</span>
+                {{ activeDeals().length }} active group deals
+              </p>
+              <p class="font-label-sm text-label-sm text-primary font-bold flex items-center gap-rally-xs">
+                from ${{ minDealPrice() }} · save up to {{ maxDealDiscount() }}%
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </p>
+            </button>
+          } @else if (primaryDeal(); as deal) {
+            <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-3 flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <p
+                  class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold flex items-center gap-rally-xs"
+                >
+                  <span class="material-symbols-outlined text-[16px]">groups</span>
+                  Active Group Deal
+                </p>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">
+                  <app-countdown [endAt]="deal.endTime ?? ''" />
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <p class="flex items-baseline gap-2">
+                  <span class="font-display-lg text-2xl font-bold text-primary">
+                    ${{ deal.dealPrice }}
+                  </span>
+                  <span class="font-body-md text-sm text-on-surface-variant line-through">
+                    ${{ deal.originalPrice }}
+                  </span>
+                </p>
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal !px-4 !py-2">
+                  <span class="material-symbols-outlined">groups</span>
+                  Join Deal
+                </a>
+              </div>
+              <div class="flex justify-between font-label-sm text-xs">
+                <span class="text-on-surface-variant font-medium">
+                  {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
+                </span>
+                <span class="text-primary font-bold">{{ neededCount(deal) }} needed</span>
+              </div>
+              <div class="progress-track">
+                <div
+                  class="h-full progress-gradient rounded-full"
+                  [style.width.%]="progressPercent(deal)"
+                ></div>
+              </div>
+            </div>
+          }
+
+          <div class="grid grid-cols-3 gap-rally-md">
             <div class="flex flex-col items-center text-center gap-rally-xs">
               <span class="material-symbols-outlined text-primary">local_shipping</span>
               <span class="font-label-sm text-label-sm text-on-surface-variant">
@@ -186,10 +199,29 @@
               </span>
             </div>
           </div>
+
+          <div class="flex flex-col gap-rally-xs">
+            @if (product.sku) {
+              <p class="font-label-sm text-label-sm text-on-surface-variant">
+                SKU: <span class="font-semibold text-on-surface">{{ product.sku }}</span>
+              </p>
+            }
+            @if (product.tags?.length) {
+              <div class="flex flex-wrap gap-rally-xs">
+                @for (tag of product.tags; track tag) {
+                  <span
+                    class="bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+                  >
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
         </div>
       </div>
 
-      <div class="mt-rally-xl py-rally-xl border-t border-outline-variant/20">
+      <div id="product-description" class="mt-rally-xl py-rally-xl border-t border-outline-variant/20">
         <div class="max-w-3xl mx-auto flex flex-col">
           <app-accordion title="Product Description" [open]="true">
             <p class="body-subtle leading-relaxed">
@@ -205,6 +237,64 @@
           </app-accordion>
         </div>
       </div>
+
+      @if (activeDeals().length > 1) {
+        <section id="product-group-deals" class="mt-rally-xl border-t border-outline-variant/20 pt-rally-xl">
+          <div class="flex items-center justify-between mb-rally-lg">
+            <h2
+              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface"
+            >
+              Active Group Deals
+            </h2>
+            <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">
+              {{ activeDeals().length }} active
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-rally-md">
+            @for (deal of activeDeals(); track deal.id) {
+              <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-4 flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="font-body-md font-semibold text-on-surface leading-snug">
+                    {{ deal.title }}
+                  </p>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">
+                    <app-countdown [endAt]="deal.endTime ?? ''" />
+                  </span>
+                </div>
+                <div class="flex items-end justify-between">
+                  <div>
+                    <p class="text-[11px] text-on-surface-variant uppercase tracking-wider font-medium">
+                      Deal price
+                    </p>
+                    <p class="font-display-lg text-2xl font-bold text-primary">
+                      ${{ deal.dealPrice }}
+                    </p>
+                  </div>
+                  <p class="font-body-md text-sm text-on-surface-variant line-through">
+                    ${{ deal.originalPrice }}
+                  </p>
+                </div>
+                <div class="flex justify-between font-label-sm text-xs mb-1">
+                  <span class="text-on-surface-variant font-medium">
+                    {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
+                  </span>
+                  <span class="text-primary font-bold">{{ neededCount(deal) }} needed</span>
+                </div>
+                <div class="progress-track">
+                  <div
+                    class="h-full progress-gradient rounded-full"
+                    [style.width.%]="progressPercent(deal)"
+                  ></div>
+                </div>
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal">
+                  <span class="material-symbols-outlined">groups</span>
+                  Join Group Deal
+                </a>
+              </div>
+            }
+          </div>
+        </section>
+      }
 
       @if (relatedProducts().length > 0) {
         <section class="pb-rally-xl">

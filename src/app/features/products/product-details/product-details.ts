@@ -11,7 +11,8 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
-import { getActiveDealForProduct, MockDeal } from '../../deals/mock-deals';
+import { getActiveDealsForProduct } from '../../../shared/mocks/deals';
+import { DealView, neededCount, progressPercent } from '../../../shared/models/deal';
 import { Countdown } from '../../../shared/components/countdown/countdown';
 
 @Component({
@@ -23,7 +24,7 @@ import { Countdown } from '../../../shared/components/countdown/countdown';
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  activeDeal = signal<MockDeal | null>(null);
+  activeDeals = signal<DealView[]>([]);
   selectedImage = signal('');
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -32,6 +33,35 @@ export class ProductDetails implements OnInit, OnDestroy {
   private addTimer: ReturnType<typeof setTimeout> | undefined;
 
   readonly resolveImageUrl = resolveImageUrl;
+  readonly neededCount = neededCount;
+  readonly progressPercent = progressPercent;
+
+  readonly primaryDeal = computed(() => this.activeDeals()[0] ?? null);
+
+  dealDiscount = (deal: DealView): number => {
+    if (!deal.originalPrice || deal.originalPrice <= 0) {
+      return 0;
+    }
+    return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
+  };
+
+  readonly minDealPrice = computed(() => {
+    const deals = this.activeDeals();
+    return deals.length ? Math.min(...deals.map((deal) => deal.dealPrice)) : 0;
+  });
+
+  readonly maxDealDiscount = computed(() => {
+    const deals = this.activeDeals();
+    return deals.length ? Math.max(...deals.map((deal) => this.dealDiscount(deal))) : 0;
+  });
+
+  scrollToDeals = () => {
+    document.getElementById('product-group-deals')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  scrollToDescription = () => {
+    document.getElementById('product-description')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
 
   readonly galleryImages = computed<string[]>(() => {
     const product = this.product();
@@ -71,6 +101,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   selectImage = (url: string) => this.selectedImage.set(url);
 
   ngOnInit() {
+    window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
@@ -85,7 +116,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     this.productsService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
-        this.activeDeal.set(getActiveDealForProduct(product.id) ?? null);
+        this.activeDeals.set(getActiveDealsForProduct(product.id));
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
         this.loadRelatedProducts(product);
