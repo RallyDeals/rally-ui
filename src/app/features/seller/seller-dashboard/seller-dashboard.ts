@@ -3,6 +3,7 @@ import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { DealStatus } from '../../../shared/models/deal';
 import { MetricCard } from '../components/metric-card/metric-card';
 
 interface ActivityItem {
@@ -17,10 +18,10 @@ interface ActivityItem {
 interface DealRow {
   name: string;
   image?: string;
-  status: string;
+  status: DealStatus;
   statusLabel: string;
-  joined: number;
-  required: number;
+  currentParticipants: number;
+  dealStock: number;
   progress: number;
   revenue: string;
 }
@@ -53,14 +54,20 @@ export class SellerDashboard {
     'primary-fixed': 'bg-primary-fixed text-primary',
   };
 
-  readonly statusClasses: Record<string, string> = {
+  readonly statusClasses: Record<DealStatus, string> = {
     active: 'bg-surface-container-high text-on-surface-variant',
-    success: 'bg-secondary-container text-on-secondary-container',
+    succeeded: 'bg-secondary-container text-on-secondary-container',
+    pending: 'bg-surface-container text-on-surface-variant',
+    failed: 'bg-error-container text-on-error-container',
+    cancelled: 'bg-surface-container-high text-on-surface-variant',
   };
 
-  readonly barClasses: Record<string, string> = {
+  readonly barClasses: Record<DealStatus, string> = {
     active: 'bg-primary-container',
-    success: 'bg-secondary',
+    succeeded: 'bg-secondary',
+    pending: 'bg-outline-variant',
+    failed: 'bg-error',
+    cancelled: 'bg-outline-variant',
   };
 
   readonly activity: ActivityItem[] = [
@@ -91,7 +98,7 @@ export class SellerDashboard {
   ];
 
   readonly deals: DealRow[] = [
-    { name: 'Wireless Earbuds PRO', status: 'active', statusLabel: 'Active', joined: 42, required: 50, progress: 84, revenue: '$2,100' },
-    { name: 'Smart Home Hub', status: 'success', statusLabel: 'Success', joined: 100, required: 100, progress: 100, revenue: '$8,900' },
+    { name: 'Wireless Earbuds PRO', status: 'active', statusLabel: 'Active', currentParticipants: 42, dealStock: 50, progress: 84, revenue: '$2,100' },
+    { name: 'Smart Home Hub', status: 'succeeded', statusLabel: 'Succeeded', currentParticipants: 100, dealStock: 100, progress: 100, revenue: '$8,900' },
   ];
 }
