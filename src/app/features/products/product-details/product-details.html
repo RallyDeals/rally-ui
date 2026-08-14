@@ -107,30 +107,63 @@
                   <span class="material-symbols-outlined">add</span>
                 </button>
               </div>
-              <p
-                class="font-label-sm text-label-sm text-secondary font-bold flex items-center gap-rally-xs"
-              >
-                <span class="icon-md">check_circle</span>
-                Approved &amp; Ready for Group Deals
-              </p>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-sm">
-              <button
-                class="product-details__add-to-cart"
-                [class.product-details__add-to-cart-added]="added()"
-                (click)="addToCart()"
-              >
-                <span class="material-symbols-outlined">
-                  {{ added() ? 'check' : 'shopping_cart' }}
-                </span>
-                {{ added() ? 'Added to Cart' : 'Add to Cart' }}
-              </button>
-              <a class="product-details__buy-now" routerLink="/deals">
-                <span class="material-symbols-outlined">groups</span>
-                Start a Group Deal
-              </a>
-            </div>
+            <button
+              class="product-details__add-to-cart"
+              [class.product-details__add-to-cart-added]="added()"
+              (click)="addToCart()"
+            >
+              <span class="material-symbols-outlined">
+                {{ added() ? 'check' : 'shopping_cart' }}
+              </span>
+              {{ added() ? 'Added to Cart' : 'Add to Cart' }}
+            </button>
+
+            @if (activeDeal(); as deal) {
+              <div class="product-details__deal-cta">
+                <div class="flex items-center justify-between">
+                  <p
+                    class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold flex items-center gap-rally-xs"
+                  >
+                    <span class="material-symbols-outlined text-[16px]">groups</span>
+                    Active Group Deal
+                  </p>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">
+                    <app-countdown [endAt]="deal.endsAt" />
+                  </span>
+                </div>
+                <div class="flex items-end justify-between">
+                  <div>
+                    <p class="text-[11px] text-on-surface-variant uppercase tracking-wider font-medium">
+                      Deal price
+                    </p>
+                    <p class="font-display-lg text-2xl font-bold text-primary">
+                      ${{ deal.dealPrice }}
+                    </p>
+                  </div>
+                  <p class="font-body-md text-sm text-on-surface-variant line-through">
+                    ${{ deal.originalPrice }}
+                  </p>
+                </div>
+                <div class="flex justify-between font-label-sm text-xs mb-1">
+                  <span class="text-on-surface-variant font-medium">
+                    {{ deal.joined }}/{{ deal.totalSpots }} joined
+                  </span>
+                  <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
+                </div>
+                <div class="progress-track">
+                  <div
+                    class="h-full progress-gradient rounded-full"
+                    [style.width.%]="deal.progressPercent"
+                  ></div>
+                </div>
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal">
+                  <span class="material-symbols-outlined">groups</span>
+                  Join Group Deal
+                </a>
+              </div>
+            }
           </div>
 
           <div class="grid grid-cols-3 gap-rally-md mt-2">

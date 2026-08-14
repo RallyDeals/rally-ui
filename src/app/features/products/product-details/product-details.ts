@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { Accordion } from './accordion/accordion';
-import { Breadcrumbs, BreadcrumbItem } from './breadcrumbs/breadcrumbs';
+import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { ProductCard } from '../components/product-card/product-card';
 import { CartService } from '../../cart/cart.service';
 import { Product } from '../../../shared/models/product';
@@ -11,16 +11,19 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { getActiveDealForProduct, MockDeal } from '../../deals/mock-deals';
+import { Countdown } from '../../../shared/components/countdown/countdown';
 
 @Component({
   selector: 'app-product-details',
-  imports: [RouterLink, Breadcrumbs, Accordion, ProductCard, ErrorState],
+  imports: [RouterLink, Breadcrumbs, Accordion, ProductCard, ErrorState, Countdown],
   templateUrl: './product-details.html',
   styleUrl: './product-details.css',
 })
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
+  activeDeal = signal<MockDeal | null>(null);
   selectedImage = signal('');
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -82,6 +85,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     this.productsService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
+        this.activeDeal.set(getActiveDealForProduct(product.id) ?? null);
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
         this.loadRelatedProducts(product);
