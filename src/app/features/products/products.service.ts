@@ -88,9 +88,25 @@ export class ProductsService {
     });
   }
 
-  getPendingApprovalProducts(): Observable<PageResponse<Product>> {
+  getPendingApprovalProducts(limit: number = 20): Observable<PageResponse<Product>> {
     return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
-      params: { status: ProductStatus.PENDING_APPROVAL },
+      params: {
+        status: ProductStatus.PENDING_APPROVAL,
+        limit: limit,
+      },
+    });
+  }
+
+  getAdminProductsBySeller(
+    sellerId: string,
+    params: { page?: number; limit?: number } = {},
+  ): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
+      params: {
+        sellerId,
+        page: params.page ?? 1,
+        limit: params.limit ?? 10,
+      },
     });
   }
 
@@ -98,7 +114,7 @@ export class ProductsService {
     return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/approve`, {});
   }
 
-  rejectProduct(id:string): Observable<void> {
+  rejectProduct(id: string): Observable<void> {
     return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/reject`, {});
   }
 

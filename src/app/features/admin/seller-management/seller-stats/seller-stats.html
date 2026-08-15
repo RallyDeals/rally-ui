@@ -1,0 +1,53 @@
+<div class="grid grid-cols-1 gap-rally-md mb-rally-xl relative z-10 md:grid-cols-3">
+  <div
+    class="bg-surface-container-low p-rally-md rounded-2xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group cursor-default"
+  >
+    <div
+      class="absolute top-0 right-0 w-32 h-32 bg-secondary-container/20 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"
+    ></div>
+    <div class="flex flex-col gap-rally-sm relative z-10">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Total Sellers</span>
+        <span class="material-symbols-outlined text-secondary">storefront</span>
+      </div>
+      <div class="flex items-baseline gap-rally-xs">
+        <span class="text-display-lg font-display-lg text-on-surface">{{ totalSellers() }}</span>
+        <span class="text-label-sm font-label-sm text-on-surface-variant">Seller</span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-surface-container-low p-rally-md rounded-2xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group cursor-default"
+  >
+    <div
+      class="absolute top-0 right-0 w-32 h-32 bg-tertiary-container/20 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"
+    ></div>
+    <div class="flex flex-col gap-rally-sm relative z-10">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Pending Review</span>
+        <span class="material-symbols-outlined text-tertiary">inventory_2</span>
+      </div>
+      <div class="flex items-baseline gap-rally-xs">
+        <span class="text-display-lg font-display-lg text-on-surface">{{ pendingReview() }}</span>
+        <span class="text-label-sm font-label-sm text-on-surface-variant">Products</span>
+      </div>
+    </div>
+  </div>
+  <div
+    class="bg-surface-container-low p-rally-md rounded-2xl shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group cursor-default"
+  >
+    <div
+      class="absolute top-0 right-0 w-32 h-32 bg-primary-container/20 rounded-bl-full -mr-8 -mt-8 transition-transform group-hover:scale-110"
+    ></div>
+    <div class="flex flex-col gap-rally-sm relative z-10">
+      <div class="flex items-center justify-between">
+        <span class="text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wider">Active Deals</span>
+        <span class="material-symbols-outlined text-primary-container">local_fire_department</span>
+      </div>
+      <div class="flex items-baseline gap-rally-xs">
+        <span class="text-display-lg font-display-lg text-on-surface">{{ activeDeals() }}</span>
+        <span class="text-label-sm font-label-sm text-on-surface-variant">Deals</span>
+      </div>
+    </div>
+  </div>
+</div>
