@@ -31,7 +31,7 @@ export class AdminSidebar {
 
   readonly navItems: NavItem[] = [
     { label: 'Product Approvals', symbol: 'verified_user', path: '/admin/product-approvals' },
-    { label: 'User Management', symbol: 'group', path: '/admin/buyer-management' },
+    { label: 'User Management', symbol: 'group', path: '/admin/user-management' },
     { label: 'Seller Management', symbol: 'storefront', path: '/admin/seller-management' },
     { label: 'Categories Management', symbol: 'category', path: '/admin/categories-management' },
     { label: 'Deals Management', symbol: 'local_offer', path: '/admin/deals-management' },
