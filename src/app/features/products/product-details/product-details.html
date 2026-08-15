@@ -57,7 +57,7 @@
             <p
               class="product-details__category font-label-sm text-label-sm uppercase tracking-wider"
             >
-              {{ product.category.name }}
+              {{ product.category?.name ?? 'Uncategorized' }}
             </p>
             <h1
               class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mt-10"

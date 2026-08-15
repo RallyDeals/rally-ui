@@ -242,6 +242,13 @@ body {
   border-color: var(--color-primary);
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 }
+.product-form__input-error {
+  border-color: var(--color-error);
+}
+.product-form__input-error:focus {
+  border-color: var(--color-error);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-error) 15%, transparent);
+}
 
 .product-form__dropzone {
   display: flex;

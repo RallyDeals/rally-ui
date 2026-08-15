@@ -10,7 +10,7 @@ import {
   DealPriceRange,
   DealStatusKey,
 } from '../components/deal-filters/deal-filters';
-import { Pagination } from '../../products/browse-products/pagination/pagination';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
 import { DealsService, DealView } from '../deals.service';
 

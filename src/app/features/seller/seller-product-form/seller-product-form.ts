@@ -12,6 +12,7 @@ import { resolveImageUrl } from '../../../shared/utils/image-url';
 const MAX_IMAGE_SIZE_MB = 5;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/svg+xml', 'image/png', 'image/jpeg'];
+const MAX_DESCRIPTION_LENGTH = 500;
 
 export interface ProductImage {
   id: string;
@@ -39,6 +40,7 @@ export class SellerProductForm implements OnInit {
 
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
+  readonly maxDescriptionLength = MAX_DESCRIPTION_LENGTH;
   productId = signal<string | null>(null);
   loading = signal(false);
   saving = signal(false);
@@ -58,6 +60,49 @@ export class SellerProductForm implements OnInit {
   tagInput = signal('');
   images = signal<ProductImage[]>([]);
   imageError = signal<string | null>(null);
+  submitted = signal(false);
+
+  readonly nameError = computed(() => (this.name().trim() ? null : 'Product name is required.'));
+  readonly descriptionError = computed(() => {
+    const value = this.description();
+    if (!value.trim()) {
+      return 'Description is required.';
+    }
+    if (value.length > MAX_DESCRIPTION_LENGTH) {
+      return `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters.`;
+    }
+    return null;
+  });
+  readonly categoryError = computed(() => (this.categoryId() ? null : 'Select a category.'));
+  readonly priceError = computed(() => {
+    if (this.basePrice().trim() === '') {
+      return 'Original price is required.';
+    }
+    const value = Number(this.basePrice());
+    if (!Number.isFinite(value) || value <= 0) {
+      return 'Price must be greater than 0.';
+    }
+    return null;
+  });
+  readonly stockError = computed(() => {
+    if (this.stockQuantity().trim() === '') {
+      return 'Stock quantity is required.';
+    }
+    const value = Number(this.stockQuantity());
+    if (!Number.isInteger(value) || value <= 0) {
+      return 'Stock quantity must be a whole number greater than 0.';
+    }
+    return null;
+  });
+
+  readonly canSave = computed(
+    () =>
+      !this.nameError() &&
+      !this.descriptionError() &&
+      !this.categoryError() &&
+      !this.priceError() &&
+      !this.stockError(),
+  );
 
   readonly isEdit = computed(() => this.productId() !== null);
 
@@ -173,8 +218,14 @@ export class SellerProductForm implements OnInit {
   };
 
   save = async () => {
-    this.saving.set(true);
+    this.submitted.set(true);
     this.error.set(null);
+    if (!this.canSave()) {
+      this.error.set('Please fix the highlighted fields before saving.');
+      return;
+    }
+
+    this.saving.set(true);
 
     let images: string[] = [];
     try {
