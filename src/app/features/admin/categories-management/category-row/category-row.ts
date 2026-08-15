@@ -10,5 +10,5 @@ import { Category } from '../../../../shared/models/category';
 export class CategoryRow {
   category = input.required<Category>();
   edit = output<Category>();
-  delete = output<string>()
+  delete = output<string>();
 }

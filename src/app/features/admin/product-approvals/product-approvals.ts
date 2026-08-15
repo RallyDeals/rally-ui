@@ -1,7 +1,7 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
+import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { ProductApprovalFilters } from './product-approval-filters/product-approval-filters';
 import { PendingProductRow } from './pending-product-row/pending-product-row';
@@ -9,25 +9,23 @@ import { ProductsService } from '../../products/products.service';
 import { Product } from '../../../shared/models/product';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { SellerInfo, UserService } from '../../auth/user.service';
+import { UserService } from '../../auth/user.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
+import { User } from '../../../shared/models/user';
 
 @Component({
   selector: 'app-product-approvals',
-  imports: [PageHeader, Pagination, ErrorModal, ProductApprovalFilters, PendingProductRow],
+  imports: [PageHeader, Pagination, ErrorState, ErrorModal, ProductApprovalFilters, PendingProductRow],
   templateUrl: './product-approvals.html',
-  styleUrl: './product-approvals.css',
 })
 export class ProductApprovals implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly userService = inject(UserService);
   private readonly categoriesService = inject(CategoriesService);
 
-  private readonly router = inject(Router);
-
   pendingProducts = signal<Product[]>([]);
-  sellers = signal<SellerInfo[]>([]);
+  sellers = signal<User[]>([]);
   categories = signal<Category[]>([]);
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
@@ -97,7 +95,7 @@ export class ProductApprovals implements OnInit {
   };
 
   loadSellers(){
-    this.userService.getSellers().subscribe({
+    this.userService.getUsers().subscribe({
       next: (sellers) => {
         this.sellers.set(sellers);
       },
@@ -117,11 +115,6 @@ export class ProductApprovals implements OnInit {
       }
     })
   }
-
-  closeLoadError = () => {
-    this.loadError.set(null);
-    this.router.navigate(['/admin']);
-  };
 
   closeActionError = () => {
     this.actionError.set(null);

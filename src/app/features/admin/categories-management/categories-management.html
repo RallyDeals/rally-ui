@@ -9,37 +9,45 @@
         Add Category
       </button>
     </app-page-header>
-    <div class="bg-surface-container-lowest rounded-2xl shadow-lg relative z-10 overflow-hidden">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left border-collapse">
-          <thead>
-          <tr class="bg-surface-container-lowest text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">
-            <th class="p-rally-md font-medium">Category Name</th>
-            <th class="p-rally-md font-medium">Description</th>
-            <th class="p-rally-md font-medium">Products Count</th>
-            <th class="p-rally-md font-medium text-right">Actions</th>
-          </tr>
-          </thead>
-          <tbody class="text-body-md font-body-md text-on-surface divide-y divide-surface-container-high border-t border-surface-container-high">
-            @if (loading()) {
-              <tr>
-                <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">Loading…</td>
-              </tr>
-            } @else {
-              @for (category of categories(); track category.id) {
-                <tr app-category-row [category]="category" (edit)="openUpdateDialog($event)" (delete)="onCategoryDelete($event)" class="hover:bg-surface-container/50 transition-colors group"></tr>
-              } @empty {
+    <div class="bg-surface rounded-2xl shadow-xl overflow-hidden relative group">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-surface-container-low/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"
+      ></div>
+
+      @if (loadError(); as err) {
+        <app-error-state [error]="err" [showRetry]="true" (retry)="loadCategories()" />
+      } @else {
+        <div class="overflow-x-auto relative z-10">
+          <table class="w-full text-left border-collapse">
+            <thead>
+            <tr class="bg-surface-container-low/50">
+              <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Category Name</th>
+              <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Description</th>
+              <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Products Count</th>
+              <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Actions</th>
+            </tr>
+            </thead>
+            <tbody class="text-body-md font-body-md text-on-surface">
+              @if (loading()) {
                 <tr>
-                  <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">No categories yet.</td>
+                  <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">Loading…</td>
                 </tr>
+              } @else {
+                @for (category of categories(); track category.id) {
+                  <tr app-category-row [category]="category" (edit)="openUpdateDialog($event)" (delete)="onCategoryDelete($event)" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>
+                } @empty {
+                  <tr>
+                    <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">No categories yet.</td>
+                  </tr>
+                }
               }
-            }
-          </tbody>
-        </table>
-      </div>
-      <div class="px-rally-md py-rally-sm bg-surface-container-low border-t border-surface-container-high flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
-        <span>Showing {{ categories().length }} of {{ categories().length }} categories</span>
-      </div>
+            </tbody>
+          </table>
+        </div>
+        <div class="p-rally-sm bg-surface-container-low/50 flex items-center justify-between relative z-10 text-label-sm font-label-sm text-on-surface-variant">
+          <span>{{ categories().length }} categories</span>
+        </div>
+      }
     </div>
   </div>
 
@@ -49,4 +57,5 @@
     (saved)="onCategorySaved($event)"
     (closed)="closeDialog()"
   />
+  <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
 </main>
