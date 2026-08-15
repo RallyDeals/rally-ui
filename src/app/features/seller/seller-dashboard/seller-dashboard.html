@@ -9,16 +9,10 @@
     </div>
     <div class="flex gap-rally-sm w-full sm:w-auto">
       <div
-        class="relative flex-1 sm:flex-none px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-2 bg-surface-container-lowest overflow-hidden"
+        class="flex items-center gap-2 px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest"
       >
-        <span class="material-symbols-outlined text-sm pointer-events-none">calendar_month</span>
-        <span class="pointer-events-none">{{ selectedDate() || 'Last 30 Days' }}</span>
-        <input
-          type="date"
-          class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
-          [value]="selectedDate()"
-          (input)="onDateChange($event)"
-        />
+        <span class="material-symbols-outlined text-sm text-primary-container">calendar_month</span>
+        <span>Last 30 Days</span>
       </div>
       <button
         type="button"
@@ -35,30 +29,30 @@
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md mb-rally-lg">
     <app-metric-card
       label="Total Revenue"
-      value="$45.2k"
+      [value]="totalRevenueValue()"
       symbol="payments"
       trend="positive"
-      trendLabel="12.5% vs last month"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
       label="Participants"
-      value="1,204"
+      [value]="participantsValue()"
       symbol="groups"
       trend="positive"
-      trendLabel="8.2% vs last month"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
       label="Success Rate"
-      value="92%"
+      [value]="successRateValue()"
       symbol="check_circle"
       trend="positive"
-      trendLabel="2.1% vs last month"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
-      label="Pending Orders"
-      value="18"
+      label="Active Deals"
+      [value]="pendingOrdersValue()"
       symbol="pending_actions"
-      trendLabel="Needs attention"
+      [trendLabel]="rangeLabel()"
     />
   </div>
 
@@ -157,7 +151,7 @@
           </tr>
         </thead>
         <tbody class="body-text divide-y divide-outline-variant/30">
-          @for (deal of deals; track deal.name) {
+          @for (deal of rangeDeals(); track deal.name) {
             <tr class="hover:bg-surface-container/30 transition-colors">
               <td class="px-rally-md py-4">
                 <div class="flex items-center gap-rally-sm">
