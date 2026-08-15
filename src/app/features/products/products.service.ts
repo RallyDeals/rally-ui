@@ -28,6 +28,12 @@ export interface UpsertProductRequest {
   images?: string[];
 }
 
+export enum ProductStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+}
+
 export interface ImageUploadResponse {
   path: string;
 }
@@ -68,21 +74,32 @@ export class ProductsService {
       limit?: number;
     } = {},
   ): Observable<PageResponse<Product>> {
-    return this.http.get<PageResponse<Product>>(
-      `${this.apiUrl}/products/sellers/${sellerId}`,
-      {
-        params: {
-          page: params.page ?? 1,
-          limit: params.limit ?? 20,
-          ...(params.status && { status: params.status }),
-          ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
-          ...(params.includeDeleted !== undefined && {
-            includeDeleted: String(params.includeDeleted),
-          }),
-          ...(params.sort && { sort: params.sort }),
-        },
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/sellers/${sellerId}`, {
+      params: {
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+        ...(params.status && { status: params.status }),
+        ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
+        ...(params.includeDeleted !== undefined && {
+          includeDeleted: String(params.includeDeleted),
+        }),
+        ...(params.sort && { sort: params.sort }),
       },
-    );
+    });
+  }
+
+  getPendingApprovalProducts(): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
+      params: { status: ProductStatus.PENDING_APPROVAL },
+    });
+  }
+
+  approveProduct(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/approve`, {});
+  }
+
+  rejectProduct(id:string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/reject`, {});
   }
 
   deleteProduct(id: string): Observable<void> {

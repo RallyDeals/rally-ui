@@ -1,0 +1,22 @@
+<div class="flex flex-wrap gap-rally-md p-rally-md bg-surface-container-low rounded-xl">
+  <div class="flex flex-col gap-rally-xs w-60">
+    <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Category</label>
+    <app-searchable-select
+      [options]="categoryOptions()"
+      [selected]="selectedCategoryId()"
+      (selectedChange)="categoryChange.emit($event)"
+      placeholder="All Categories"
+      searchPlaceholder="Search categories..."
+    />
+  </div>
+  <div class="flex flex-col gap-rally-xs w-60">
+    <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Seller Name</label>
+    <app-searchable-select
+      [options]="sellerOptions()"
+      [selected]="selectedSellerId()"
+      (selectedChange)="sellerChange.emit($event)"
+      placeholder="All Sellers"
+      searchPlaceholder="Search sellers..."
+    />
+  </div>
+</div>

@@ -1,0 +1,66 @@
+<main class="min-h-screen bg-background">
+  <div class="flex flex-col w-full p-rally-lg gap-rally-lg">
+    <app-page-header title="Product Approvals" subtitle="Review and manage products submitted by sellers." />
+
+    <div class="flex flex-col gap-rally-md">
+      <app-product-approval-filters
+        [categories]="categories()"
+        [sellers]="sellers()"
+        [selectedCategoryId]="selectedCategoryId()"
+        [selectedSellerId]="selectedSellerId()"
+        (categoryChange)="onCategoryFilterChange($event)"
+        (sellerChange)="onSellerFilterChange($event)"
+      />
+      <div class="bg-surface-container-lowest rounded-xl shadow-sm overflow-hidden">
+        <div class="overflow-x-auto">
+          <table class="w-full text-left border-collapse">
+            <thead>
+            <tr class="border-b border-outline-variant/30">
+              <th class="p-rally-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Product</th>
+              <th class="p-rally-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Price</th>
+              <th class="p-rally-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Category
+              </th>
+              <th class="p-rally-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">Seller
+                Name
+              </th>
+              <th class="p-rally-md font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider text-right">
+                Actions
+              </th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-outline-variant/20">
+              @if (loading()) {
+                <tr>
+                  <td class="p-rally-md text-center text-on-surface-variant" colspan="5">Loading…</td>
+                </tr>
+              } @else {
+                @for (product of visibleProducts(); track product.id) {
+                  <tr
+                    app-pending-product-row
+                    [product]="product"
+                    (approve)="approveProduct($event)"
+                    (reject)="rejectProduct($event)"
+                    class="hover:bg-surface-container-low transition-colors"
+                  ></tr>
+                } @empty {
+                  <tr>
+                    <td class="p-rally-md text-center text-on-surface-variant" colspan="5">No products awaiting approval.</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="p-rally-md border-t border-outline-variant/30 flex flex-col sm:flex-row items-center justify-between gap-rally-sm">
+          <p class="font-body-md text-body-md text-on-surface-variant">
+            Showing {{ fromIndex }}-{{ toIndex }} of {{ total() }} products
+          </p>
+          <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <app-error-modal [error]="loadError()" (closed)="closeLoadError()" />
+  <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
+</main>
