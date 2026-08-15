@@ -18,7 +18,14 @@
   </header>
 
   <!-- Page Header -->
-  <app-page-header title="Orders" subtitle="Manage and track customer orders." />
+  <app-page-header title="Orders" subtitle="Manage and track customer orders.">
+    <div
+      class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest"
+    >
+      <span class="material-symbols-outlined text-sm text-primary-container">calendar_month</span>
+      <span>Last 30 Days</span>
+    </div>
+  </app-page-header>
 
   <!-- Quick Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
@@ -26,26 +33,26 @@
       label="Total Orders"
       [value]="totalOrdersValue()"
       symbol="receipt_long"
-      trendLabel="All time"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
       label="Revenue"
       [value]="revenueValue()"
       symbol="payments"
       trend="positive"
-      trendLabel="Gross sales"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
       label="Pending"
       [value]="pendingValue()"
       symbol="pending_actions"
-      trendLabel="Needs action"
+      [trendLabel]="rangeLabel()"
     />
     <app-metric-card
       label="Delivered"
       [value]="deliveredValue()"
       symbol="inventory_2"
-      trendLabel="Completed"
+      [trendLabel]="rangeLabel()"
     />
   </div>
 

@@ -16,6 +16,7 @@ import { SellerOrderService } from './seller-order.service';
 import { formatMoney } from '../../../shared/utils/money.util';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { orderCode, productCode } from '../../../shared/utils/order-code.util';
+import { dateInRange, todayISO, daysAgoISO } from '../../../shared/utils/date-range.util';
 
 export const ORDER_PHASE_OPTIONS: FilterPillOption[] = [
   { value: 'ALL', label: 'All' },
@@ -25,6 +26,10 @@ export const ORDER_PHASE_OPTIONS: FilterPillOption[] = [
   { value: 'DELIVERED', label: 'Delivered' },
   { value: 'CANCELLED', label: 'Cancelled' },
 ];
+
+const RANGE_START = daysAgoISO(30);
+const RANGE_END = todayISO();
+const RANGE_LABEL = 'Last 30 Days';
 
 @Component({
   selector: 'app-seller-orders',
@@ -52,10 +57,16 @@ export class SellerOrders {
   limit = 5;
   orders = toSignal(this.orderService.listOrders(), { initialValue: [] });
 
+  readonly rangeOrders = computed(() =>
+    this.orders().filter((order) => dateInRange(order.createdAt, RANGE_START, RANGE_END)),
+  );
+
+  readonly rangeLabel = computed(() => RANGE_LABEL);
+
   readonly visibleOrders = computed(() => {
     const phase = this.phaseFilter();
     const query = this.searchQuery().trim().toLowerCase();
-    return this.orders().filter((order) => {
+    return this.rangeOrders().filter((order) => {
       const matchesPhase = phase === 'ALL' || order.phase === phase;
       const matchesQuery =
         query === '' ||
@@ -84,19 +95,19 @@ export class SellerOrders {
     return Math.min(this.page() * this.limit, this.visibleOrders().length);
   }
 
-  readonly totalOrdersValue = computed(() => String(this.orders().length));
+  readonly totalOrdersValue = computed(() => String(this.rangeOrders().length));
 
   readonly revenueValue = computed(() => {
-    const total = this.orders().reduce((sum, order) => sum + order.totalPrice, 0);
+    const total = this.rangeOrders().reduce((sum, order) => sum + order.totalPrice, 0);
     return `$${formatMoney(total)}`;
   });
 
   readonly pendingValue = computed(
-    () => String(this.orders().filter((order) => order.phase === 'PENDING').length),
+    () => String(this.rangeOrders().filter((order) => order.phase === 'PENDING').length),
   );
 
   readonly deliveredValue = computed(
-    () => String(this.orders().filter((order) => order.phase === 'DELIVERED').length),
+    () => String(this.rangeOrders().filter((order) => order.phase === 'DELIVERED').length),
   );
 
   orderNumber = (id: string): string => orderCode(id);
