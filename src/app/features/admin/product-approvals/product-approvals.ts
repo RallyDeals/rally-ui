@@ -12,7 +12,7 @@ import { toApiError } from '../../../shared/utils/api-error.util';
 import { UserService } from '../../auth/user.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
-import { User } from '../../../shared/models/user';
+import { Seller } from '../interfaces/seller';
 
 @Component({
   selector: 'app-product-approvals',
@@ -25,7 +25,7 @@ export class ProductApprovals implements OnInit {
   private readonly categoriesService = inject(CategoriesService);
 
   pendingProducts = signal<Product[]>([]);
-  sellers = signal<User[]>([]);
+  sellers = signal<Seller[]>([]);
   categories = signal<Category[]>([]);
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
@@ -95,9 +95,9 @@ export class ProductApprovals implements OnInit {
   };
 
   loadSellers(){
-    this.userService.getUsers().subscribe({
+    this.userService.getSellers().subscribe({
       next: (sellers) => {
-        this.sellers.set(sellers);
+        this.sellers.set(sellers.items);
       },
       error: (err) => {
         this.loadError.set(toApiError(err));

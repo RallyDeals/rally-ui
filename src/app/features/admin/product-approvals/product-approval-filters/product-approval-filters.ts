@@ -1,7 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Category } from '../../../../shared/models/category';
 import { SearchableSelect, SelectOption } from '../../../../shared/components/searchable-select/searchable-select';
-import { User } from '../../../../shared/models/user';
+import { Seller } from '../../interfaces/seller';
 
 @Component({
   selector: 'app-product-approval-filters',
@@ -10,7 +10,7 @@ import { User } from '../../../../shared/models/user';
 })
 export class ProductApprovalFilters {
   categories = input.required<Category[]>();
-  sellers = input.required<User[]>();
+  sellers = input.required<Seller[]>();
   selectedCategoryId = input('');
   selectedSellerId = input('');
 
