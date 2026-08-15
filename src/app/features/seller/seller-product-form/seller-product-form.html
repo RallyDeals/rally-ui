@@ -23,7 +23,7 @@
       <button
         type="button"
         class="px-6 py-2.5 rounded-xl bg-primary-container text-on-primary hover:shadow-lg hover:scale-[1.02] transition-all font-semibold disabled:opacity-60 disabled:hover:scale-100"
-        [disabled]="saving()"
+        [disabled]="saving() || (submitted() && !canSave())"
         (click)="save()"
       >
         @if (saving()) {
@@ -82,9 +82,14 @@
                 type="text"
                 class="product-form__input"
                 placeholder="e.g. Ergonomic Office Chair Pro"
+                required
                 [value]="name()"
+                [class.product-form__input-error]="(submitted() || name()) && nameError()"
                 (input)="name.set($any($event.target).value)"
               />
+              @if ((submitted() || name()) && nameError(); as msg) {
+                <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+              }
             </div>
             <div>
               <label class="field-label" for="product-description">
@@ -95,9 +100,24 @@
                 rows="5"
                 class="product-form__input resize-y"
                 placeholder="Highlight the key benefits and features of your product..."
+                required
+                [attr.maxlength]="maxDescriptionLength"
                 [value]="description()"
+                [class.product-form__input-error]="(submitted() || description()) && descriptionError()"
                 (input)="description.set($any($event.target).value)"
               ></textarea>
+              @if ((submitted() || description()) && descriptionError(); as msg) {
+                <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+              }
+              <div class="mt-1 flex justify-end">
+                <span
+                  class="text-xs font-medium"
+                  [class.text-error]="description().length > maxDescriptionLength"
+                  [class.text-on-surface-variant]="description().length <= maxDescriptionLength"
+                >
+                  {{ description().length }}/{{ maxDescriptionLength }}
+                </span>
+              </div>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-md">
               <div>
@@ -107,7 +127,9 @@
                 <select
                   id="product-category"
                   class="product-form__input"
+                  required
                   [value]="categoryId()"
+                  [class.product-form__input-error]="(submitted() || categoryId()) && categoryError()"
                   (change)="onCategoryChange($any($event.target).value)"
                 >
                   <option value="">Select Category</option>
@@ -115,6 +137,9 @@
                     <option [value]="category.id">{{ category.name }}</option>
                   }
                 </select>
+                @if ((submitted() || categoryId()) && categoryError(); as msg) {
+                  <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+                }
               </div>
             </div>
           </div>
@@ -135,13 +160,19 @@
                 <input
                   id="product-price"
                   type="number"
-                  min="0"
+                  min="0.01"
+                  step="0.01"
                   class="product-form__input price-input"
                   placeholder="0.00"
+                  required
                   [value]="basePrice()"
+                  [class.product-form__input-error]="(submitted() || basePrice()) && priceError()"
                   (input)="basePrice.set($any($event.target).value)"
                 />
               </div>
+              @if ((submitted() || basePrice()) && priceError(); as msg) {
+                <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+              }
             </div>
             <div>
               <label class="field-label" for="product-stock">
@@ -150,12 +181,18 @@
               <input
                 id="product-stock"
                 type="number"
-                min="0"
+                min="1"
+                step="1"
                 class="product-form__input"
                 placeholder="0"
+                required
                 [value]="stockQuantity()"
+                [class.product-form__input-error]="(submitted() || stockQuantity()) && stockError()"
                 (input)="stockQuantity.set($any($event.target).value)"
               />
+              @if ((submitted() || stockQuantity()) && stockError(); as msg) {
+                <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+              }
             </div>
             <div>
               <label class="field-label" for="product-sku">
@@ -326,7 +363,7 @@
     <button
       type="button"
       class="flex-1 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-semibold disabled:opacity-60"
-      [disabled]="saving()"
+      [disabled]="saving() || (submitted() && !canSave())"
       (click)="save()"
     >
       @if (saving()) {

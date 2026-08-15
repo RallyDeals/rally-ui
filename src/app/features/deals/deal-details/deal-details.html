@@ -92,14 +92,14 @@
               class="absolute top-0 right-0 w-32 h-32 bg-primary-container/10 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"
             ></div>
 
-            <div class="relative z-10 flex flex-col gap-rally-md">
+            <div class="relative z-10 flex flex-col gap-rally-xs">
               <div class="flex justify-between items-end">
                 <div>
                   <div class="text-on-surface-variant font-label-sm text-label-sm mb-1 uppercase tracking-wider">
                     Rally Price.
                   </div>
                   <div class="flex items-baseline gap-rally-sm">
-                    <span class="font-display-lg text-[40px] text-primary-container font-black leading-none">
+                    <span class="font-display-lg text-[32px] text-primary-container font-black leading-none">
                       ${{ deal.dealPrice }}
                     </span>
                     <span class="font-body-lg text-body-lg text-on-surface-variant line-through opacity-60">
@@ -117,47 +117,7 @@
                 </div>
               </div>
 
-              <div class="flex flex-col gap-rally-xs mt-rally-sm">
-                <div class="flex justify-between font-label-sm text-label-sm text-on-surface font-semibold">
-                  <span>{{ deal.currentParticipants }} Joined</span>
-                  <span>Target: {{ deal.dealStock }}</span>
-                </div>
-                <div class="progress-track">
-                  <div class="h-full progress-gradient rounded-full relative" [style.width.%]="progress()">
-                    <div class="progress-tip"></div>
-                  </div>
-                </div>
-                <p class="font-label-sm text-label-sm text-on-surface-variant text-right">
-                  @if (isFull()) {
-                    Rally is full!
-                  } @else {
-                    Only {{ spotsLeft() }} spots left at this price!
-                  }
-                </p>
-              </div>
-
-              <div class="flex items-center gap-rally-sm mt-rally-xs">
-                <div class="flex -space-x-3">
-                  @for (person of participants(); track person.initials) {
-                    <span
-                      class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white"
-                      [style.background-color]="person.color"
-                    >
-                      {{ person.initials }}
-                    </span>
-                  }
-                  @if (extraParticipants() > 0) {
-                    <span
-                      class="w-8 h-8 rounded-full border-2 border-white bg-surface-container flex items-center justify-center font-label-sm text-[10px] text-on-surface-variant z-10"
-                    >
-                      +{{ extraParticipants() }}
-                    </span>
-                  }
-                </div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant">just joined</span>
-              </div>
-
-              <div class="flex flex-col gap-rally-sm mt-rally-sm">
+              <div class="flex flex-col gap-rally-sm">
                 <app-primary-btn
                   [content]="
                     isClosed() && !isFull()
@@ -183,6 +143,46 @@
                   </span>
                   {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
                 </button>
+              </div>
+
+              <div class="flex flex-col gap-rally-xs">
+                <div class="flex justify-between font-label-sm text-label-sm text-on-surface font-semibold">
+                  <span>{{ deal.currentParticipants }} Joined</span>
+                  <span>Target: {{ deal.dealStock }}</span>
+                </div>
+                <div class="progress-track">
+                  <div class="h-full progress-gradient rounded-full relative" [style.width.%]="progress()">
+                    <div class="progress-tip"></div>
+                  </div>
+                </div>
+                <p class="font-label-sm text-label-sm text-on-surface-variant text-right">
+                  @if (isFull()) {
+                    Rally is full!
+                  } @else {
+                    Only {{ spotsLeft() }} spots left at this price!
+                  }
+                </p>
+              </div>
+
+              <div class="flex items-center gap-rally-sm">
+                <div class="flex -space-x-3">
+                  @for (person of participants(); track person.initials) {
+                    <span
+                      class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white"
+                      [style.background-color]="person.color"
+                    >
+                      {{ person.initials }}
+                    </span>
+                  }
+                  @if (extraParticipants() > 0) {
+                    <span
+                      class="w-8 h-8 rounded-full border-2 border-white bg-surface-container flex items-center justify-center font-label-sm text-[10px] text-on-surface-variant z-10"
+                    >
+                      +{{ extraParticipants() }}
+                    </span>
+                  }
+                </div>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">just joined</span>
               </div>
             </div>
           </div>

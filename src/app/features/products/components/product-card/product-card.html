@@ -23,7 +23,7 @@
     <span
       class="product-card__category font-label-sm text-label-sm uppercase tracking-wider font-semibold"
     >
-      {{ product().category.name }}
+      {{ product().category?.name ?? 'Uncategorized' }}
     </span>
     <h3 class="product-card__title font-headline-md text-lg leading-tight line-clamp-2">
       {{ product().name }}

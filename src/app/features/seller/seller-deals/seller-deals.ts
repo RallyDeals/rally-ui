@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Pagination } from '../../products/browse-products/pagination/pagination';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
