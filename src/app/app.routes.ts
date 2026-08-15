@@ -16,6 +16,7 @@ import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 import { OrderDetails } from './features/orders/order-details/order-details';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 
 export const routes: Routes = [
@@ -80,6 +81,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [adminGuard],
     children: ADMIN_ROUTES
   },
 ];
