@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
 import { ProductCard } from '../components/product-card/product-card';
-import { Pagination } from './pagination/pagination';
+import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ProductFilters, PriceRange } from '../components/product-filters/product-filters';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService } from '../products.service';
