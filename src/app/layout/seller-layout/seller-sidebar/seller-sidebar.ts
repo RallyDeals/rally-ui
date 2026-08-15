@@ -32,8 +32,7 @@ export class SellerSidebar {
     { label: 'Overview', symbol: 'dashboard', path: '/seller' },
     { label: 'My Products', symbol: 'inventory_2', path: '/seller/products' },
     { label: 'Deals', symbol: 'group_add', path: '/seller/deals' },
-    { label: 'Orders', symbol: 'receipt_long', path: null },
-    { label: 'Analytics', symbol: 'analytics', path: null },
+    { label: 'Orders', symbol: 'receipt_long', path: '/seller/orders' },
   ];
 
   readonly settingsItem: NavItem = { label: 'Settings', symbol: 'settings', path: null };

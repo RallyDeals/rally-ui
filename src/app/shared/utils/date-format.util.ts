@@ -1,3 +1,15 @@
+export function formatShortDate(iso: string): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) {
+    return '—';
+  }
+  return date.toLocaleDateString(undefined, {
+    month: 'short',
+    day: 'numeric',
+    year: 'numeric',
+  });
+}
+
 export function formatDuration(totalMinutes: number): string {
   if (!totalMinutes || totalMinutes <= 0) {
     return '0 minutes';
