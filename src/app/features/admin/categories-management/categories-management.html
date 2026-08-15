@@ -1,0 +1,51 @@
+<main class="min-h-screen bg-background">
+  <div class="flex flex-col w-full px-rally-lg gap-rally-lg">
+    <app-page-header title="Categories Management" subtitle="Manage product categories and track assigned inventory.">
+      <button
+        (click)="openCreateDialog()"
+        class="bg-primary hover:bg-primary-container text-on-primary font-label-sm py-rally-sm px-rally-md rounded-full shadow-sm hover:shadow-md transition-all duration-300 transform hover:scale-[1.02] flex items-center gap-rally-xs w-fit"
+      >
+        <span class="material-symbols-outlined text-[18px]">add</span>
+        Add Category
+      </button>
+    </app-page-header>
+    <div class="bg-surface-container-lowest rounded-2xl shadow-lg relative z-10 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-left border-collapse">
+          <thead>
+          <tr class="bg-surface-container-lowest text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">
+            <th class="px-rally-md py-rally-sm font-medium">Category Name</th>
+            <th class="px-rally-md py-rally-sm font-medium">Description</th>
+            <th class="px-rally-md py-rally-sm font-medium">Products Count</th>
+            <th class="px-rally-md py-rally-sm font-medium text-right">Actions</th>
+          </tr>
+          </thead>
+          <tbody class="text-body-md font-body-md text-on-surface divide-y divide-surface-container-high border-t border-surface-container-high">
+            @if (loading()) {
+              <tr>
+                <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">Loading…</td>
+              </tr>
+            } @else {
+              @for (category of categories(); track category.id) {
+                <tr app-category-row [category]="category" class="hover:bg-surface-container/50 transition-colors group"></tr>
+              } @empty {
+                <tr>
+                  <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">No categories yet.</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="px-rally-md py-rally-sm bg-surface-container-low border-t border-surface-container-high flex items-center justify-between text-label-sm font-label-sm text-on-surface-variant">
+        <span>Showing {{ categories().length }} of {{ categories().length }} categories</span>
+      </div>
+    </div>
+  </div>
+
+  <app-category-form-dialog
+    [open]="showCreateDialog()"
+    (created)="onCategoryCreated($event)"
+    (closed)="closeCreateDialog()"
+  />
+</main>

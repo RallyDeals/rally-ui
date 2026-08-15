@@ -6,14 +6,6 @@ import { ApiError } from '../../shared/models/api-error';
 import { toApiError } from '../../shared/utils/api-error.util';
 import { ErrorState } from '../../shared/components/error-state/error-state';
 
-const CATEGORY_ICONS: Record<string, string> = {
-  Electronics: 'devices',
-  Watches: 'watch',
-  Shoes: 'checkroom',
-  'Home & Furniture': 'chair',
-  'Beauty & Fragrance': 'spa',
-  Menswear: 'checkroom',
-};
 
 @Component({
   selector: 'app-categories',
@@ -39,9 +31,5 @@ export class Categories implements OnInit {
         this.loading.set(false);
       },
     });
-  }
-
-  categoryIcon(name: string): string {
-    return CATEGORY_ICONS[name] ?? 'category';
   }
 }
