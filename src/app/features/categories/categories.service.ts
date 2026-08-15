@@ -24,4 +24,12 @@ export class CategoriesService {
   createCategory(request: CreateCategoryRequest): Observable<Category> {
     return this.http.post<Category>(`${this.apiUrl}/categories`, request);
   }
+
+  updateCategory(id: string, request: CreateCategoryRequest): Observable<Category> {
+    return this.http.patch<Category>(`${this.apiUrl}/categories/${id}`, request);
+  }
+
+  deleteCategory(id: string): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/categories/${id}`, {});
+  }
 }

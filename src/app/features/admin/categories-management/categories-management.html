@@ -14,10 +14,10 @@
         <table class="w-full text-left border-collapse">
           <thead>
           <tr class="bg-surface-container-lowest text-on-surface-variant text-label-sm font-label-sm uppercase tracking-wider">
-            <th class="px-rally-md py-rally-sm font-medium">Category Name</th>
-            <th class="px-rally-md py-rally-sm font-medium">Description</th>
-            <th class="px-rally-md py-rally-sm font-medium">Products Count</th>
-            <th class="px-rally-md py-rally-sm font-medium text-right">Actions</th>
+            <th class="p-rally-md font-medium">Category Name</th>
+            <th class="p-rally-md font-medium">Description</th>
+            <th class="p-rally-md font-medium">Products Count</th>
+            <th class="p-rally-md font-medium text-right">Actions</th>
           </tr>
           </thead>
           <tbody class="text-body-md font-body-md text-on-surface divide-y divide-surface-container-high border-t border-surface-container-high">
@@ -27,7 +27,7 @@
               </tr>
             } @else {
               @for (category of categories(); track category.id) {
-                <tr app-category-row [category]="category" class="hover:bg-surface-container/50 transition-colors group"></tr>
+                <tr app-category-row [category]="category" (edit)="openUpdateDialog($event)" (delete)="onCategoryDelete($event)" class="hover:bg-surface-container/50 transition-colors group"></tr>
               } @empty {
                 <tr>
                   <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">No categories yet.</td>
@@ -44,8 +44,9 @@
   </div>
 
   <app-category-form-dialog
-    [open]="showCreateDialog()"
-    (created)="onCategoryCreated($event)"
-    (closed)="closeCreateDialog()"
+    [open]="showDialog()"
+    [category]="editingCategory()"
+    (saved)="onCategorySaved($event)"
+    (closed)="closeDialog()"
   />
 </main>

@@ -15,7 +15,8 @@ export class CategoriesManagement implements OnInit {
   categoriesService = inject(CategoriesService);
   categories = signal<Category[]>([]);
   loading = signal(true);
-  showCreateDialog = signal(false);
+  showDialog = signal(false);
+  editingCategory = signal<Category | null>(null);
 
   ngOnInit() {
     this.loadCategories();
@@ -30,15 +31,28 @@ export class CategoriesManagement implements OnInit {
   }
 
   openCreateDialog = () => {
-    this.showCreateDialog.set(true);
+    this.editingCategory.set(null);
+    this.showDialog.set(true);
   };
 
-  closeCreateDialog = () => {
-    this.showCreateDialog.set(false);
+  openUpdateDialog = (category: Category) => {
+    this.editingCategory.set(category);
+    this.showDialog.set(true);
   };
 
-  onCategoryCreated = (category: Category) => {
-    this.categories.update((categories) => [category, ...categories]);
-    this.showCreateDialog.set(false);
+  closeDialog = () => {
+    this.showDialog.set(false);
   };
+
+  onCategorySaved = (category: Category) => {
+    this.categories.update((categories) =>
+      this.editingCategory()
+        ? categories.map((existing) => (existing.id === category.id ? category : existing))
+        : [category, ...categories],
+    );
+    this.showDialog.set(false);
+  };
+  onCategoryDelete = (id: string) => {
+    this.categories.update((categories) => categories.filter(c => c.id !== id));
+  }
 }

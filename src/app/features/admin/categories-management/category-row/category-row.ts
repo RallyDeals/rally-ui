@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
 import { Category } from '../../../../shared/models/category';
 
@@ -9,4 +9,6 @@ import { Category } from '../../../../shared/models/category';
 })
 export class CategoryRow {
   category = input.required<Category>();
+  edit = output<Category>();
+  delete = output<string>()
 }

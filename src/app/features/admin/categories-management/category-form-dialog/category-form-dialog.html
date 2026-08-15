@@ -8,7 +8,7 @@
       (click)="$event.stopPropagation()"
     >
       <div class="flex items-center justify-between">
-        <h2 class="section-title-plain">New Category</h2>
+        <h2 class="section-title-plain">{{ isEditMode() ? 'Edit Category' : 'New Category' }}</h2>
         <button
           type="button"
           aria-label="Close"
@@ -65,7 +65,7 @@
           [disabled]="!canSave()"
           class="flex-1 py-2 rounded-lg font-label-sm text-label-sm font-bold bg-primary text-on-primary hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
         >
-          {{ saving() ? 'Creating…' : 'Create Category' }}
+          {{ saving() ? (isEditMode() ? 'Saving…' : 'Creating…') : (isEditMode() ? 'Save Changes' : 'Create Category') }}
         </button>
       </div>
     </div>

@@ -6,7 +6,7 @@
     <span class="font-headline-md text-[16px] text-on-surface group-hover:text-primary transition-colors">{{ category().name }}</span>
   </div>
 </td>
-<td class="px-rally-md py-rally-md max-w-[280px]">
+<td class="px-rally-md py-rally-md max-w-70">
   <span class="font-body-md text-on-surface-variant text-[14px] truncate block">{{ category().description || '—' }}</span>
 </td>
 <td class="px-rally-md py-rally-md">
@@ -17,10 +17,10 @@
 </td>
 <td class="px-rally-md py-rally-md text-right">
   <div class="flex items-center justify-end gap-rally-xs">
-    <button [attr.aria-label]="'Edit ' + category().name" class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors">
+    <button (click)="edit.emit(category())" [attr.aria-label]="'Edit ' + category().name" class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-primary hover:bg-primary-container/10 transition-colors">
       <span class="material-symbols-outlined text-[18px]">edit</span>
     </button>
-    <button [attr.aria-label]="'Delete ' + category().name" class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-error-container transition-colors">
+    <button (click)="delete.emit(category().id)" [attr.aria-label]="'Delete ' + category().name" class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-error hover:bg-error-container transition-colors">
       <span class="material-symbols-outlined text-[18px]">delete</span>
     </button>
   </div>
