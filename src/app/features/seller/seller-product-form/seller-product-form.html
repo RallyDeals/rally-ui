@@ -128,13 +128,14 @@
                   id="product-category"
                   class="product-form__input"
                   required
-                  [value]="categoryId()"
                   [class.product-form__input-error]="(submitted() || categoryId()) && categoryError()"
                   (change)="onCategoryChange($any($event.target).value)"
                 >
                   <option value="">Select Category</option>
                   @for (category of categories(); track category.id) {
-                    <option [value]="category.id">{{ category.name }}</option>
+                    <option [value]="category.id" [selected]="category.id === categoryId()">
+                      {{ category.name }}
+                    </option>
                   }
                 </select>
                 @if ((submitted() || categoryId()) && categoryError(); as msg) {
