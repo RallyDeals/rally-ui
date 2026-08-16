@@ -1,11 +1,14 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
-import { DealStatus } from '../../../shared/models/deal';
+import { DealStatus, DealStatusLabels, DealView } from '../../../shared/models/deal';
 import { MetricCard } from '../components/metric-card/metric-card';
-import { listDeals } from '../../../shared/mocks/deals';
+import { DealsService } from '../../deals/deals.service';
+import { TokenService } from '../../../shared/services/token.service';
 import {
   dateInRange,
   todayISO,
@@ -37,31 +40,23 @@ interface DealRow {
   revenue: string;
 }
 
-const STATUS_LABELS: Record<DealStatus, string> = {
-  active: 'Active',
-  succeeded: 'Succeeded',
-  pending: 'Pending',
-  failed: 'Failed',
-  cancelled: 'Cancelled',
-};
-
 const STATUS_CLASSES: Record<DealStatus, string> = {
-  active: 'bg-surface-container-high text-on-surface-variant',
-  succeeded: 'bg-secondary-container text-on-secondary-container',
-  pending: 'bg-surface-container text-on-surface-variant',
-  failed: 'bg-error-container text-on-error-container',
-  cancelled: 'bg-surface-container-high text-on-surface-variant',
+  ACTIVE: 'bg-surface-container-high text-on-surface-variant',
+  SUCCEEDED: 'bg-secondary-container text-on-secondary-container',
+  PENDING: 'bg-surface-container text-on-surface-variant',
+  FAILED: 'bg-error-container text-on-error-container',
+  CANCELLED: 'bg-surface-container-high text-on-surface-variant',
 };
 
 const BAR_CLASSES: Record<DealStatus, string> = {
-  active: 'bg-primary-container',
-  succeeded: 'bg-secondary',
-  pending: 'bg-outline-variant',
-  failed: 'bg-error',
-  cancelled: 'bg-outline-variant',
+  ACTIVE: 'bg-primary-container',
+  SUCCEEDED: 'bg-secondary',
+  PENDING: 'bg-outline-variant',
+  FAILED: 'bg-error',
+  CANCELLED: 'bg-outline-variant',
 };
 
-function toDealRow(deal: import('../../../shared/models/deal').DealView): DealRow {
+function toDealRow(deal: DealView): DealRow {
   const progress = deal.dealStock > 0
     ? Math.min(100, Math.round((deal.currentParticipants / deal.dealStock) * 100))
     : 0;
@@ -69,7 +64,7 @@ function toDealRow(deal: import('../../../shared/models/deal').DealView): DealRo
     name: deal.title,
     image: deal.image,
     status: deal.status,
-    statusLabel: STATUS_LABELS[deal.status],
+    statusLabel: DealStatusLabels[deal.status],
     currentParticipants: deal.currentParticipants,
     dealStock: deal.dealStock,
     progress,
@@ -83,18 +78,27 @@ function toDealRow(deal: import('../../../shared/models/deal').DealView): DealRo
   templateUrl: './seller-dashboard.html',
   styleUrl: './seller-dashboard.css',
 })
-export class SellerDashboard {
+export class SellerDashboard implements OnInit {
   private readonly router = inject(Router);
+  private readonly dealsService = inject(DealsService);
+  private readonly tokenService = inject(TokenService);
 
   readonly productImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
   readonly statusClasses = STATUS_CLASSES;
   readonly barClasses = BAR_CLASSES;
 
-  deals = signal<DealRow[]>(listDeals().map(toDealRow));
+  private readonly allDeals = toSignal(
+    this.dealsService.getSellerDeals(this.getSellerId(), { size: 100 }).pipe(
+      map((page) => page.content)
+    ),
+    { initialValue: [] as DealView[] }
+  );
+
+  deals = computed(() => this.allDeals().map(toDealRow));
 
   readonly rangeDeals = computed(() =>
-    listDeals()
+    this.allDeals()
       .filter((deal) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
       .map(toDealRow),
   );
@@ -102,7 +106,7 @@ export class SellerDashboard {
   readonly rangeLabel = computed(() => RANGE_LABEL);
 
   readonly totalRevenueValue = computed(() => {
-    const total = listDeals()
+    const total = this.allDeals()
       .filter((deal) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
       .reduce((sum, deal) => sum + deal.dealPrice * deal.currentParticipants, 0);
     return `$${formatMoney(total)}`;
@@ -117,12 +121,12 @@ export class SellerDashboard {
     if (deals.length === 0) {
       return '0%';
     }
-    const succeeded = deals.filter((deal) => deal.status === 'succeeded').length;
+    const succeeded = deals.filter((deal) => deal.status === 'SUCCEEDED').length;
     return `${Math.round((succeeded / deals.length) * 100)}%`;
   });
 
   readonly pendingOrdersValue = computed(
-    () => String(this.rangeDeals().filter((deal) => deal.status === 'active').length),
+    () => String(this.rangeDeals().filter((deal) => deal.status === 'ACTIVE').length),
   );
 
   goToCreateDeal = () => {
@@ -162,4 +166,10 @@ export class SellerDashboard {
       time: '2 hours ago',
     },
   ];
+
+  ngOnInit() {}
+
+  private getSellerId(): string {
+    return this.tokenService.getSellerId() ?? '';
+  }
 }

@@ -68,6 +68,14 @@
   box-shadow: none;
 }
 
+.product-details__add-to-cart-disabled,
+.product-details__add-to-cart-disabled:hover {
+  background-color: color-mix(in srgb, var(--color-on-surface) 12%, transparent);
+  color: color-mix(in srgb, var(--color-on-surface) 38%, transparent);
+  box-shadow: none;
+  cursor: not-allowed;
+}
+
 .product-details__deal-cta {
   display: flex;
   flex-direction: column;

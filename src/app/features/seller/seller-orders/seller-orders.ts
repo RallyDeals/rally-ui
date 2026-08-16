@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
+import { map } from 'rxjs';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
@@ -45,7 +46,7 @@ const RANGE_LABEL = 'Last 30 Days';
   templateUrl: './seller-orders.html',
   styleUrl: './seller-orders.css',
 })
-export class SellerOrders {
+export class SellerOrders implements OnInit {
   private readonly router = inject(Router);
   private readonly orderService = inject(SellerOrderService);
 
@@ -55,7 +56,7 @@ export class SellerOrders {
   searchQuery = signal('');
   page = signal(1);
   limit = 5;
-  orders = toSignal(this.orderService.listOrders(), { initialValue: [] });
+  orders = toSignal(this.orderService.listOrders(), { initialValue: [] as SellerOrder[] });
 
   readonly rangeOrders = computed(() =>
     this.orders().filter((order) => dateInRange(order.createdAt, RANGE_START, RANGE_END)),
@@ -71,9 +72,7 @@ export class SellerOrders {
       const matchesQuery =
         query === '' ||
         order.id.toLowerCase().includes(query) ||
-        order.customerName.toLowerCase().includes(query) ||
-        order.customerEmail.toLowerCase().includes(query) ||
-        order.items.some((entry) => entry.productName.toLowerCase().includes(query));
+        order.items.some((entry) => entry.productName.toLowerCase().toLowerCase().includes(query));
       return matchesPhase && matchesQuery;
     });
   });
@@ -146,4 +145,6 @@ export class SellerOrders {
   viewOrder = (id: string) => {
     this.router.navigate(['/seller/orders', id]);
   };
+
+  ngOnInit() {}
 }

@@ -1,7 +1,28 @@
 import { Category } from './category';
 import { Product } from './product';
 
-export type DealStatus = 'pending' | 'active' | 'succeeded' | 'failed' | 'cancelled';
+export type DealStatus =
+  | 'PENDING'
+  | 'ACTIVE'
+  | 'SUCCEEDED'
+  | 'FAILED'
+  | 'CANCELLED';
+
+export const DealStatusLabels: Record<DealStatus, string> = {
+  PENDING: 'Pending',
+  ACTIVE: 'Active',
+  SUCCEEDED: 'Succeeded',
+  FAILED: 'Failed',
+  CANCELLED: 'Cancelled',
+};
+
+export const DealStatusDisplay: Record<DealStatus, { label: string; description: string }> = {
+  PENDING: { label: 'Pending', description: 'Created. Becomes active automatically once the first buyer joins.' },
+  ACTIVE: { label: 'Active', description: 'Live — buyers can join. Ends when the stock sells out or time runs out.' },
+  SUCCEEDED: { label: 'Succeeded', description: 'Deal stock was sold. Buyers are being fulfilled at the deal price.' },
+  FAILED: { label: 'Failed', description: 'Ended before reaching the minimum participants. Buyers were not charged.' },
+  CANCELLED: { label: 'Cancelled', description: 'Cancelled before it started. Only possible while no one has joined yet.' },
+};
 
 export interface DealBadge {
   icon: string;
@@ -10,7 +31,6 @@ export interface DealBadge {
   textClass: string;
 }
 
-/** Mirrors the DealService DealResponse contract (deal-service.md §5.2). */
 export interface Deal {
   id: string;
   productId: string;
@@ -29,7 +49,6 @@ export interface Deal {
   createdAt: string;
 }
 
-/** Deal enriched with catalog product presentation data (not part of the API). */
 export interface DealView extends Deal {
   image: string;
   imageAlt: string;

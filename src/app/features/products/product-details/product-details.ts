@@ -7,6 +7,8 @@ import { ProductCard } from '../components/product-card/product-card';
 import { CartService } from '../../cart/cart.service';
 import { Product } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
+import { InventoryService } from '../../../shared/services/inventory.service';
+import { Inventory } from '../../../shared/models/inventory';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -25,6 +27,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
   activeDeals = signal<DealView[]>([]);
+  inventory = signal<Inventory | null>(null);
   selectedImage = signal('');
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -37,6 +40,14 @@ export class ProductDetails implements OnInit, OnDestroy {
   readonly progressPercent = progressPercent;
 
   readonly primaryDeal = computed(() => this.activeDeals()[0] ?? null);
+  readonly availableStock = computed(() => {
+    const stock = this.inventory()?.availableStock ?? 0;
+    const product = this.product();
+    if (!product) return stock;
+    const cartItem = this.cartService.items().find((i) => i.id === product.id);
+    return Math.max(0, stock - (cartItem?.quantity ?? 0));
+  });
+  readonly outOfStock = computed(() => this.availableStock() <= 0);
 
   dealDiscount = (deal: DealView): number => {
     if (!deal.originalPrice || deal.originalPrice <= 0) {
@@ -92,6 +103,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     private readonly route: ActivatedRoute,
     private readonly productsService: ProductsService,
     private readonly cartService: CartService,
+    private readonly inventoryService: InventoryService,
   ) {}
 
   get imageSrc(): string {
@@ -113,6 +125,8 @@ export class ProductDetails implements OnInit, OnDestroy {
   loadProduct(id: string) {
     this.loading.set(true);
     this.error.set(null);
+    this.inventory.set(null);
+    this.quantity.set(1);
     this.productsService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
@@ -120,11 +134,19 @@ export class ProductDetails implements OnInit, OnDestroy {
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
         this.loadRelatedProducts(product);
+        this.loadInventory(product.id);
       },
       error: (err) => {
         this.error.set(toApiError(err));
         this.loading.set(false);
       },
+    });
+  }
+
+  loadInventory(productId: string) {
+    this.inventoryService.getInventory(productId).subscribe({
+      next: (inventory) => this.inventory.set(inventory),
+      error: () => this.inventory.set(null),
     });
   }
 
@@ -136,8 +158,13 @@ export class ProductDetails implements OnInit, OnDestroy {
     });
   }
 
+  readonly atMaxStock = computed(() => this.quantity() >= this.availableStock());
+
   incrementQuantity = () => {
-    this.quantity.set(this.quantity() + 1);
+    if (this.quantity() < this.availableStock()) {
+      const next = this.quantity() + 1;
+      this.quantity.set(next);
+    }
   };
 
   decrementQuantity = () => {
@@ -146,10 +173,13 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   addToCart = () => {
     const product = this.product();
-    if (!product) {
+    if (!product || this.outOfStock()) {
       return;
     }
     this.cartService.add(product, this.quantity());
+    const remaining = this.availableStock() - this.quantity();
+    this.inventory.set({ ...this.inventory()!, availableStock: remaining });
+    this.quantity.set(1);
     this.added.set(true);
     clearTimeout(this.addTimer);
     this.addTimer = setTimeout(() => this.added.set(false), 1200);

@@ -14,6 +14,10 @@ export class InventoryService {
     return this.http.get<Inventory>(`${this.apiUrl}/inventory/${productId}`);
   }
 
+  getInventoryBulk(productIds: string[]): Observable<Record<string, Inventory>> {
+    return this.http.post<Record<string, Inventory>>(`${this.apiUrl}/inventory/bulk`, productIds);
+  }
+
   restock(productId: string, quantity: number): Observable<{ message: string }> {
     return this.http.patch<{ message: string }>(`${this.apiUrl}/inventory/${productId}/restock`, {
       quantity,

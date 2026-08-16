@@ -1,7 +1,4 @@
-import { SellerOrder, SellerOrderItem, toSellerOrderPhase } from '../models/seller-order';
-import { OrderStatus } from '../models/order-status';
-import { OrderType } from '../models/order-type';
-import { ShippingStatus } from '../models/shipping-status';
+import { SellerOrder, SellerOrderItem, SellerOrderPhase, computeTotalPrice } from '../models/seller-order';
 
 // Product thumbnails reference the same aida-public assets used by the catalog
 // seed and the deal mock, so they resolve in the UI without a placeholder.
@@ -87,215 +84,6 @@ const PRODUCTS: Record<string, Omit<SellerOrderItem, 'quantity'>> = {
 const hoursFromNow = (hours: number): string =>
   new Date(Date.now() - hours * 60 * 60 * 1000).toISOString();
 
-interface OrderSeed {
-  id: string;
-  orderType: OrderType;
-  status: OrderStatus;
-  shippingStatus?: ShippingStatus | null;
-  createdAt: string;
-  customerName: string;
-  customerEmail: string;
-  items: Array<{ product: keyof typeof PRODUCTS; quantity: number }>;
-}
-
-// Single in-memory seller order store. Mocks the Order Service data a seller
-// would receive once the seller-orders endpoint lands.
-const ORDER_SEEDS: OrderSeed[] = [
-  {
-    id: '10234',
-    orderType: 'NORMAL',
-    status: 'RESERVING',
-    shippingStatus: null,
-    createdAt: hoursFromNow(2),
-    customerName: 'Alex Johnson',
-    customerEmail: 'alex.j@example.com',
-    items: [item('headphones', 2)],
-  },
-  {
-    id: '10233',
-    orderType: 'NORMAL',
-    status: 'PENDING_CHARGE',
-    shippingStatus: null,
-    createdAt: hoursFromNow(3),
-    customerName: 'Sarah Miller',
-    customerEmail: 'sarah.m@domain.co',
-    items: [item('watch', 1)],
-  },
-  {
-    id: '10232',
-    orderType: 'DEAL',
-    status: 'PENDING_AUTHORIZATION',
-    shippingStatus: null,
-    createdAt: hoursFromNow(5),
-    customerName: 'Dev Guru',
-    customerEmail: 'dev_guru@startup.io',
-    items: [item('keyboard', 3)],
-  },
-  {
-    id: '10231',
-    orderType: 'NORMAL',
-    status: 'AUTHORIZED',
-    shippingStatus: null,
-    createdAt: hoursFromNow(8),
-    customerName: 'Lina Karim',
-    customerEmail: 'lina.k@example.com',
-    items: [item('brew', 1)],
-  },
-  {
-    id: '10230',
-    orderType: 'DEAL',
-    status: 'PENDING_CAPTURE',
-    shippingStatus: null,
-    createdAt: hoursFromNow(10),
-    customerName: 'Mina Ali',
-    customerEmail: 'm.ali@example.com',
-    items: [item('pouch', 2)],
-  },
-  {
-    id: '10229',
-    orderType: 'NORMAL',
-    status: 'PENDING_VOID',
-    shippingStatus: null,
-    createdAt: hoursFromNow(12),
-    customerName: 'Tony Reyes',
-    customerEmail: 'tony.r@example.com',
-    items: [item('aqua', 1)],
-  },
-  {
-    id: '10228',
-    orderType: 'DEAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'PROCESSING',
-    createdAt: hoursFromNow(26),
-    customerName: 'Nora Hassan',
-    customerEmail: 'nora.h@example.com',
-    items: [item('headphones', 1), item('keyboard', 1)],
-  },
-  {
-    id: '10227',
-    orderType: 'NORMAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'PROCESSING',
-    createdAt: hoursFromNow(30),
-    customerName: 'Peter Wilson',
-    customerEmail: 'peter.w@example.com',
-    items: [item('backpack', 2)],
-  },
-  {
-    id: '10226',
-    orderType: 'NORMAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'PROCESSING',
-    createdAt: hoursFromNow(50),
-    customerName: 'Ivy Chen',
-    customerEmail: 'ivy.c@example.com',
-    items: [item('lamp', 1)],
-  },
-  {
-    id: '10225',
-    orderType: 'DEAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'PROCESSING',
-    createdAt: hoursFromNow(52),
-    customerName: 'Adam Khan',
-    customerEmail: 'adam.k@example.com',
-    items: [item('sonic', 1)],
-  },
-  {
-    id: '10224',
-    orderType: 'NORMAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'SHIPPING',
-    createdAt: hoursFromNow(74),
-    customerName: 'Ruby Torres',
-    customerEmail: 'ruby.t@example.com',
-    items: [item('watch', 1), item('aqua', 1)],
-  },
-  {
-    id: '10223',
-    orderType: 'DEAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'SHIPPING',
-    createdAt: hoursFromNow(78),
-    customerName: 'James Lee',
-    customerEmail: 'james.l@example.com',
-    items: [item('brew', 2)],
-  },
-  {
-    id: '10222',
-    orderType: 'NORMAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'SHIPPING',
-    createdAt: hoursFromNow(96),
-    customerName: 'Zoe Martin',
-    customerEmail: 'zoe.m@example.com',
-    items: [item('keyboard', 1)],
-  },
-  {
-    id: '10221',
-    orderType: 'DEAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'DELIVERED',
-    createdAt: hoursFromNow(120),
-    customerName: 'Sam Quinn',
-    customerEmail: 'sam.q@example.com',
-    items: [item('headphones', 1)],
-  },
-  {
-    id: '10220',
-    orderType: 'NORMAL',
-    status: 'CONFIRMED',
-    shippingStatus: 'DELIVERED',
-    createdAt: hoursFromNow(140),
-    customerName: 'Lea Novak',
-    customerEmail: 'lea.n@example.com',
-    items: [item('aqua', 1)],
-  },
-  {
-    id: '10219',
-    orderType: 'NORMAL',
-    status: 'CANCELLED',
-    shippingStatus: null,
-    createdAt: hoursFromNow(160),
-    customerName: 'Max Joseph',
-    customerEmail: 'max.j@example.com',
-    items: [item('lamp', 1)],
-  },
-  {
-    id: '10218',
-    orderType: 'DEAL',
-    status: 'CANCELLED',
-    shippingStatus: null,
-    createdAt: hoursFromNow(168),
-    customerName: 'Dina Salah',
-    customerEmail: 'dina.s@example.com',
-    items: [item('pouch', 2)],
-  },
-];
-
-const seedOrders = (seeds: OrderSeed[]): Array<Omit<SellerOrder, 'phase'>> =>
-  seeds.map((seed) => {
-    const items: SellerOrderItem[] = seed.items.map(({ product, quantity }) => ({
-      ...PRODUCTS[product],
-      quantity,
-    }));
-    const totalPrice =
-      Math.round(
-        items.reduce((sum, entry) => sum + entry.unitPrice * entry.quantity, 0) * 100,
-      ) / 100;
-    return {
-      id: seed.id,
-      orderType: seed.orderType,
-      status: seed.status,
-      shippingStatus: seed.shippingStatus ?? null,
-      createdAt: seed.createdAt,
-      customerName: seed.customerName,
-      customerEmail: seed.customerEmail,
-      items,
-      totalPrice,
-    };
-  });
-
 function item(product: keyof typeof PRODUCTS, quantity: number): {
   product: keyof typeof PRODUCTS;
   quantity: number;
@@ -303,11 +91,34 @@ function item(product: keyof typeof PRODUCTS, quantity: number): {
   return { product, quantity };
 }
 
-// Wrap the seeds so every order carries a computed `phase`.
-const ORDERS: SellerOrder[] = seedOrders(ORDER_SEEDS).map((order) => ({
-  ...order,
-  phase: toSellerOrderPhase(order.status, order.shippingStatus),
-}));
+function makeItems(entries: Array<{ product: keyof typeof PRODUCTS; quantity: number }>): SellerOrderItem[] {
+  return entries.map(({ product, quantity }) => ({
+    ...PRODUCTS[product],
+    quantity,
+  }));
+}
+
+// Single in-memory seller order store. Mocks the Order Service data a seller
+// would receive once the seller-orders endpoint lands.
+const ORDERS: SellerOrder[] = [
+  { id: '10234', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(2), items: makeItems([item('headphones', 2)]), totalPrice: 0 },
+  { id: '10233', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(3), items: makeItems([item('watch', 1)]), totalPrice: 0 },
+  { id: '10232', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(5), items: makeItems([item('keyboard', 3)]), totalPrice: 0 },
+  { id: '10231', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(8), items: makeItems([item('brew', 1)]), totalPrice: 0 },
+  { id: '10230', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(10), items: makeItems([item('pouch', 2)]), totalPrice: 0 },
+  { id: '10229', phase: 'PENDING' as SellerOrderPhase, createdAt: hoursFromNow(12), items: makeItems([item('aqua', 1)]), totalPrice: 0 },
+  { id: '10228', phase: 'PROCESSING' as SellerOrderPhase, createdAt: hoursFromNow(26), items: makeItems([item('headphones', 1), item('keyboard', 1)]), totalPrice: 0 },
+  { id: '10227', phase: 'PROCESSING' as SellerOrderPhase, createdAt: hoursFromNow(30), items: makeItems([item('backpack', 2)]), totalPrice: 0 },
+  { id: '10226', phase: 'PROCESSING' as SellerOrderPhase, createdAt: hoursFromNow(50), items: makeItems([item('lamp', 1)]), totalPrice: 0 },
+  { id: '10225', phase: 'PROCESSING' as SellerOrderPhase, createdAt: hoursFromNow(52), items: makeItems([item('sonic', 1)]), totalPrice: 0 },
+  { id: '10224', phase: 'SHIPPING' as SellerOrderPhase, createdAt: hoursFromNow(74), items: makeItems([item('watch', 1), item('aqua', 1)]), totalPrice: 0 },
+  { id: '10223', phase: 'SHIPPING' as SellerOrderPhase, createdAt: hoursFromNow(78), items: makeItems([item('brew', 2)]), totalPrice: 0 },
+  { id: '10222', phase: 'SHIPPING' as SellerOrderPhase, createdAt: hoursFromNow(96), items: makeItems([item('keyboard', 1)]), totalPrice: 0 },
+  { id: '10221', phase: 'DELIVERED' as SellerOrderPhase, createdAt: hoursFromNow(120), items: makeItems([item('headphones', 1)]), totalPrice: 0 },
+  { id: '10220', phase: 'DELIVERED' as SellerOrderPhase, createdAt: hoursFromNow(140), items: makeItems([item('aqua', 1)]), totalPrice: 0 },
+  { id: '10219', phase: 'CANCELLED' as SellerOrderPhase, createdAt: hoursFromNow(160), items: makeItems([item('lamp', 1)]), totalPrice: 0 },
+  { id: '10218', phase: 'CANCELLED' as SellerOrderPhase, createdAt: hoursFromNow(168), items: makeItems([item('pouch', 2)]), totalPrice: 0 },
+].map((order) => ({ ...order, totalPrice: computeTotalPrice(order.items) }));
 
 export function listSellerOrders(): SellerOrder[] {
   return ORDERS;

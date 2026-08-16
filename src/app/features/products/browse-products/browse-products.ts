@@ -7,6 +7,7 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ProductFilters, PriceRange } from '../components/product-filters/product-filters';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService } from '../products.service';
+import { InventoryService } from '../../../shared/services/inventory.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -77,6 +78,7 @@ export class BrowseProducts implements OnInit {
   constructor(
     private readonly productsService: ProductsService,
     private readonly categoriesService: CategoriesService,
+    private readonly inventoryService: InventoryService,
     private readonly route: ActivatedRoute,
     private readonly router: Router,
   ) {}
@@ -121,6 +123,7 @@ export class BrowseProducts implements OnInit {
           this.loading.set(false);
           this.hasLoadedOnce = true;
           this.lastSuccessfulPage = this.page();
+          this.loadInventoryForProducts(response.items);
         },
         error: (err) => {
           this.loading.set(false);
@@ -139,6 +142,31 @@ export class BrowseProducts implements OnInit {
     this.categoriesService.getCategories().subscribe({
       next: (categories) => this.categories.set(categories),
       error: () => {},
+    });
+  }
+
+  onAddedToCart = (productId: string) => {
+    const updated = this.products().map((p) =>
+      p.id === productId ? { ...p, availableStock: Math.max(0, (p.availableStock ?? 0) - 1) } : p,
+    );
+    this.products.set(updated);
+  };
+
+  loadInventoryForProducts(products: Product[]) {
+    const ids = products.map((p) => p.id);
+    if (ids.length === 0) return;
+    this.inventoryService.getInventoryBulk(ids).subscribe({
+      next: (map) => {
+        const updated = products.map((p) => ({
+          ...p,
+          availableStock: map[p.id]?.availableStock ?? 0,
+        }));
+        this.products.set(updated);
+      },
+      error: () => {
+        const updated = products.map((p) => ({ ...p, availableStock: 0 }));
+        this.products.set(updated);
+      },
     });
   }
 

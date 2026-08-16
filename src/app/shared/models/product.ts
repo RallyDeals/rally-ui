@@ -21,4 +21,5 @@ export interface Product {
   updatedAt: string;
   deleted: boolean;
   deletedAt: string | null;
+  availableStock?: number;
 }

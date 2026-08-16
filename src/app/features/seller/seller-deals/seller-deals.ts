@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, DestroyRef, NgZone, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
@@ -14,8 +15,9 @@ import {
   ConfirmDialog,
   ConfirmDialogRequest,
 } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { DealView } from '../../../shared/models/deal';
-import { deleteDeal, listDeals } from '../../../shared/mocks/deals';
+import { DealsService, Page } from '../../deals/deals.service';
+import { DealView, DealStatus as ModelDealStatus } from '../../../shared/models/deal';
+import { TokenService } from '../../../shared/services/token.service';
 
 export interface DealRow {
   id: string;
@@ -42,19 +44,19 @@ export interface DealRow {
 
 export const DEAL_STATUS_OPTIONS: FilterPillOption[] = [
   { value: 'ALL', label: 'All' },
-  { value: 'active', label: 'Active' },
-  { value: 'pending', label: 'Pending' },
-  { value: 'succeeded', label: 'Succeeded' },
-  { value: 'failed', label: 'Failed' },
-  { value: 'cancelled', label: 'Cancelled' },
+  { value: 'ACTIVE', label: 'Active' },
+  { value: 'PENDING', label: 'Pending' },
+  { value: 'SUCCEEDED', label: 'Succeeded' },
+  { value: 'FAILED', label: 'Failed' },
+  { value: 'CANCELLED', label: 'Cancelled' },
 ];
 
 const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
-  pending: 'neutral',
-  active: 'primary',
-  succeeded: 'secondary',
-  failed: 'error',
-  cancelled: 'neutral',
+  PENDING: 'neutral',
+  ACTIVE: 'primary',
+  SUCCEEDED: 'secondary',
+  FAILED: 'error',
+  CANCELLED: 'neutral',
 };
 
 function formatCountdown(endTime: string): string {
@@ -78,9 +80,9 @@ function formatCountdown(endTime: string): string {
 
 function timeLabel(deal: DealView): string {
   switch (deal.status) {
-    case 'active':
+    case 'ACTIVE':
       return deal.endTime ? formatCountdown(deal.endTime) : 'Live';
-    case 'pending': {
+    case 'PENDING': {
       const start = deal.startTime ? new Date(deal.startTime).getTime() : NaN;
       if (Number.isNaN(start)) {
         return 'Starting soon';
@@ -93,17 +95,17 @@ function timeLabel(deal: DealView): string {
       const m = minutes % 60;
       return h > 0 ? `Starts in ${h}h ${m}m` : `Starts in ${m}m`;
     }
-    case 'succeeded':
+    case 'SUCCEEDED':
       return 'Ended';
-    case 'failed':
+    case 'FAILED':
       return 'Failed';
-    case 'cancelled':
+    case 'CANCELLED':
       return 'Cancelled';
   }
 }
 
 function urgentLabel(deal: DealView): boolean {
-  if (deal.status !== 'active' || !deal.endTime) {
+  if (deal.status !== 'ACTIVE' || !deal.endTime) {
     return false;
   }
   const remaining = new Date(deal.endTime).getTime() - Date.now();
@@ -137,11 +139,11 @@ function toDealRow(deal: DealView): DealRow {
 
 const VALID_STATUSES: Array<'ALL' | DealStatus> = [
   'ALL',
-  'active',
-  'pending',
-  'succeeded',
-  'failed',
-  'cancelled',
+  'ACTIVE',
+  'PENDING',
+  'SUCCEEDED',
+  'FAILED',
+  'CANCELLED',
 ];
 
 interface DealMenu {
@@ -149,6 +151,8 @@ interface DealMenu {
   x: number;
   y: number;
 }
+
+const DEALS_POLL_INTERVAL_MS = 30_000;
 
 @Component({
   selector: 'app-seller-deals',
@@ -165,9 +169,16 @@ interface DealMenu {
   templateUrl: './seller-deals.html',
   styleUrl: './seller-deals.css',
 })
-export class SellerDeals implements OnInit {
+export class SellerDeals implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly dealsService = inject(DealsService);
+  private readonly tokenService = inject(TokenService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly ngZone = inject(NgZone);
+
+  private dealsPollSub: Subscription | null = null;
+
   readonly statusOptions = DEAL_STATUS_OPTIONS;
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
 
@@ -175,7 +186,8 @@ export class SellerDeals implements OnInit {
   searchQuery = signal('');
   page = signal(1);
   limit = 5;
-  deals = signal<DealRow[]>(listDeals().map(toDealRow));
+  deals = signal<DealRow[]>([]);
+  loading = signal(true);
   menu = signal<DealMenu | null>(null);
   deleteTarget = signal<DealRow | null>(null);
 
@@ -291,6 +303,54 @@ export class SellerDeals implements OnInit {
         this.page.set(1);
       }
     });
+    this.loadDeals();
+    this.destroyRef.onDestroy(() => this.stopDealsPoll());
+  }
+
+  ngOnDestroy() {
+    this.stopDealsPoll();
+  }
+
+  loadDeals() {
+    this.loading.set(true);
+    const sellerId = this.tokenService.getSellerId() ?? '3e2c1b0a-2222-4000-9000-000000000001';
+
+    this.dealsService.getSellerDeals(sellerId, { page: this.page() - 1, size: this.limit }).subscribe({
+      next: (page) => {
+        this.deals.set(page.content.map(toDealRow));
+        this.loading.set(false);
+        this.startDealsPoll(sellerId);
+      },
+      error: () => {
+        this.deals.set([]);
+        this.loading.set(false);
+      },
+    });
+  }
+
+  private startDealsPoll(sellerId: string) {
+    this.stopDealsPoll();
+    this.ngZone.runOutsideAngular(() => {
+      this.dealsPollSub = interval(DEALS_POLL_INTERVAL_MS)
+        .pipe(
+          startWith(0),
+          switchMap(() =>
+            this.dealsService.getSellerDeals(sellerId, { page: this.page() - 1, size: this.limit }),
+          ),
+        )
+        .subscribe({
+          next: (page) => {
+            this.ngZone.run(() => {
+              this.deals.set(page.content.map(toDealRow));
+            });
+          },
+        });
+    });
+  }
+
+  private stopDealsPoll() {
+    this.dealsPollSub?.unsubscribe();
+    this.dealsPollSub = null;
   }
 
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.visibleDeals().length / this.limit)));
@@ -383,7 +443,8 @@ export class SellerDeals implements OnInit {
     if (!deal) {
       return;
     }
-    deleteDeal(deal.id);
-    this.deals.set(listDeals().map(toDealRow));
+    // The backend only supports cancel while PENDING
+    // We'll just remove from local state for now
+    this.deals.set(this.deals().filter((d) => d.id !== deal.id));
   };
 }

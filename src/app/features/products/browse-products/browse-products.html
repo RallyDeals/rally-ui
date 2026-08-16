@@ -165,7 +165,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
             @for (product of products(); track product.id) {
               @if (product.category) {
-                <app-product-card [product]="product" />
+                <app-product-card [product]="product" [outOfStock]="(product.availableStock ?? 0) <= 0" (addedToCart)="onAddedToCart($event)" />
               }
             }
           </div>
