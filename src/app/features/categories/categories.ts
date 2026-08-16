@@ -21,7 +21,7 @@ export class Categories implements OnInit {
   constructor(private readonly categoriesService: CategoriesService) {}
 
   ngOnInit() {
-    this.categoriesService.getCategories().subscribe({
+    this.categoriesService.getCategories(true).subscribe({
       next: (categories) => {
         this.categories.set(categories);
         this.loading.set(false);
