@@ -1,11 +1,13 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { lastValueFrom } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { CategoriesService } from '../../categories/categories.service';
 import { ProductsService, UpsertProductRequest } from '../../products/products.service';
+import { InventoryService } from '../../../shared/services/inventory.service';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 
@@ -35,6 +37,7 @@ function newImageId(): string {
 export class SellerProductForm implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly categoriesService = inject(CategoriesService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
@@ -61,6 +64,7 @@ export class SellerProductForm implements OnInit {
   images = signal<ProductImage[]>([]);
   imageError = signal<string | null>(null);
   submitted = signal(false);
+  originalStock = signal<number | null>(null);
 
   readonly nameError = computed(() => (this.name().trim() ? null : 'Product name is required.'));
   readonly descriptionError = computed(() => {
@@ -142,7 +146,17 @@ export class SellerProductForm implements OnInit {
             (url) => ({ id: newImageId(), url }),
           ),
         ]);
-        this.loading.set(false);
+        this.inventoryService.getInventory(id).subscribe({
+          next: (inv) => {
+            this.originalStock.set(inv.totalStock);
+            this.stockQuantity.set(String(inv.totalStock));
+            this.loading.set(false);
+          },
+          error: () => {
+            this.originalStock.set(null);
+            this.loading.set(false);
+          },
+        });
       },
       error: () => {
         this.error.set('Failed to load product. Please try again later.');
@@ -246,12 +260,26 @@ export class SellerProductForm implements OnInit {
       tags: this.tags(),
       imageUrl: images[0],
       images,
+      initialStock: Number(this.stockQuantity()) || 0,
     };
 
     const id = this.productId();
-    const operation = id
-      ? this.productsService.updateProduct(id, request)
-      : this.productsService.createProduct(request);
+    const newStock = Number(this.stockQuantity()) || 0;
+    const oldStock = this.originalStock();
+
+    let operation;
+    if (id) {
+      operation = this.productsService.updateProduct(id, request).pipe(
+        switchMap(() => {
+          if (oldStock !== null && newStock !== oldStock) {
+            return this.inventoryService.adjust(id, newStock - oldStock);
+          }
+          return [];
+        }),
+      );
+    } else {
+      operation = this.productsService.createProduct(request);
+    }
 
     operation.subscribe({
       next: () => {
