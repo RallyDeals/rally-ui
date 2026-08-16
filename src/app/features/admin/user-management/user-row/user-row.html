@@ -1,0 +1,69 @@
+<td class="py-rally-md px-rally-lg">
+  <div class="flex items-center gap-rally-md">
+    <div class="relative">
+      @if (user().avatarUrl) {
+        <img
+          class="w-12 h-12 rounded-full object-cover shadow-sm group-hover:scale-105 transition-transform"
+          [src]="user().avatarUrl"
+          [alt]="user().name"
+        />
+      } @else {
+        <div
+          class="w-12 h-12 rounded-full bg-tertiary-container flex items-center justify-center shadow-sm group-hover:scale-105 transition-transform"
+        >
+          <span class="text-on-tertiary-container font-headline-md text-[18px]">{{ initials() }}</span>
+        </div>
+      }
+    </div>
+    <div>
+      <div class="text-on-surface font-headline-md text-[16px] leading-tight">{{ user().name }}</div>
+      <div class="text-on-surface-variant text-[14px]">{{ user().email }}</div>
+    </div>
+  </div>
+</td>
+
+<td class="py-rally-md px-rally-lg">
+  @if (user().type === 'seller') {
+    <span
+      class="inline-flex items-center px-3 py-1 rounded-full bg-tertiary-container text-on-tertiary-container text-label-sm font-label-sm"
+    >
+      Seller
+    </span>
+  } @else {
+    <span
+      class="inline-flex items-center px-3 py-1 rounded-full bg-surface-container-high text-on-surface-variant text-label-sm font-label-sm"
+    >
+      Buyer
+    </span>
+  }
+</td>
+
+<td class="py-rally-md px-rally-lg">
+  @if (user().status === 'active') {
+    <span
+      class="inline-flex items-center gap-rally-xs px-3 py-1 rounded-full bg-secondary-fixed text-on-secondary-fixed text-label-sm font-label-sm"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-secondary"></span>
+      Active
+    </span>
+  } @else {
+    <span
+      class="inline-flex items-center gap-rally-xs px-3 py-1 rounded-full bg-error-container text-on-error-container text-label-sm font-label-sm"
+    >
+      <span class="w-1.5 h-1.5 rounded-full bg-error"></span>
+      Banned
+    </span>
+  }
+</td>
+<td class="py-rally-md px-rally-lg text-on-surface-variant">
+  {{ user().joinedAt ? (user().joinedAt | date: 'MMM d, y') : '—' }}
+</td>
+<td class="py-rally-md px-rally-lg text-right">
+  <button
+    (click)="toggleStatus.emit(user())"
+    [attr.aria-label]="(user().status === 'active' ? 'Ban ' : 'Unban ') + user().name"
+    class="inline-flex items-center justify-center p-2 rounded-full hover:bg-primary-container/20 text-primary transition-colors group-hover:bg-surface-container-high"
+  >
+    <span class="material-symbols-outlined">{{ user().status === 'active' ? 'block' : 'lock_open' }}</span>
+  </button>
+</td>

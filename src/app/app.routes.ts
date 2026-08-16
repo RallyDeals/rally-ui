@@ -12,8 +12,11 @@ import { SELLER_ROUTES } from './features/seller/seller.routes';
 import { Cart } from './features/cart/cart';
 import { USER_PROFILE_ROUTES } from './features/user-profile/user-profile.routes';
 import { SellerLayout } from './layout/seller-layout/seller-layout';
+import { AdminLayout } from './layout/admin-layout/admin-layout';
+import { ADMIN_ROUTES } from './features/admin/admin.routes';
 import { OrderDetails } from './features/orders/order-details/order-details';
 import { authGuard } from './core/guards/auth.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
 
 export const routes: Routes = [
@@ -74,5 +77,11 @@ export const routes: Routes = [
     path: 'seller',
     component: SellerLayout,
     children: SELLER_ROUTES
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    canActivate: [adminGuard],
+    children: ADMIN_ROUTES
   },
 ];

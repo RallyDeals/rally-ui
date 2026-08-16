@@ -1,0 +1,32 @@
+<td class="py-rally-md px-rally-lg">
+  <div class="flex items-center gap-rally-sm">
+    <img
+      class="w-10 h-10 rounded object-cover"
+      [src]="resolveImageUrl(product().imageUrl, placeholderImage)"
+      fallbackSrc="/assets/placeholder.svg"
+      [alt]="product().name">
+    <span class="font-body-md text-on-surface">{{ product().name }}</span>
+  </div>
+</td>
+<td class="py-rally-md px-rally-lg font-body-md text-primary">${{ product().basePrice.toFixed(2) }}</td>
+<td class="py-rally-md px-rally-lg">
+  <span
+    class="px-rally-xs py-rally-base bg-surface-container-high rounded-md font-label-sm text-label-sm text-on-surface">{{ product().category.name }}</span>
+</td>
+<td class="py-rally-md px-rally-lg font-body-md text-on-surface-variant">{{ product().sellerName }}</td>
+<td class="py-rally-md px-rally-lg">
+  <div class="flex justify-end gap-rally-xs">
+    <button
+      type="button"
+      (click)="reject.emit(product())"
+      class="flex items-center justify-center p-rally-xs rounded-lg bg-error-container text-on-error-container hover:bg-error hover:text-on-error transition-colors">
+      <span class="material-symbols-outlined text-[18px]">close</span>
+    </button>
+    <button
+      type="button"
+      (click)="approve.emit(product())"
+      class="flex items-center justify-center p-rally-xs rounded-lg bg-secondary-container text-on-secondary-container hover:bg-secondary hover:text-on-secondary transition-colors">
+      <span class="material-symbols-outlined text-[18px]">check</span>
+    </button>
+  </div>
+</td>
