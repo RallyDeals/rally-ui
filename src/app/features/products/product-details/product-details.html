@@ -92,35 +92,52 @@
           </div>
 
           <div class="flex items-center gap-rally-md">
-            <div class="flex items-center bg-surface-container rounded-lg px-rally-xs py-1 shrink-0">
-              <button
-                class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
-                (click)="decrementQuantity()"
-                aria-label="Decrease quantity"
-              >
-                <span class="material-symbols-outlined">remove</span>
-              </button>
-              <span class="px-rally-md font-body-md font-bold">{{ quantity() }}</span>
-              <button
-                class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
-                (click)="incrementQuantity()"
-                aria-label="Increase quantity"
-              >
-                <span class="material-symbols-outlined">add</span>
-              </button>
-            </div>
+            @if (outOfStock()) {
+              <div class="flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-error-container text-on-error-container font-semibold">
+                <span class="material-symbols-outlined">block</span>
+                Out of Stock
+              </div>
+            } @else {
+              <div class="flex items-center bg-surface-container rounded-lg px-rally-xs py-1 shrink-0">
+                <button
+                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                  (click)="decrementQuantity()"
+                  aria-label="Decrease quantity"
+                >
+                  <span class="material-symbols-outlined">remove</span>
+                </button>
+                <span class="px-rally-md font-body-md font-bold">{{ quantity() }}</span>
+                <button
+                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                  (click)="incrementQuantity()"
+                  [disabled]="quantity() >= availableStock()"
+                  [class.opacity-30]="quantity() >= availableStock()"
+                  [class.pointer-events-none]="quantity() >= availableStock()"
+                  aria-label="Increase quantity"
+                >
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+              </div>
 
-            <button
-              class="product-details__add-to-cart flex-1"
-              [class.product-details__add-to-cart-added]="added()"
-              (click)="addToCart()"
-            >
-              <span class="material-symbols-outlined">
-                {{ added() ? 'check' : 'shopping_cart' }}
-              </span>
-              {{ added() ? 'Added to Cart' : 'Add to Cart' }}
-            </button>
+              <button
+                class="product-details__add-to-cart flex-1"
+                [class.product-details__add-to-cart-added]="added()"
+                [disabled]="outOfStock()"
+                (click)="addToCart()"
+              >
+                <span class="material-symbols-outlined">
+                  {{ added() ? 'check' : 'shopping_cart' }}
+                </span>
+                {{ added() ? 'Added to Cart' : 'Add to Cart' }}
+              </button>
+            }
           </div>
+
+          @if (!outOfStock() && availableStock() <= 10) {
+            <p class="font-label-sm text-label-sm text-error font-medium">
+              Only {{ availableStock() }} left in stock
+            </p>
+          }
 
           @if (activeDeals().length > 1) {
             <button
