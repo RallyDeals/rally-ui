@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom } from 'rxjs';
+import { EMPTY, Observable, lastValueFrom, of } from 'rxjs';
 import { switchMap } from 'rxjs/operators';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
@@ -267,14 +267,16 @@ export class SellerProductForm implements OnInit {
     const newStock = Number(this.stockQuantity()) || 0;
     const oldStock = this.originalStock();
 
-    let operation;
+    let operation: Observable<Product>;
     if (id) {
       operation = this.productsService.updateProduct(id, request).pipe(
         switchMap(() => {
           if (oldStock !== null && newStock !== oldStock) {
-            return this.inventoryService.adjust(id, newStock - oldStock);
+            return this.inventoryService.adjust(id, newStock - oldStock).pipe(
+              switchMap(() => this.productsService.getProduct(id)),
+            );
           }
-          return [];
+          return of(null as any);
         }),
       );
     } else {
