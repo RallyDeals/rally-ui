@@ -26,6 +26,7 @@ export interface UpsertProductRequest {
   tags?: string[];
   imageUrl?: string;
   images?: string[];
+  initialStock?: number;
 }
 
 export enum ProductStatus {
