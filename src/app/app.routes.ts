@@ -60,7 +60,6 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
-        canActivate: [authGuard],
         children: USER_PROFILE_ROUTES,
       },
       {
@@ -81,7 +80,6 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayout,
-    canActivate: [adminGuard],
     children: ADMIN_ROUTES
   },
 ];

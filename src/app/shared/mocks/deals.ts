@@ -9,24 +9,32 @@ export type MockDeal = DealView;
 const CATEGORY_ELECTRONICS: Category = {
   id: 'cat-seed-electronics',
   name: 'Electronics',
+  icon: 'devices',
+  productsCount: 0,
   description: 'Laptops, devices and mobile accessories',
   createdAt: '',
 };
 const CATEGORY_HOME: Category = {
   id: 'cat-seed-home',
   name: 'Home & Furniture',
+  icon: 'chair',
+  productsCount: 0,
   description: 'Furniture and decor for your home',
   createdAt: '',
 };
 const CATEGORY_SHOES: Category = {
   id: 'cat-seed-shoes',
   name: 'Shoes',
+  icon: 'checkroom',
+  productsCount: 0,
   description: 'Footwear for every occasion',
   createdAt: '',
 };
 const CATEGORY_BEAUTY: Category = {
   id: 'cat-seed-beauty',
   name: 'Beauty & Fragrance',
+  icon: 'spa',
+  productsCount: 0,
   description: 'Skincare, makeup and fragrances',
   createdAt: '',
 };

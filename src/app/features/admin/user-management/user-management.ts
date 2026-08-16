@@ -16,7 +16,6 @@ const PAGE_SIZE = 3;
   selector: 'app-user-management',
   imports: [PageHeader, UserToolbar, UserRow, Pagination, ErrorState, ErrorModal],
   templateUrl: './user-management.html',
-  styleUrl: './user-management.css',
 })
 export class UserManagement implements OnInit {
   private readonly userService = inject(UserService);
