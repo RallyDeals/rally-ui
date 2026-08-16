@@ -22,6 +22,8 @@ export class Header {
     { name: 'Products', path: '/products', symbol: 'inventory_2' },
     { name: 'Deals', path: '/deals', symbol: 'local_offer' },
     { name: 'Categories', path: '/categories', symbol: 'category' },
+    { name: 'Seller Dashboard', path: '/seller', symbol: 'storefront' },
+    { name: 'Admin Dashboard', path: '/admin', symbol: 'admin_panel_settings' },
   ];
 
   toggleMenu() {
