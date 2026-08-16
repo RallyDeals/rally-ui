@@ -106,6 +106,7 @@ export class DealsService {
             page: page.page,
             size: page.size,
             totalElements: page.totalElements,
+            totalPages: Math.ceil(page.totalElements / page.size),
           }))
         )
       )

@@ -99,7 +99,7 @@ export class SellerDashboard implements OnInit {
 
   readonly rangeDeals = computed(() =>
     this.allDeals()
-      .filter((deal) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
+      .filter((deal: DealView) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
       .map(toDealRow),
   );
 
@@ -107,13 +107,13 @@ export class SellerDashboard implements OnInit {
 
   readonly totalRevenueValue = computed(() => {
     const total = this.allDeals()
-      .filter((deal) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
-      .reduce((sum, deal) => sum + deal.dealPrice * deal.currentParticipants, 0);
+      .filter((deal: DealView) => dateInRange(deal.createdAt, RANGE_START, RANGE_END))
+      .reduce((sum: number, deal: DealView) => sum + deal.dealPrice * deal.currentParticipants, 0);
     return `$${formatMoney(total)}`;
   });
 
   readonly participantsValue = computed(() =>
-    this.rangeDeals().reduce((sum, deal) => sum + deal.currentParticipants, 0).toLocaleString(),
+    this.rangeDeals().reduce((sum: number, deal: DealRow) => sum + deal.currentParticipants, 0).toLocaleString(),
   );
 
   readonly successRateValue = computed(() => {
@@ -121,17 +121,25 @@ export class SellerDashboard implements OnInit {
     if (deals.length === 0) {
       return '0%';
     }
-    const succeeded = deals.filter((deal) => deal.status === 'SUCCEEDED').length;
+    const succeeded = deals.filter((deal: DealRow) => deal.status === 'SUCCEEDED').length;
     return `${Math.round((succeeded / deals.length) * 100)}%`;
   });
 
   readonly pendingOrdersValue = computed(
-    () => String(this.rangeDeals().filter((deal) => deal.status === 'ACTIVE').length),
+    () => String(this.rangeDeals().filter((deal: DealRow) => deal.status === 'ACTIVE').length),
   );
 
   goToCreateDeal = () => {
     this.router.navigate(['/seller/deals/new']);
   };
+
+  getStatusClass(status: DealStatus): string {
+    return this.statusClasses[status];
+  }
+
+  getBarClass(status: DealStatus): string {
+    return this.barClasses[status];
+  }
 
   readonly toneClasses: Record<string, string> = {
     primary: 'bg-surface-container-high text-primary',

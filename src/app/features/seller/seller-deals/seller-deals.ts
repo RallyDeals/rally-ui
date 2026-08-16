@@ -12,7 +12,6 @@ import {
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
 import { MetricCard } from '../components/metric-card/metric-card';
 import {
-  ConfirmDialog,
   ConfirmDialogRequest,
 } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { DealsService, Page } from '../../deals/deals.service';
@@ -164,7 +163,6 @@ const DEALS_POLL_INTERVAL_MS = 30_000;
     DealStatusBadge,
     DealProgress,
     MetricCard,
-    ConfirmDialog,
   ],
   templateUrl: './seller-deals.html',
   styleUrl: './seller-deals.css',
