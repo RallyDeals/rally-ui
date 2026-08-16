@@ -16,7 +16,6 @@ export interface DealsAnalyticsResponse {
   completedDeals: number;
   successRate: number;
 }
-
 export interface DealsQueryParams {
   search?: string;
   status?: DealStatus;
@@ -26,10 +25,45 @@ export interface DealsQueryParams {
   page?: number;
   limit?: number;
 }
+interface DealResponse {
+  id: string;
+  productId: string;
+  sellerId: string;
+  originalPrice: number;
+  dealPrice: number;
+  dealStock: number;
+  currentParticipants: number;
+  authorizedCount: number;
+  minParticipants: number;
+  status: DealStatus;
+  startTime: string | null;
+  durationMinutes: number;
+  endTime: string | null;
+  timeRemainingSeconds: number | null;
+  createdAt: string;
+}
+
+interface DealPageResponse {
+  content: DealResponse[];
+  page: number;
+  size: number;
+  totalElements: number;
+}
+
+interface CreateDealRequest {
+  productId: string;
+  dealPrice: number;
+  dealStock: number;
+  minParticipants: number;
+  durationMinutes: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class DealsService {
-  private readonly apiUrl = environment.apiUrl;
+  private readonly baseUrl = `${environment.apiUrl}/deals`;
+  private readonly catalogUrl = `${environment.apiUrl}/products`;
+
+  private productCache = new Map<string, Product>();
 
   constructor(private readonly http: HttpClient) {}
 
@@ -38,7 +72,85 @@ export class DealsService {
       observer.next(DUMMY_DEALS_ANALYTICS);
       observer.complete();
     });
-    // return this.http.get<DealsAnalyticsResponse>(`${this.apiUrl}/deals/analytics`);
+    // return this.http.get<DealsAnalyticsResponse>(`${this.baseUrl}/deals/analytics`);
+  }
+
+  getActiveDeals(): Observable<DealView[]> {
+    return this.listDeals({ status: 'ACTIVE' }).pipe(
+      switchMap((page) => this.enrichDeals(page.content))
+    );
+  }
+
+  getActiveDeal(id: string): Observable<DealView | null> {
+    return this.http.get<DealResponse>(`${this.baseUrl}/${id}`).pipe(
+      switchMap((response) => this.enrichDeal(response)),
+      map((deal) => deal ?? null)
+    );
+  }
+
+  getDeal(id: string): Observable<DealView | null> {
+    return this.getActiveDeal(id);
+  }
+
+  joinDeal(id: string): Observable<DealView | null> {
+    return this.http.post<unknown>(`${environment.apiUrl}/deals/${id}/join`, {}).pipe(
+      switchMap(() => this.getActiveDeal(id))
+    );
+  }
+
+  getSellerDeals(
+    sellerId: string,
+    params: { status?: string; page?: number; size?: number } = {}
+  ): Observable<Page<DealView>> {
+    return this.listDeals({
+      sellerId,
+      status: params.status,
+      page: params.page ?? 0,
+      size: params.size ?? 20,
+    }).pipe(
+      switchMap((page) =>
+        this.enrichDeals(page.content).pipe(
+          map((enriched) => ({
+            content: enriched,
+            page: page.page,
+            size: page.size,
+            totalElements: page.totalElements,
+            totalPages: Math.ceil(page.totalElements / page.size),
+          }))
+        )
+      )
+    );
+  }
+
+  createDeal(request: CreateDealRequest): Observable<DealView> {
+    return this.http.post<DealResponse>(this.baseUrl, request).pipe(
+      switchMap((response) => this.enrichDeal(response)),
+      map((deal) => deal!)
+    );
+  }
+
+  cancelDeal(id: string): Observable<DealView> {
+    return this.http.post<DealResponse>(`${this.baseUrl}/${id}/cancel`, {}).pipe(
+      switchMap((response) => this.enrichDeal(response)),
+      map((deal) => deal!)
+    );
+  }
+
+  private listDeals(params: {
+    status?: string;
+    sellerId?: string;
+    productId?: string;
+    page?: number;
+    size?: number;
+  }): Observable<DealPageResponse> {
+    let httpParams = new HttpParams();
+    if (params.status) httpParams = httpParams.set('status', params.status);
+    if (params.sellerId) httpParams = httpParams.set('sellerId', params.sellerId);
+    if (params.productId) httpParams = httpParams.set('productId', params.productId);
+    if (params.page !== undefined) httpParams = httpParams.set('page', params.page);
+    if (params.size !== undefined) httpParams = httpParams.set('size', params.size);
+
+    return this.http.get<DealPageResponse>(this.baseUrl, { params: httpParams });
   }
 
   getDealsOverview(params: DealsQueryParams = {}): Observable<PageResponse<DealOverview>> {
@@ -86,14 +198,74 @@ export class DealsService {
       observer.next(
         deal
           ? {
-              ...deal,
-              productDescription: `Group deal for the ${deal.productName}.`,
-              productImages: [deal.productImageUrl],
-            }
+            ...deal,
+            productDescription: `Group deal for the ${deal.productName}.`,
+            productImages: [deal.productImageUrl],
+          }
           : null,
       );
       observer.complete();
     });
     // return this.http.get<PageResponse<DealDetails>>(`${this.apiUrl}/deals/{id}`);
+  }
+  private enrichDeals(responses: DealResponse[]): Observable<DealView[]> {
+    if (responses.length === 0) {
+      return of([]);
+    }
+    return forkJoin(responses.map((r) => this.enrichDeal(r))).pipe(
+      map((deals) => deals.filter((d): d is DealView => d !== null))
+    );
+  }
+
+  private enrichDeal(response: DealResponse): Observable<DealView> {
+    const base = this.toDealView(response);
+    const cached = this.productCache.get(response.productId);
+    if (cached) {
+      return of(this.applyProduct(base, cached));
+    }
+    return this.http.get<Product>(`${this.catalogUrl}/${response.productId}`).pipe(
+      map((product) => {
+        this.productCache.set(response.productId, product);
+        return this.applyProduct(base, product);
+      }),
+    );
+  }
+
+  private applyProduct(deal: DealView, product: Product): DealView {
+    return {
+      ...deal,
+      image: product.imageUrl ?? '',
+      imageAlt: product.name,
+      title: product.name,
+      description: product.description,
+      category: product.category ?? null,
+      badge: dealBadge(deal),
+      product,
+    };
+  }
+
+  private toDealView(response: DealResponse): DealView {
+    return {
+      id: response.id,
+      productId: response.productId,
+      sellerId: response.sellerId,
+      originalPrice: response.originalPrice,
+      dealPrice: response.dealPrice,
+      dealStock: response.dealStock,
+      currentParticipants: response.currentParticipants,
+      authorizedCount: response.authorizedCount,
+      minParticipants: response.minParticipants,
+      status: response.status,
+      startTime: response.startTime,
+      durationMinutes: response.durationMinutes,
+      endTime: response.endTime,
+      timeRemainingSeconds: response.timeRemainingSeconds,
+      createdAt: response.createdAt,
+      image: '',
+      imageAlt: '',
+      title: '',
+      description: '',
+      badge: { icon: '', text: '', bgClass: '', textClass: '' },
+    };
   }
 }

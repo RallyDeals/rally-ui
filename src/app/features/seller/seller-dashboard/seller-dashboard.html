@@ -164,7 +164,7 @@
               <td class="px-rally-md py-4">
                 <span
                   class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold"
-                  [ngClass]="statusClasses[deal.status]"
+                  [ngClass]="getStatusClass(deal.status)"
                 >
                   {{ deal.statusLabel }}
                 </span>
@@ -174,7 +174,7 @@
               </td>
               <td class="px-rally-md py-4 w-48">
                 <div class="w-full bg-surface-container rounded-full h-2">
-                  <div class="h-2 rounded-full" [ngClass]="barClasses[deal.status]" [style.width.%]="deal.progress"></div>
+                  <div class="h-2 rounded-full" [ngClass]="getBarClass(deal.status)" [style.width.%]="deal.progress"></div>
                 </div>
               </td>
               <td class="px-rally-md py-4 text-right font-semibold">{{ deal.revenue }}</td>
