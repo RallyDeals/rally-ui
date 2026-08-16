@@ -31,30 +31,22 @@
               >
                 {{ orderNumber(order.id) }}
               </h2>
-              <p class="font-body-md text-body-md text-on-surface-variant mt-1 truncate">
-                {{ order.customerName }} &middot; {{ order.customerEmail }}
-              </p>
             </div>
           </div>
           <div class="flex items-center gap-2 flex-wrap self-start lg:self-center">
             <app-order-phase-badge
-              [status]="order.status"
-              [shippingStatus]="order.shippingStatus"
+              [phase]="order.phase"
             />
           </div>
         </div>
       </div>
 
       <div
-        class="px-rally-md py-rally-md sm:px-rally-lg grid grid-cols-2 lg:grid-cols-4 gap-rally-md border-t border-outline-variant/30 text-center"
+        class="px-rally-md py-rally-md sm:px-rally-lg grid grid-cols-2 lg:grid-cols-3 gap-rally-md border-t border-outline-variant/30 text-center"
       >
         <div>
           <p class="label-caps mb-1">Placed</p>
           <p class="font-body-md text-body-md text-on-surface">{{ formatDate(order.createdAt) }}</p>
-        </div>
-        <div>
-          <p class="label-caps mb-1">Order Type</p>
-          <p class="font-body-md text-body-md text-on-surface">{{ orderTypeLabel(order.orderType) }}</p>
         </div>
         <div>
           <p class="label-caps mb-1">Items</p>
@@ -65,6 +57,20 @@
           <p class="font-body-md text-body-md text-on-surface font-semibold">${{ price(order.totalPrice) }}</p>
         </div>
       </div>
+
+      @if (order.address) {
+        <div class="px-rally-md py-rally-md sm:px-rally-lg border-t border-outline-variant/30">
+          <p class="label-caps mb-1">Shipping Address</p>
+          <p class="font-body-md text-body-md text-on-surface">{{ order.address }}</p>
+        </div>
+      }
+
+      @if (order.cancelReason) {
+        <div class="px-rally-md py-rally-md sm:px-rally-lg border-t border-outline-variant/30">
+          <p class="label-caps mb-1">Cancel Reason</p>
+          <p class="font-body-md text-body-md text-on-error-container font-semibold">{{ order.cancelReason }}</p>
+        </div>
+      }
     </div>
 
     <!-- Items Table -->

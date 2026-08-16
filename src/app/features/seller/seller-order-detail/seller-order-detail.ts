@@ -1,10 +1,12 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { map } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { ORDER_TYPE_LABELS } from '../../../shared/models/order-type';
 import { OrderPhaseBadge } from '../components/order-phase-badge/order-phase-badge';
 import { SellerOrderService } from '../seller-orders/seller-order.service';
+import { SellerOrderDetail as SellerOrderDetailModel } from '../../../shared/models/seller-order';
 import { formatMoney } from '../../../shared/utils/money.util';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { orderCode } from '../../../shared/utils/order-code.util';
@@ -21,7 +23,7 @@ export class SellerOrderDetail {
 
   private readonly orderId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly order = toSignal(this.orderService.getOrderById(this.orderId), {
-    initialValue: undefined,
+    initialValue: undefined as SellerOrderDetailModel | undefined,
   });
 
   readonly breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -30,7 +32,6 @@ export class SellerOrderDetail {
   ]);
 
   orderNumber = (id: string): string => orderCode(id);
-  orderTypeLabel = (type: keyof typeof ORDER_TYPE_LABELS): string => ORDER_TYPE_LABELS[type];
   formatDate = (iso: string): string => formatShortDate(iso);
   price = (amount: number): string => formatMoney(amount);
   lineTotal = (unitPrice: number, quantity: number): string =>

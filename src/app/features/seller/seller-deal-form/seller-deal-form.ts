@@ -2,9 +2,10 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
-import { DealStatus, DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
+import { DealStatus, DealStatusDisplay } from '../../../shared/models/deal';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
-import { createDeal, getDealById, updateDeal, SELLER_ID } from '../../../shared/mocks/deals';
+import { DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
+import { DealsService } from '../../deals/deals.service';
 import { ProductsService } from '../../products/products.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
@@ -13,11 +14,11 @@ import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
-  pending: 'neutral',
-  active: 'primary',
-  succeeded: 'secondary',
-  failed: 'error',
-  cancelled: 'neutral',
+  PENDING: 'neutral',
+  ACTIVE: 'primary',
+  SUCCEEDED: 'secondary',
+  FAILED: 'error',
+  CANCELLED: 'neutral',
 };
 
 @Component({
@@ -30,6 +31,7 @@ export class SellerDealForm implements OnInit {
   private readonly router = inject(Router);
   private readonly productsService = inject(ProductsService);
   private readonly tokenService = inject(TokenService);
+  private readonly dealsService = inject(DealsService);
 
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
   readonly placeholderImage = PLACEHOLDER_IMAGE;
@@ -44,7 +46,7 @@ export class SellerDealForm implements OnInit {
   productName = signal('');
   sku = signal('');
   image = signal('');
-  status = signal<DealStatus>('pending');
+  status = signal<DealStatus>('PENDING');
   dealPrice = signal('');
   originalPrice = signal('');
   dealStock = signal('');
@@ -55,27 +57,12 @@ export class SellerDealForm implements OnInit {
 
   readonly isEdit = computed(() => this.dealId() !== null);
 
-  // Only an editable deal (new, or still pending with no participants joined) can be modified.
   readonly isFormDisabled = computed(
-    () => this.isEdit() && (this.status() !== 'pending' || this.currentParticipants() > 0),
+    () => this.isEdit() && (this.status() !== 'PENDING' || this.currentParticipants() > 0),
   );
 
-  readonly statusHint = computed(() => {
-    switch (this.status()) {
-      case 'pending':
-        return 'Created. Becomes active automatically once the first buyer joins.';
-      case 'active':
-        return 'Live — buyers can join. Ends when the stock sells out or time runs out.';
-      case 'succeeded':
-        return 'Deal stock was sold. Buyers are being fulfilled at the deal price.';
-      case 'failed':
-        return 'Ended before reaching the minimum participants. Buyers were not charged.';
-      case 'cancelled':
-        return 'Cancelled before it started. Only possible while no one has joined yet.';
-    }
-  });
+  readonly statusHint = computed(() => DealStatusDisplay[this.status()].description);
 
-  /** Explains why the form is locked, based on the deal's status. */
   readonly lockMessage = computed<string | null>(() => {
     if (!this.isFormDisabled()) {
       return null;
@@ -83,18 +70,7 @@ export class SellerDealForm implements OnInit {
     if (this.currentParticipants() > 0) {
       return 'This deal already has participants joined, so it cannot be edited.';
     }
-    switch (this.status()) {
-      case 'active':
-        return 'This deal is live — buyers can join right now. It cannot be edited while active.';
-      case 'succeeded':
-        return 'This deal has ended — all deal stock was sold. It can no longer be edited.';
-      case 'failed':
-        return 'This deal ended without reaching the minimum participants. It can no longer be edited.';
-      case 'cancelled':
-        return 'This deal was cancelled and can no longer be edited.';
-      default:
-        return 'This deal is locked and cannot be edited.';
-    }
+    return DealStatusDisplay[this.status()].description;
   });
 
   readonly breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -215,7 +191,6 @@ export class SellerDealForm implements OnInit {
     });
   }
 
-  /** Pre-fill the schedule for a new deal: starts next hour, runs for 24h. */
   private initDefaults() {
     const durationMinutes = 1440;
     const start = new Date();
@@ -224,13 +199,12 @@ export class SellerDealForm implements OnInit {
     this.endAt.set(this.formatToDatetimeLocal(new Date(start.getTime() + durationMinutes * 60000)));
   }
 
-  /** Clears every form field so a new deal never shows a previously loaded deal's data. */
   private resetForm() {
     this.productId.set(null);
     this.productName.set('');
     this.sku.set('');
     this.image.set('');
-    this.status.set('pending');
+    this.status.set('PENDING');
     this.dealPrice.set('');
     this.originalPrice.set('');
     this.dealStock.set('');
@@ -246,41 +220,47 @@ export class SellerDealForm implements OnInit {
     this.loading.set(true);
     this.error.set(null);
     this.resetForm();
-    const deal = getDealById(id);
-    if (!deal) {
-      this.error.set('Deal not found. It may have been removed.');
-      this.loading.set(false);
-      return;
-    }
-    this.productId.set(deal.productId);
-    this.productName.set(deal.title);
-    this.image.set(deal.image);
-    this.status.set(deal.status);
-    this.dealPrice.set(String(deal.dealPrice));
-    this.originalPrice.set(String(deal.originalPrice));
-    this.dealStock.set(String(deal.dealStock));
-    this.minParticipants.set(String(deal.minParticipants));
-    this.currentParticipants.set(deal.currentParticipants);
+    this.dealsService.getDeal(id).subscribe({
+      next: (deal) => {
+        if (!deal) {
+          this.error.set('Deal not found. It may have been removed.');
+          this.loading.set(false);
+          return;
+        }
+        this.productId.set(deal.productId);
+        this.productName.set(deal.title);
+        this.image.set(deal.image);
+        this.status.set(deal.status);
+        this.dealPrice.set(String(deal.dealPrice));
+        this.originalPrice.set(String(deal.originalPrice));
+        this.dealStock.set(String(deal.dealStock));
+        this.minParticipants.set(String(deal.minParticipants));
+        this.currentParticipants.set(deal.currentParticipants);
 
-    // Populate the schedule from the contract fields (startTime, endTime, durationMinutes).
-    const startDate = deal.startTime ? new Date(deal.startTime) : null;
-    const startOk = !!startDate && !Number.isNaN(startDate.getTime());
-    const endDate = deal.endTime ? new Date(deal.endTime) : null;
-    const endOk = !!endDate && !Number.isNaN(endDate.getTime());
+        const startDate = deal.startTime ? new Date(deal.startTime) : null;
+        const startOk = !!startDate && !Number.isNaN(startDate.getTime());
+        const endDate = deal.endTime ? new Date(deal.endTime) : null;
+        const endOk = !!endDate && !Number.isNaN(endDate.getTime());
 
-    this.startAt.set(startOk ? this.formatToDatetimeLocal(startDate!) : '');
+        this.startAt.set(startOk ? this.formatToDatetimeLocal(startDate!) : '');
 
-    if (endOk) {
-      this.endAt.set(this.formatToDatetimeLocal(endDate!));
-    } else if (startOk && deal.durationMinutes > 0) {
-      this.endAt.set(
-        this.formatToDatetimeLocal(new Date(startDate!.getTime() + deal.durationMinutes * 60000)),
-      );
-    } else {
-      this.endAt.set('');
-    }
+        if (endOk) {
+          this.endAt.set(this.formatToDatetimeLocal(endDate!));
+        } else if (startOk && deal.durationMinutes > 0) {
+          this.endAt.set(
+            this.formatToDatetimeLocal(new Date(startDate!.getTime() + deal.durationMinutes * 60000)),
+          );
+        } else {
+          this.endAt.set('');
+        }
 
-    this.loading.set(false);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set('Failed to load deal.');
+        this.loading.set(false);
+      },
+    });
   }
 
   save = () => {
@@ -292,51 +272,29 @@ export class SellerDealForm implements OnInit {
       return;
     }
     const payload = {
-      productId: this.productId(),
+      productId: this.productId()!,
       dealPrice: Number(this.dealPrice()),
       dealStock: Number(this.dealStock()),
       minParticipants: Number(this.minParticipants()),
-      durationMinutes: this.durationMinutes() ?? 0,
+      durationMinutes: this.durationMinutes() ?? 1440,
     };
     this.saving.set(true);
-    setTimeout(() => {
-      const dealId = this.dealId();
-      const startAt = this.startAt();
-      const endAt = this.endAt();
-      if (dealId) {
-        updateDeal(dealId, {
-          dealPrice: payload.dealPrice,
-          dealStock: payload.dealStock,
-          minParticipants: payload.minParticipants,
-          durationMinutes: payload.durationMinutes,
-          startTime: startAt ? new Date(startAt).toISOString() : null,
-          endTime: endAt ? new Date(endAt).toISOString() : null,
-          timeRemainingSeconds: payload.durationMinutes > 0 ? payload.durationMinutes * 60 : null,
-        });
-      } else {
-        createDeal({
-          sellerId: this.tokenService.getSellerId() ?? SELLER_ID,
-          productId: payload.productId ?? '',
-          productName: this.productName(),
-          image: this.image(),
-          originalPrice: Number(this.originalPrice()) || 0,
-          dealPrice: payload.dealPrice,
-          dealStock: payload.dealStock,
-          minParticipants: payload.minParticipants,
-          durationMinutes: payload.durationMinutes,
-          startAt,
-        });
-      }
-      this.saving.set(false);
-      this.router.navigate(['/seller/deals']);
-    }, 800);
+    this.dealsService.createDeal(payload).subscribe({
+      next: () => {
+        this.saving.set(false);
+        this.router.navigate(['/seller/deals']);
+      },
+      error: (err) => {
+        this.error.set('Failed to create deal.');
+        this.saving.set(false);
+      },
+    });
   };
 
   cancel = () => {
     this.router.navigate(['/seller/deals']);
   };
 
-  // Helpers to keep duration <-> start/end in sync
   private formatToDatetimeLocal(d: Date): string {
     const pad = (n: number) => String(n).padStart(2, '0');
     const yyyy = d.getFullYear();

@@ -12,7 +12,8 @@ import {
 } from '../components/deal-filters/deal-filters';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
-import { DealsService, DealView } from '../deals.service';
+import { DealsService } from '../deals.service';
+import { DealView, DealStatus } from '../../../shared/models/deal';
 
 export type DealSortKey = DealStatusKey | 'relevance' | 'price-asc' | 'price-desc' | 'discount';
 

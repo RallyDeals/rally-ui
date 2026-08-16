@@ -134,7 +134,6 @@
                 </td>
                 <td class="table-cell text-center">
                   <p class="font-medium text-primary">{{ orderNumber(order.id) }}</p>
-                  <p class="text-label-sm text-on-surface-variant truncate">{{ order.customerEmail }}</p>
                 </td>
                 <td class="table-cell text-center">
                   <p class="font-bold text-on-surface">${{ price(order.totalPrice) }}</p>
@@ -142,8 +141,7 @@
                 </td>
                 <td class="table-cell text-center">
                   <app-order-phase-badge
-                    [status]="order.status"
-                    [shippingStatus]="order.shippingStatus"
+                    [phase]="order.phase"
                   />
                 </td>
                 <td class="table-cell text-center text-on-surface-variant">{{ formatDate(order.createdAt) }}</td>

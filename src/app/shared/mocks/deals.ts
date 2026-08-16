@@ -81,7 +81,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 200,
     originalPrice: 1999.99,
     dealPrice: 1799.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-92),
     durationMinutes: 5760,
     endTime: hoursFromNow(4),
@@ -111,7 +111,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 120,
     originalPrice: 149.99,
     dealPrice: 119.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-124),
     durationMinutes: 8640,
     endTime: hoursFromNow(20),
@@ -141,7 +141,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 50,
     originalPrice: 149.99,
     dealPrice: 99.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-1),
     durationMinutes: 240,
     endTime: hoursFromNow(3),
@@ -171,7 +171,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 500,
     originalPrice: 149.99,
     dealPrice: 129.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-6),
     durationMinutes: 4320,
     endTime: hoursFromNow(66),
@@ -201,7 +201,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 150,
     originalPrice: 149.99,
     dealPrice: 109.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-1),
     durationMinutes: 2880,
     endTime: hoursFromNow(47),
@@ -231,7 +231,7 @@ const DEAL_STORE: DealView[] = [
     dealStock: 400,
     originalPrice: 9.99,
     dealPrice: 7.99,
-    status: 'active',
+    status: 'ACTIVE',
     startTime: hoursFromNow(-120),
     durationMinutes: 4320,
     endTime: hoursFromNow(48),
@@ -264,7 +264,7 @@ const DEAL_STORE: DealView[] = [
     endTime: hoursFromNow(45),
     timeRemainingSeconds: null,
     createdAt: hoursFromNow(-24),
-    status: 'active',
+    status: 'ACTIVE',
   },
   {
     id: '8e2b0a2f-3333-4000-8000-000000000202',
@@ -292,7 +292,7 @@ const DEAL_STORE: DealView[] = [
     endTime: '2026-08-11T10:00:00',
     timeRemainingSeconds: null,
     createdAt: '2026-08-01T09:00:00',
-    status: 'succeeded',
+    status: 'SUCCEEDED',
   },
   {
     id: '8e2b0a2f-3333-4000-8000-000000000203',
@@ -320,7 +320,7 @@ const DEAL_STORE: DealView[] = [
     endTime: hoursFromNow(30),
     timeRemainingSeconds: null,
     createdAt: hoursFromNow(-4),
-    status: 'active',
+    status: 'ACTIVE',
   },
   {
     id: '8e2b0a2f-3333-4000-8000-000000000204',
@@ -348,7 +348,7 @@ const DEAL_STORE: DealView[] = [
     endTime: hoursFromNow(12),
     timeRemainingSeconds: null,
     createdAt: hoursFromNow(-48),
-    status: 'active',
+    status: 'ACTIVE',
   },
   {
     id: '8e2b0a2f-3333-4000-8000-000000000205',
@@ -376,7 +376,7 @@ const DEAL_STORE: DealView[] = [
     endTime: hoursFromNow(5),
     timeRemainingSeconds: null,
     createdAt: hoursFromNow(-48),
-    status: 'active',
+    status: 'ACTIVE',
   },
   {
     id: '8e2b0a2f-3333-4000-8000-000000000206',
@@ -404,7 +404,7 @@ const DEAL_STORE: DealView[] = [
     endTime: hoursFromNow(47),
     timeRemainingSeconds: null,
     createdAt: hoursFromNow(-3),
-    status: 'active',
+    status: 'ACTIVE',
   },
 ];
 
@@ -434,7 +434,7 @@ export function listDeals(): DealView[] {
 }
 
 export function listActiveDeals(): DealView[] {
-  return DEAL_STORE.filter((deal) => deal.status === 'active');
+  return DEAL_STORE.filter((deal) => deal.status === 'ACTIVE');
 }
 
 export function getDealById(id: string): DealView | undefined {
@@ -442,11 +442,11 @@ export function getDealById(id: string): DealView | undefined {
 }
 
 export function getActiveDealForProduct(productId: string): DealView | undefined {
-  return DEAL_STORE.find((deal) => deal.productId === productId && deal.status === 'active');
+  return DEAL_STORE.find((deal) => deal.productId === productId && deal.status === 'ACTIVE');
 }
 
 export function getActiveDealsForProduct(productId: string): DealView[] {
-  return DEAL_STORE.filter((deal) => deal.productId === productId && deal.status === 'active');
+  return DEAL_STORE.filter((deal) => deal.productId === productId && deal.status === 'ACTIVE');
 }
 
 export function createDeal(input: CreateDealInput): DealView {
@@ -466,7 +466,7 @@ export function createDeal(input: CreateDealInput): DealView {
     currentParticipants: 0,
     authorizedCount: 0,
     minParticipants: input.minParticipants,
-    status: 'active',
+    status: 'ACTIVE',
     startTime,
     durationMinutes,
     endTime,
@@ -511,7 +511,7 @@ export function joinDeal(id: string): DealView | undefined {
     return undefined;
   }
   const deal = DEAL_STORE[index];
-  if (deal.status === 'succeeded' || deal.status === 'failed' || deal.status === 'cancelled') {
+  if (deal.status === 'SUCCEEDED' || deal.status === 'FAILED' || deal.status === 'CANCELLED') {
     return deal;
   }
   if (deal.currentParticipants >= deal.dealStock) {
@@ -521,7 +521,7 @@ export function joinDeal(id: string): DealView | undefined {
     ...deal,
     currentParticipants: deal.currentParticipants + 1,
     authorizedCount: deal.authorizedCount + 1,
-    status: deal.status === 'pending' ? 'active' : deal.status,
+    status: deal.status === 'PENDING' ? 'ACTIVE' : deal.status,
   };
   DEAL_STORE[index] = next;
   return next;

@@ -1,12 +1,14 @@
-import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService, DealView } from '../deals.service';
+import { DealsService } from '../deals.service';
+import { DealView, DealStatus, DealStatusDisplay } from '../../../shared/models/deal';
 import { dealBadge } from '../deal-badge';
 import { neededCount } from '../../../shared/models/deal';
 
@@ -38,12 +40,22 @@ const FAQS = [
   },
 ];
 
+const DEAL_POLL_INTERVAL_MS = 15_000;
+
 @Component({
   selector: 'app-deal-details',
   imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn],
   templateUrl: './deal-details.html',
 })
-export class DealDetails implements OnInit, OnDestroy {
+export class DealDetails implements OnInit {
+  private readonly route = inject(ActivatedRoute);
+  private readonly dealsService = inject(DealsService);
+  private readonly destroyRef = inject(DestroyRef);
+  private readonly ngZone = inject(NgZone);
+
+  private dealPollSub: Subscription | null = null;
+  private currentDealId: string | null = null;
+
   deal = signal<DealView | null>(null);
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -221,7 +233,7 @@ export class DealDetails implements OnInit, OnDestroy {
 
   isClosed = computed(() => {
     const deal = this.deal();
-    return !!deal && deal.status !== 'active';
+    return !!deal && deal.status !== 'ACTIVE';
   });
 
   badge = computed(() => {
@@ -229,35 +241,27 @@ export class DealDetails implements OnInit, OnDestroy {
     return deal ? dealBadge(deal) : null;
   });
 
-  statusText = computed(() => {
+statusText = computed(() => {
     const deal = this.deal();
     if (!deal) {
       return '';
     }
-    switch (deal.status) {
-      case 'active':
-        return 'Rally Active.';
-      case 'pending':
-        return 'Pending.';
-      case 'succeeded':
-        return 'Rally Succeeded.';
-      case 'failed':
-        return 'Rally Failed.';
-      case 'cancelled':
-        return 'Cancelled.';
-    }
+    return DealStatusDisplay[deal.status].label;
   });
 
-  constructor(
-    private readonly route: ActivatedRoute,
-    private readonly dealsService: DealsService,
-  ) {}
+  constructor() {
+    this.destroyRef.onDestroy(() => {
+      this.stopDealPoll();
+      clearTimeout(this.copyTimer);
+    });
+  }
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
+        this.currentDealId = id;
         this.loadDeal(id);
       }
     });
@@ -274,16 +278,40 @@ export class DealDetails implements OnInit, OnDestroy {
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
+          this.startDealPoll(id);
         } else {
           this.error.set(NOT_FOUND_ERROR);
+          this.stopDealPoll();
         }
         this.loading.set(false);
       },
       error: (err) => {
         this.loading.set(false);
         this.error.set(toApiError(err));
+        this.stopDealPoll();
       },
     });
+  }
+
+  private startDealPoll(dealId: string) {
+    this.stopDealPoll();
+    this.ngZone.runOutsideAngular(() => {
+      this.dealPollSub = interval(DEAL_POLL_INTERVAL_MS)
+        .pipe(
+          startWith(0),
+          switchMap(() => this.dealsService.getActiveDeal(dealId)),
+        )
+        .subscribe((deal) => {
+          if (deal) {
+            this.ngZone.run(() => this.deal.set(deal));
+          }
+        });
+    });
+  }
+
+  private stopDealPoll() {
+    this.dealPollSub?.unsubscribe();
+    this.dealPollSub = null;
   }
 
   joinDeal = () => {
@@ -345,8 +373,4 @@ export class DealDetails implements OnInit, OnDestroy {
       this.loadDeal(id);
     }
   };
-
-  ngOnDestroy(): void {
-    clearTimeout(this.copyTimer);
-  }
 }
