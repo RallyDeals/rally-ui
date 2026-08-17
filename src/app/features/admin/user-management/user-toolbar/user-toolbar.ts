@@ -1,7 +1,5 @@
-import { Component, ElementRef, HostListener, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { Component, ElementRef, HostListener, computed, inject, input, output, signal } from '@angular/core';
 import { BuyerStatus, UserType } from '../../../../shared/models/user';
-
-const PANEL_WIDTH = 256;
 
 @Component({
   selector: 'app-user-toolbar',
@@ -10,7 +8,6 @@ const PANEL_WIDTH = 256;
 })
 export class UserToolbar {
   private readonly host = inject(ElementRef<HTMLElement>);
-  private readonly filterButton = viewChild<ElementRef<HTMLButtonElement>>('filterButton');
 
   search = input('');
   selectedTypes = input<ReadonlySet<UserType>>(new Set());
@@ -21,39 +18,17 @@ export class UserToolbar {
   statusesChange = output<Set<BuyerStatus>>();
 
   open = signal(false);
-  panelPosition = signal({ top: 0, left: 0 });
 
   readonly isAllSelected = computed(() => this.selectedTypes().size === 0 && this.selectedStatuses().size === 0);
   readonly activeCount = computed(() => this.selectedTypes().size + this.selectedStatuses().size);
 
   toggleOpen = () => {
-    const next = !this.open();
-    this.open.set(next);
-    if (next) {
-      this.updatePosition();
-    }
+    this.open.update((value) => !value);
   };
 
   close = () => {
     this.open.set(false);
   };
-
-  private updatePosition() {
-    const button = this.filterButton()?.nativeElement;
-    if (!button) {
-      return;
-    }
-    const rect = button.getBoundingClientRect();
-    this.panelPosition.set({ top: rect.bottom + 4, left: rect.right - PANEL_WIDTH });
-  }
-
-  @HostListener('window:scroll')
-  @HostListener('window:resize')
-  onViewportChange() {
-    if (this.open()) {
-      this.close();
-    }
-  }
 
   isTypeChecked = (type: UserType) => this.selectedTypes().has(type);
   isStatusChecked = (status: BuyerStatus) => this.selectedStatuses().has(status);

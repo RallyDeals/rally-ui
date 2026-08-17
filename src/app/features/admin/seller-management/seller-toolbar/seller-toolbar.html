@@ -1,0 +1,9 @@
+<div class="relative w-full max-w-md mb-rally-md">
+  <span class="material-symbols-outlined absolute left-rally-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+  <input
+    class="w-full bg-surface-container-lowest text-on-surface text-body-md font-body-md rounded-full py-2 pl-12 pr-4 border-none outline-none shadow-sm transition-shadow focus:outline-none focus:ring-0 focus:border-none focus:shadow-sm"
+    placeholder="Search sellers by name or email..."
+    type="text"
+    [value]="search()"
+    (input)="searchChange.emit($any($event.target).value)" />
+</div>

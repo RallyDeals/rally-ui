@@ -12,7 +12,9 @@
       </div>
     </div>
 
-    <app-seller-stats [totalSellers]="totalSellers()" [pendingReview]="pendingApprovalProductsCount()" [activeDeals]="activeDealsCount()" />
+    <app-seller-stats [totalSellers]="totalSellersCount()" [pendingReview]="pendingApprovalProductsCount()" [activeDeals]="activeDealsCount()" />
+
+    <app-seller-toolbar [search]="search()" (searchChange)="onSearchChange($event)" />
 
     <div class="bg-surface rounded-2xl shadow-xl overflow-hidden relative group">
       <div
@@ -34,7 +36,7 @@
               </tr>
             </thead>
             <tbody class="text-body-md font-body-md text-on-surface">
-              @for (seller of pagedSellers(); track seller.id) {
+              @for (seller of sellers(); track seller.id) {
                 <tr
                   app-seller-row
                   [seller]="seller"
@@ -54,7 +56,7 @@
           <span>
             Showing <span class="font-headline-md text-on-surface">{{ rangeStart() }}</span> to
             <span class="font-headline-md text-on-surface">{{ rangeEnd() }}</span> of
-            <span class="font-headline-md text-on-surface">{{ sellers().length }}</span> sellers
+            <span class="font-headline-md text-on-surface">{{ total() }}</span> sellers
           </span>
           <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
         </div>

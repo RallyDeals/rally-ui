@@ -5,17 +5,18 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { SellerStats } from './seller-stats/seller-stats';
+import { SellerToolbar } from './seller-toolbar/seller-toolbar';
 import { SellerRow } from './seller-row/seller-row';
 import { Seller } from '../interfaces/seller';
 import { UserService } from '../../auth/user.service';
 import { ProductsService } from '../../products/products.service';
-import { DealsCountResponse, DealsService } from '../../deals/deals.service';
+import { DealsService } from '../../deals/deals.service';
 
 const PAGE_SIZE = 3;
 
 @Component({
   selector: 'app-seller-management',
-  imports: [PageHeader, SellerStats, SellerRow, Pagination, ErrorState],
+  imports: [PageHeader, SellerStats, SellerToolbar, SellerRow, Pagination, ErrorState],
   templateUrl: './seller-management.html',
 })
 export class SellerManagement implements OnInit {
@@ -24,25 +25,27 @@ export class SellerManagement implements OnInit {
   dealService = inject(DealsService);
   pendingApprovalProductsCount = signal<number>(0);
   activeDealsCount = signal<number>(0);
-  totalSellers = signal<number>(0);
+  totalSellersCount = signal<number>(0);
+  total = signal<number>(0);
   sellers = signal<Seller[]>([]);
   loadError = signal<ApiError | null>(null);
+  search = signal('');
   page = signal<number>(1);
 
-  totalPages = computed(() => Math.max(1, Math.ceil(this.sellers().length / PAGE_SIZE)));
+  totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
 
-  pagedSellers = computed(() => {
-    const start = (this.page() - 1) * PAGE_SIZE;
-    return this.sellers().slice(start, start + PAGE_SIZE);
-  });
+  rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1));
+  rangeEnd = computed(() => Math.min(this.page() * PAGE_SIZE, this.total()));
 
-  rangeStart = computed(() =>
-    this.sellers().length === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1,
-  );
-  rangeEnd = computed(() => Math.min(this.page() * PAGE_SIZE, this.sellers().length));
+  onSearchChange = (search: string) => {
+    this.search.set(search);
+    this.page.set(1);
+    this.loadSellers();
+  };
 
   onPageChange = (page: number) => {
     this.page.set(page);
+    this.loadSellers();
   };
 
   ngOnInit() {
@@ -52,10 +55,10 @@ export class SellerManagement implements OnInit {
 
   loadSellers() {
     this.loadError.set(null);
-    this.userService.getSellers().subscribe({
+    this.userService.getSellers({ search: this.search(), page: this.page(), limit: PAGE_SIZE }).subscribe({
       next: (sellers) => {
         this.sellers.set(sellers.items);
-        this.totalSellers.set(sellers.total);
+        this.total.set(sellers.total);
       },
       error: (err) => {
         this.loadError.set(toApiError(err));
@@ -64,7 +67,15 @@ export class SellerManagement implements OnInit {
   }
 
   loadStats() {
-    this.productsService.getPendingApprovalProducts(1).subscribe({
+    this.userService.getSellers({ limit: 1 }).subscribe({
+      next: (response) => {
+        this.totalSellersCount.set(response.total);
+      },
+      error: (err) => {
+        console.error('Error loading total sellers count:', err);
+      }
+    });
+    this.productsService.getPendingApprovalProducts({ limit: 1 }).subscribe({
       next: (response) => {
         this.pendingApprovalProductsCount.set(response.total);
       },
@@ -72,9 +83,9 @@ export class SellerManagement implements OnInit {
         console.error('Error loading pending approval products:', err);
       }
     });
-    this.dealService.getDealsCount().subscribe({
+    this.dealService.getDealsAnalytics().subscribe({
       next: (response) => {
-        this.activeDealsCount.set(response.active);
+        this.activeDealsCount.set(response.activeDeals);
       },
       error: (err) => {
         console.error('Error loading active deals count:', err);

@@ -43,7 +43,7 @@
                     <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="5">Loading…</td>
                   </tr>
                 } @else {
-                  @for (product of visibleProducts(); track product.id) {
+                  @for (product of pendingProducts(); track product.id) {
                     <tr
                       app-pending-product-row
                       [product]="product"

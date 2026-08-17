@@ -52,7 +52,7 @@
                     <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="5">Loading…</td>
                   </tr>
                 } @else {
-                  @for (user of pagedUsers(); track user.id) {
+                  @for (user of users(); track user.id) {
                     <tr app-user-row [user]="user" (toggleStatus)="onToggleUserStatus($event)" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>
                   } @empty {
                     <tr>
@@ -68,7 +68,7 @@
             <div class="text-label-sm font-label-sm text-on-surface-variant">
               Showing <span class="font-headline-md text-on-surface">{{ rangeStart() }}</span> to
               <span class="font-headline-md text-on-surface">{{ rangeEnd() }}</span> of
-              <span class="font-headline-md text-on-surface">{{ filteredUsers().length }}</span> users
+              <span class="font-headline-md text-on-surface">{{ total() }}</span> users
             </div>
             <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
           </div>

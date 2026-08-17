@@ -14,6 +14,8 @@ import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
 import { Seller } from '../interfaces/seller';
 
+const PAGE_SIZE = 4;
+
 @Component({
   selector: 'app-product-approvals',
   imports: [PageHeader, Pagination, ErrorState, ErrorModal, ProductApprovalFilters, PendingProductRow],
@@ -25,6 +27,7 @@ export class ProductApprovals implements OnInit {
   private readonly categoriesService = inject(CategoriesService);
 
   pendingProducts = signal<Product[]>([]);
+  total = signal(0);
   sellers = signal<Seller[]>([]);
   categories = signal<Category[]>([]);
   loading = signal(true);
@@ -35,32 +38,15 @@ export class ProductApprovals implements OnInit {
   selectedSellerId = signal('');
 
   page = signal(1);
-  limit = 4;
 
-  readonly filteredProducts = computed(() => {
-    const categoryId = this.selectedCategoryId();
-    const sellerId = this.selectedSellerId();
-    return this.pendingProducts().filter(
-      (product) =>
-        (!categoryId || product.category.id === categoryId) && (!sellerId || product.sellerId === sellerId),
-    );
-  });
-
-  readonly total = computed(() => this.filteredProducts().length);
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
-
-  readonly visibleProducts = computed(() => {
-    const currentPage = Math.min(this.page(), this.totalPages());
-    const start = (currentPage - 1) * this.limit;
-    return this.filteredProducts().slice(start, start + this.limit);
-  });
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
 
   get fromIndex(): number {
-    return this.total() === 0 ? 0 : (this.page() - 1) * this.limit + 1;
+    return this.total() === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1;
   }
 
   get toIndex(): number {
-    return Math.min(this.page() * this.limit, this.total());
+    return Math.min(this.page() * PAGE_SIZE, this.total());
   }
 
   ngOnInit() {
@@ -72,30 +58,45 @@ export class ProductApprovals implements OnInit {
   loadPendingProducts() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.productsService.getPendingApprovalProducts().subscribe({
-      next: (response) => {
-        this.pendingProducts.set(response.items);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.loadError.set(toApiError(err));
-        this.loading.set(false);
-      },
-    });
+    this.productsService
+      .getPendingApprovalProducts({
+        categoryId: this.selectedCategoryId() || undefined,
+        sellerId: this.selectedSellerId() || undefined,
+        page: this.page(),
+        limit: PAGE_SIZE,
+      })
+      .subscribe({
+        next: (response) => {
+          this.pendingProducts.set(response.items);
+          this.total.set(response.total);
+          this.loading.set(false);
+          const lastPage = Math.max(1, Math.ceil(response.total / PAGE_SIZE));
+          if (this.page() > lastPage) {
+            this.page.set(lastPage);
+            this.loadPendingProducts();
+          }
+        },
+        error: (err) => {
+          this.loadError.set(toApiError(err));
+          this.loading.set(false);
+        },
+      });
   }
 
   onCategoryFilterChange = (categoryId: string) => {
     this.selectedCategoryId.set(categoryId);
     this.page.set(1);
+    this.loadPendingProducts();
   };
 
   onSellerFilterChange = (sellerId: string) => {
     this.selectedSellerId.set(sellerId);
     this.page.set(1);
+    this.loadPendingProducts();
   };
 
   loadSellers(){
-    this.userService.getSellers().subscribe({
+    this.userService.getSellers({ limit: 100 }).subscribe({
       next: (sellers) => {
         this.sellers.set(sellers.items);
       },
@@ -122,20 +123,14 @@ export class ProductApprovals implements OnInit {
 
   goToPage = (page: number) => {
     this.page.set(page);
+    this.loadPendingProducts();
   };
-
-  private clampPage() {
-    if (this.page() > this.totalPages()) {
-      this.page.set(this.totalPages());
-    }
-  }
 
   approveProduct = (product: Product) => {
     this.actionError.set(null);
     this.productsService.approveProduct(product.id).subscribe({
       next: () => {
-        this.pendingProducts.update((items) => items.filter((item) => item.id !== product.id));
-        this.clampPage();
+        this.loadPendingProducts();
       },
       error: (err) => {
         this.actionError.set(toApiError(err));
@@ -147,8 +142,7 @@ export class ProductApprovals implements OnInit {
     this.actionError.set(null);
     this.productsService.rejectProduct(product.id).subscribe({
       next: () => {
-        this.pendingProducts.update((items) => items.filter((item) => item.id !== product.id));
-        this.clampPage();
+        this.loadPendingProducts();
       },
       error: (err) => {
         this.actionError.set(toApiError(err));

@@ -88,11 +88,16 @@ export class ProductsService {
     });
   }
 
-  getPendingApprovalProducts(limit: number = 20): Observable<PageResponse<Product>> {
+  getPendingApprovalProducts(
+    params: { categoryId?: string; sellerId?: string; page?: number; limit?: number } = {},
+  ): Observable<PageResponse<Product>> {
     return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
       params: {
         status: ProductStatus.PENDING_APPROVAL,
-        limit: limit,
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+        ...(params.categoryId && { categoryId: params.categoryId }),
+        ...(params.sellerId && { sellerId: params.sellerId }),
       },
     });
   }

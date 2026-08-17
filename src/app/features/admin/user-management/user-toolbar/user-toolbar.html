@@ -13,7 +13,6 @@
   </div>
   <div class="flex items-center gap-rally-sm flex-wrap w-full lg:w-auto relative">
     <button
-      #filterButton
       type="button"
       (click)="toggleOpen()"
       class="flex items-center gap-rally-xs bg-surface-container-lowest rounded-full px-rally-sm py-2 shadow-sm cursor-pointer border-none outline-none focus:outline-none focus:ring-0"
@@ -32,9 +31,7 @@
 
     @if (open()) {
       <div
-        class="fixed z-30 w-64 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant/30 overflow-hidden py-rally-xs"
-        [style.top.px]="panelPosition().top"
-        [style.left.px]="panelPosition().left"
+        class="absolute right-0 top-full mt-1 z-30 w-64 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant/30 overflow-hidden py-rally-xs"
       >
         <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
           <input type="checkbox" [checked]="isAllSelected()" (change)="selectAll()" class="accent-primary" />
