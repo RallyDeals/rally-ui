@@ -5,18 +5,13 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Category } from '../../../shared/models/category';
 import { ActiveDealCard } from '../components/deal-card/deal-card';
-import {
-  DealFilters,
-  DealPriceRange,
-  DealStatusKey,
-} from '../components/deal-filters/deal-filters';
+import { DealFilters, DealPriceRange } from '../components/deal-filters/deal-filters';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
 import { DealsService } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealOverview } from '../interfaces/DealOverview';
-
-export type DealSortKey = DealStatusKey | 'relevance' | 'price-asc' | 'price-desc' | 'discount';
+import { DealSortKey } from '../interfaces/DealsQueryParams';
 
 const DEFAULT_SORT: DealSortKey = 'relevance';
 const DEALS_PER_PAGE = 6;
@@ -29,15 +24,18 @@ const DEALS_PER_PAGE = 6;
 export class BrowseDeals implements OnInit {
   deals = signal<DealOverview[]>([]);
   categories = signal<Category[]>([]);
+  total = signal(0);
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
 
+  searchQuery = signal('');
   selectedCategoryIds = signal<Set<string>>(new Set());
   selectedCategoryIdsArray = computed(() => [...this.selectedCategoryIds()]);
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal<DealSortKey>(DEFAULT_SORT);
   page = signal(1);
+  readonly limit = DEALS_PER_PAGE;
 
   sortOptions: { key: DealSortKey; label: string }[] = [
     { key: 'relevance', label: 'Relevance' },
@@ -49,46 +47,11 @@ export class BrowseDeals implements OnInit {
     { key: 'discount', label: 'Discount %' },
   ];
 
-  filteredDeals = computed(() => {
-    const categoryIds = this.selectedCategoryIds();
-    const min = this.minPrice();
-    const max = this.maxPrice();
-    const selectedCategoryNames = new Set(
-      this.categories()
-        .filter((category) => categoryIds.has(category.id))
-        .map((category) => category.name),
-    );
-    const list = this.deals().filter((deal) => {
-      if (selectedCategoryNames.size > 0 && !selectedCategoryNames.has(deal.category)) {
-        return false;
-      }
-      if (min !== null && deal.dealPrice < min) {
-        return false;
-      }
-      if (max !== null && deal.dealPrice > max) {
-        return false;
-      }
-      return true;
-    });
-    return this.sortDeals(list);
-  });
+  totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
 
-  totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.filteredDeals().length / DEALS_PER_PAGE)),
-  );
+  fromIndex = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * this.limit + 1));
 
-  pagedDeals = computed(() => {
-    const start = (this.page() - 1) * DEALS_PER_PAGE;
-    return this.filteredDeals().slice(start, start + DEALS_PER_PAGE);
-  });
-
-  fromIndex = computed(() =>
-    this.filteredDeals().length === 0 ? 0 : (this.page() - 1) * DEALS_PER_PAGE + 1,
-  );
-
-  toIndex = computed(() =>
-    Math.min(this.page() * DEALS_PER_PAGE, this.filteredDeals().length),
-  );
+  toIndex = computed(() => Math.min(this.page() * this.limit, this.total()));
 
   activeFilterCount = computed(() => {
     let count = this.selectedCategoryIds().size;
@@ -99,14 +62,6 @@ export class BrowseDeals implements OnInit {
       count += 1;
     }
     return count;
-  });
-
-  isStatusSort = computed<DealStatusKey | null>(() => {
-    const current = this.sortBy();
-    if (current === 'ending-soon' || current === 'most-joined' || current === 'newest') {
-      return current;
-    }
-    return null;
   });
 
   priceLabel = computed(() => {
@@ -140,16 +95,39 @@ export class BrowseDeals implements OnInit {
   loadDeals() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.dealsService.getDealsOverview({ status: DealStatus.ACTIVE, limit: 100 }).subscribe({
-      next: (response) => {
-        this.deals.set(response.items);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.loadError.set(toApiError(err));
-      },
-    });
+    this.dealsService
+      .getDealsOverview({
+        status: DealStatus.ACTIVE,
+        search: this.searchQuery().trim() || undefined,
+        categories: this.selectedCategoryNames(),
+        minPrice: this.minPrice() ?? undefined,
+        maxPrice: this.maxPrice() ?? undefined,
+        sort: this.sortBy(),
+        page: this.page(),
+        limit: this.limit,
+      })
+      .subscribe({
+        next: (response) => {
+          this.deals.set(response.items);
+          this.total.set(response.total);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loading.set(false);
+          this.loadError.set(toApiError(err));
+        },
+      });
+  }
+
+  private selectedCategoryNames(): string[] | undefined {
+    const categoryIds = this.selectedCategoryIds();
+    if (categoryIds.size === 0) {
+      return undefined;
+    }
+    const names = this.categories()
+      .filter((category) => categoryIds.has(category.id))
+      .map((category) => category.name);
+    return names.length ? names : undefined;
   }
 
   onCategoryToggle = (categoryId: string) => {
@@ -163,22 +141,35 @@ export class BrowseDeals implements OnInit {
       return next;
     });
     this.page.set(1);
+    this.loadDeals();
   };
 
   onPriceApply = ({ minPrice, maxPrice }: DealPriceRange) => {
     this.minPrice.set(minPrice);
     this.maxPrice.set(maxPrice);
     this.page.set(1);
+    this.loadDeals();
   };
 
-  onStatusChange = (status: DealStatusKey) => {
-    this.sortBy.set(status);
+  onSearchInput = (value: string) => {
+    this.searchQuery.set(value);
+  };
+
+  search = () => {
     this.page.set(1);
+    this.loadDeals();
+  };
+
+  clearSearch = () => {
+    this.searchQuery.set('');
+    this.page.set(1);
+    this.loadDeals();
   };
 
   onSortChange = (value: string) => {
     this.sortBy.set(value as DealSortKey);
     this.page.set(1);
+    this.loadDeals();
   };
 
   resetFilters = () => {
@@ -186,12 +177,15 @@ export class BrowseDeals implements OnInit {
     this.minPrice.set(null);
     this.maxPrice.set(null);
     this.sortBy.set(DEFAULT_SORT);
+    this.searchQuery.set('');
     this.page.set(1);
+    this.loadDeals();
   };
 
   resetSort = () => {
     this.sortBy.set(DEFAULT_SORT);
     this.page.set(1);
+    this.loadDeals();
   };
 
   categoryName = (categoryId: string): string =>
@@ -202,37 +196,6 @@ export class BrowseDeals implements OnInit {
 
   goToPage = (page: number) => {
     this.page.set(page);
+    this.loadDeals();
   };
-
-  private sortDeals(list: DealOverview[]): DealOverview[] {
-    const copy = [...list];
-    switch (this.sortBy()) {
-      case 'price-asc':
-        return copy.sort((a, b) => a.dealPrice - b.dealPrice);
-      case 'price-desc':
-        return copy.sort((a, b) => b.dealPrice - a.dealPrice);
-      case 'discount':
-        return copy.sort((a, b) => savingsOf(b) - savingsOf(a));
-      case 'ending-soon':
-        return copy.sort((a, b) => a.endTime.getTime() - b.endTime.getTime());
-      case 'most-joined':
-        return copy.sort((a, b) => b.currentParticipants - a.currentParticipants);
-      case 'newest':
-        return copy.sort((a, b) => startTimeOf(b) - startTimeOf(a));
-      default:
-        return copy;
-    }
-  }
-}
-
-function savingsOf(deal: DealOverview): number {
-  if (!deal.originalPrice || deal.originalPrice <= 0) {
-    return 0;
-  }
-  return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
-}
-
-// Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran.
-function startTimeOf(deal: DealOverview): number {
-  return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }

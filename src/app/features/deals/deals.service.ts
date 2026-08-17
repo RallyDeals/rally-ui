@@ -8,9 +8,9 @@ import { DealStatus } from '../../shared/models/deal';
 import { DealOverview } from './interfaces/DealOverview';
 import { DealDetails } from './interfaces/DealDetails';
 import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
-import { DealsQueryParams } from './interfaces/DealsQueryParams';
+import { DealsQueryParams, DealSortKey } from './interfaces/DealsQueryParams';
 import { CreateDealRequest } from './interfaces/CreateDealRequest';
-import { DUMMY_DEALS, DUMMY_DEALS_ANALYTICS } from '../../shared/mocks/deals.mock';
+import { DUMMY_DEALS, DUMMY_DEALS_ANALYTICS, DUMMY_DEAL_PARTICIPANTS } from '../../shared/mocks/deals.mock';
 import { ProductsService } from '../products/products.service';
 
 @Injectable({ providedIn: 'root' })
@@ -33,11 +33,13 @@ export class DealsService {
   getDealsOverview(params: DealsQueryParams = {}): Observable<PageResponse<DealOverview>> {
     const search = params.search?.trim().toLowerCase();
     const status = params.status;
-    const category = params.category;
+    const categories = params.categories?.length ? params.categories : undefined;
     const sellerId = params.sellerId;
+    const participantId = params.participantId;
     const productId = params.productId;
     const minPrice = params.minPrice;
     const maxPrice = params.maxPrice;
+    const sort = params.sort;
     const page = params.page ?? 1;
     const limit = params.limit ?? 10;
 
@@ -49,15 +51,18 @@ export class DealsService {
           deal.sku.toLowerCase().includes(search) ||
           deal.sellerName.toLowerCase().includes(search);
         const matchesStatus = !status || deal.status === status;
-        const matchesCategory = !category || deal.category === category;
+        const matchesCategory = !categories || categories.includes(deal.category);
         const matchesSeller = !sellerId || deal.sellerId === sellerId;
+        const matchesParticipant =
+          !participantId || (DUMMY_DEAL_PARTICIPANTS[deal.id]?.includes(participantId) ?? false);
         const matchesProduct = !productId || deal.productId === productId;
         const matchesMinPrice = minPrice === undefined || deal.dealPrice >= minPrice;
         const matchesMaxPrice = maxPrice === undefined || deal.dealPrice <= maxPrice;
-        return matchesSearch && matchesStatus && matchesCategory && matchesSeller && matchesProduct && matchesMinPrice && matchesMaxPrice;
+        return matchesSearch && matchesStatus && matchesCategory && matchesSeller && matchesParticipant && matchesProduct && matchesMinPrice && matchesMaxPrice;
       });
+      const sorted = this.sortDeals(filtered, sort);
       const start = (page - 1) * limit;
-      observer.next({ items: filtered.slice(start, start + limit), total: filtered.length, page, limit });
+      observer.next({ items: sorted.slice(start, start + limit), total: sorted.length, page, limit });
       observer.complete();
     });
     // return this.http.get<PageResponse<DealOverview>>(this.baseUrl, {
@@ -66,17 +71,47 @@ export class DealsService {
     //     limit,
     //     ...(search && { search }),
     //     ...(status && { status }),
-    //     ...(category && { category }),
+    //     ...(categories && { categories }),
     //     ...(sellerId && { sellerId }),
+    //     ...(participantId && { participantId }),
     //     ...(productId && { productId }),
     //     ...(minPrice !== undefined && { minPrice }),
     //     ...(maxPrice !== undefined && { maxPrice }),
+    //     ...(sort && sort !== 'relevance' && { sort }),
     //   },
     // });
   }
 
+  private sortDeals(list: DealOverview[], sort?: DealSortKey): DealOverview[] {
+    if (!sort || sort === 'relevance') {
+      return list;
+    }
+    const copy = [...list];
+    switch (sort) {
+      case 'price-asc':
+        return copy.sort((a, b) => a.dealPrice - b.dealPrice);
+      case 'price-desc':
+        return copy.sort((a, b) => b.dealPrice - a.dealPrice);
+      case 'discount':
+        return copy.sort((a, b) => discountOf(b) - discountOf(a));
+      case 'ending-soon':
+        return copy.sort((a, b) => a.endTime.getTime() - b.endTime.getTime());
+      case 'most-joined':
+        return copy.sort((a, b) => b.currentParticipants - a.currentParticipants);
+      case 'newest':
+        return copy.sort((a, b) => startTimeOf(b) - startTimeOf(a));
+      default:
+        return copy;
+    }
+  }
+
   getSellerDeals(sellerId: string, params: Omit<DealsQueryParams, 'sellerId'> = {}): Observable<PageResponse<DealOverview>> {
     return this.getDealsOverview({ ...params, sellerId });
+  }
+
+  // Buyer profile "My Deals": all statuses, scoped to deals this buyer has joined.
+  getMyDeals(buyerId: string, params: Omit<DealsQueryParams, 'participantId'> = {}): Observable<PageResponse<DealOverview>> {
+    return this.getDealsOverview({ ...params, participantId: buyerId });
   }
 
   getDealsDetails(id: string): Observable<DealDetails | null> {
@@ -92,7 +127,7 @@ export class DealsService {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string): Observable<DealDetails | null> {
+  joinDeal(id: string, buyerId: string): Observable<DealDetails | null> {
     return new Observable(observer => {
       const deal = DUMMY_DEALS.find((item) => item.id === id);
       if (deal && deal.currentParticipants < deal.dealStock) {
@@ -100,6 +135,10 @@ export class DealsService {
         deal.currentParticipants += 1;
         deal.neededCount = Math.max(0, deal.minParticipants - deal.currentParticipants);
         deal.progressPercent = deal.dealStock > 0 ? Math.min(100, Math.round((deal.currentParticipants / deal.dealStock) * 100)) : 0;
+        const participants = (DUMMY_DEAL_PARTICIPANTS[id] ??= []);
+        if (!participants.includes(buyerId)) {
+          participants.push(buyerId);
+        }
         if (isFirstJoin) {
           // Pending deals have no timer until the first participant joins; that join starts the clock.
           deal.status = DealStatus.ACTIVE;
@@ -180,4 +219,16 @@ export class DealsService {
       productImages: [deal.productImageUrl],
     };
   }
+}
+
+function discountOf(deal: DealOverview): number {
+  if (!deal.originalPrice || deal.originalPrice <= 0) {
+    return 0;
+  }
+  return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
+}
+
+// Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran.
+function startTimeOf(deal: DealOverview): number {
+  return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }

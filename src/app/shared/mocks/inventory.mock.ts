@@ -1,6 +1,6 @@
 import { Inventory } from '../models/inventory';
 
-const DEFAULT_TOTAL_STOCK = 50;
+const DEFAULT_TOTAL_STOCK = 2;
 
 const store = new Map<string, Inventory>();
 

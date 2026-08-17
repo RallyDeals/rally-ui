@@ -2,19 +2,8 @@
   <div class="max-w-rally-container-max mx-auto px-rally-gutter">
     <app-page-header
       title="Active Group Deals"
-      [subtitle]="deals().length + ' deals currently active'"
-    >
-      <select
-        class="filter-select"
-        [value]="sortBy()"
-        (change)="onSortChange($any($event.target).value)"
-        aria-label="Sort deals"
-      >
-        @for (option of sortOptions; track option.key) {
-          <option [value]="option.key">{{ option.label }}</option>
-        }
-      </select>
-    </app-page-header>
+      [subtitle]="total() + ' deals currently active'"
+    />
 
     <div class="mt-rally-lg flex flex-col lg:grid lg:grid-cols-[minmax(15rem,22%)_1fr] gap-rally-lg items-start">
       <aside class="w-full min-w-0 lg:sticky lg:top-32">
@@ -23,15 +12,57 @@
           [selectedCategoryIds]="selectedCategoryIdsArray()"
           [minPrice]="minPrice()"
           [maxPrice]="maxPrice()"
-          [status]="isStatusSort()"
           (categoryToggle)="onCategoryToggle($event)"
           (priceApply)="onPriceApply($event)"
-          (statusChange)="onStatusChange($event)"
           (reset)="resetFilters()"
         />
       </aside>
 
       <div class="min-w-0">
+        <div class="filter-toolbar">
+          <div class="search-box">
+            <button
+              class="search-icon hover:cursor-pointer"
+              (mousedown)="$event.preventDefault()"
+              (click)="search()"
+              aria-label="Search"
+            >
+              <span class="material-symbols-outlined">search</span>
+            </button>
+            <input
+              class="search-input"
+              placeholder="Search deals..."
+              [value]="searchQuery()"
+              (input)="onSearchInput($any($event.target).value)"
+              (keyup.enter)="search()"
+            />
+            @if (searchQuery()) {
+              <button
+                class="search-clear hover:cursor-pointer"
+                (mousedown)="$event.preventDefault()"
+                (click)="clearSearch()"
+              >
+                <span class="icon-lg">close</span>
+              </button>
+            }
+          </div>
+
+          <p class="result-count font-body-md text-body-md">
+            Showing {{ fromIndex() }}–{{ toIndex() }} of {{ total() }}
+          </p>
+
+          <select
+            class="filter-select"
+            [value]="sortBy()"
+            (change)="onSortChange($any($event.target).value)"
+            aria-label="Sort deals"
+          >
+            @for (option of sortOptions; track option.key) {
+              <option [value]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
         @if (activeFilterCount() > 0) {
           <div class="flex flex-wrap items-center gap-rally-xs mb-rally-md">
             <span class="font-body-md text-body-md text-on-surface-variant">Active filters:</span>
@@ -106,24 +137,21 @@
               </div>
             }
           </div>
-        } @else if (filteredDeals().length === 0) {
+        } @else if (deals().length === 0) {
           <div class="text-center py-16">
             <span class="material-symbols-outlined text-5xl text-primary mb-4 block">search_off</span>
             <h2 class="section-title mb-1">No deals found</h2>
-            <p class="body-subtle">Try adjusting your filters or sort.</p>
+            <p class="body-subtle">Try adjusting your filters or search.</p>
           </div>
         } @else {
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
-            @for (deal of pagedDeals(); track deal.id) {
+            @for (deal of deals(); track deal.id) {
               <app-active-deal-card [deal]="deal" />
             }
           </div>
 
           @if (totalPages() > 1) {
-            <div class="flex flex-col sm:flex-row items-center justify-between gap-rally-sm mt-10">
-              <p class="font-body-md text-body-md text-on-surface-variant whitespace-nowrap">
-                Showing {{ fromIndex() }}–{{ toIndex() }} of {{ filteredDeals().length }}
-              </p>
+            <div class="flex justify-center mt-10">
               <app-pagination
                 [page]="page()"
                 [totalPages]="totalPages()"

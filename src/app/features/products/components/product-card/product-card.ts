@@ -8,10 +8,11 @@ import { CartService } from '../../../cart/cart.service';
 import { DealsService } from '../../../deals/deals.service';
 import { DealStatus } from '../../../../shared/models/deal';
 import { DealOverview } from '../../../deals/interfaces/DealOverview';
+import { ImageFallbackDirective } from '../../../../shared/directives/image-fallback.directive';
 
 @Component({
   selector: 'app-product-card',
-  imports: [],
+  imports: [ImageFallbackDirective],
   templateUrl: './product-card.html',
   styleUrl: './product-card.css',
 })

@@ -17,7 +17,7 @@ export const DUMMY_DEALS: DealOverview[] = [
   {
     id: '8e2b0a2f-1111-4000-8000-000000000101',
     productId: '43326b0f-3f5a-7b34-1eb0-6e39aea121b7',
-    productName: 'Obsidian Pro Mech Keyboard',
+    productName: 'Apple MacBook Pro 14 Inch Space Grey',
     productImageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuBhIVyOrlGvfXpBMDtDKx_T_eugYYaqujDts8MkkHuB1GaRi5s0Guuj12zFwxtohasvaQ3HQwuYEeto_U5C7enLh8CoU02cZKfvcmFcoXK2rgcN8zHK5z26Ai3I4VLfweFsq01G3hw08hkyWKR_DMgTe2P5UcdzFluF1HQposj2r3jfPeAOKtYBWU25-sfoPaHv0xByx0K3fomRK5H2MmbObixg1Twm_2AAIHx3nL51s-ThuZBV4lgA',
     category: 'Electronics',
@@ -61,7 +61,7 @@ export const DUMMY_DEALS: DealOverview[] = [
   {
     id: '8e2b0a2f-1111-4000-8000-000000000103',
     productId: '20689b6f-d578-784d-bb4a-525e24aa4c33',
-    productName: 'Aura Sound ANC',
+    productName: 'Essence Mascara Lash Princess',
     productImageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuCJy92DfFyt974AvE1R8nnIIAXTdAi-WvfYBdvIb6k1DIDypfjisfJB5YyXe_oGhPy9ofRtXJK1kcaG7jDs9SGD6ui_iErmSLtpKW3M6D-uJw1dCcngXGE3UP9QoUjTqz5-0hKxqhpbNUvMf3oipIDR3AAYfcGgTQNzzghOgDQsk9pFJzjw8sbocH_qwR0Rt0MK4-9LbLUzyMGJyPwAkcuCz6zIjGbzXPd5tXt3APqkx8Ic6FfMZ4-h',
     category: 'Electronics',
@@ -127,7 +127,7 @@ export const DUMMY_DEALS: DealOverview[] = [
   {
     id: '8e2b0a2f-1111-4000-8000-000000000106',
     productId: '419c9562-6d38-1da9-47b2-b59e8fb16a70',
-    productName: 'Lumina 4K Portable Projector',
+    productName: 'AquaSmart Hydration',
     productImageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuD62NIOdDtK1qtf_8Uy2d6yrMxQPhfME03qpxPGSKHiBaaHFdnjApTumFrKxRO0bdwRwpKhYRF4MtT-eQx8QmwVjfMQViTYKCHuOTC871mBuwyPcdJXZZpOJCIYiZV8vsntLqNbZ24VyqNTdpCNvnb1eFkIMDdhMs9APAzhbNJriuEutGpWHLEU0kKSrHfhOrxCWVJ_IvEUE4_0tZuTkrP8Hp2hw4LHgczOL2ox6GlPuOtxqZRAZE3_Y4Ij1RPTkud88cYYPMPAa_M',
     category: 'Electronics',
@@ -149,7 +149,7 @@ export const DUMMY_DEALS: DealOverview[] = [
   {
     id: '8e2b0a2f-1111-4000-8000-000000000107',
     productId: '60930722-39b4-9b3a-3f08-07c0926e5450',
-    productName: 'Summit Trail Backpack',
+    productName: 'EcoTech Tech Pouch',
     productImageUrl:
       'https://lh3.googleusercontent.com/aida-public/AB6AXuDt0vfHKyf-KWvrp3ab2lYy2T643Sjjl6sT_KcbSeqNzT-3k62dj5SQuaD4BjptmB35Zs9uSy5rdM1T9LN6iPeVW4xZYSrQjGctukrGc3-raf7dqF7unX_UN60G-LVJ1P7llFmGmXhLpV2ZBVHmShTFvWyMPpRkPEDNRxarGN2oKKcA3BFZaEqLh63N1gjaaCqBWn27oxodcDLG5koAADfFQZI4tpWq2bqll05fmsR1Nq_X81WrOOZ1wXqM1B8HCEw7MfpR8Gbmgo4',
     category: 'Home & Furniture',
@@ -191,3 +191,13 @@ export const DUMMY_DEALS: DealOverview[] = [
     timeRemainingInSeconds: 0,
   },
 ];
+
+const DEV_BUYER_ID = '22222222-2222-2222-2222-222222222222';
+
+// dealId -> ids of buyers who joined. joinDeal() appends to this as buyers join;
+// seeded here so "My Deals" has something to show across active/succeeded/failed deals.
+export const DUMMY_DEAL_PARTICIPANTS: Record<string, string[]> = {
+  '8e2b0a2f-1111-4000-8000-000000000101': [DEV_BUYER_ID],
+  '8e2b0a2f-1111-4000-8000-000000000102': [DEV_BUYER_ID],
+  '8e2b0a2f-1111-4000-8000-000000000104': [DEV_BUYER_ID],
+};

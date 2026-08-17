@@ -8,6 +8,7 @@ import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/prima
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { DealsService } from '../deals.service';
+import { TokenService } from '../../../shared/services/token.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { dealBadge } from '../deal-badge';
@@ -63,6 +64,7 @@ const DEAL_POLL_INTERVAL_MS = 15_000;
 export class DealDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly dealsService = inject(DealsService);
+  private readonly tokenService = inject(TokenService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
@@ -326,10 +328,11 @@ export class DealDetails implements OnInit {
   joinDeal = () => {
     this.joined.set(true);
     const deal = this.deal();
-    if (!deal) {
+    const buyerId = this.tokenService.getUserId();
+    if (!deal || !buyerId) {
       return;
     }
-    this.dealsService.joinDeal(deal.id).subscribe({
+    this.dealsService.joinDeal(deal.id, buyerId).subscribe({
       next: (updated) => {
         if (updated) {
           this.deal.set(updated);

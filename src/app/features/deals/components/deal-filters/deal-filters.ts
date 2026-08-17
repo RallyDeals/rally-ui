@@ -1,8 +1,6 @@
 import { Component, effect, input, output } from '@angular/core';
 import { Category } from '../../../../shared/models/category';
 
-export type DealStatusKey = 'ending-soon' | 'most-joined' | 'newest';
-
 export interface DealPriceRange {
   minPrice: number | null;
   maxPrice: number | null;
@@ -18,18 +16,10 @@ export class DealFilters {
   selectedCategoryIds = input<string[]>([]);
   minPrice = input<number | null>(null);
   maxPrice = input<number | null>(null);
-  status = input<DealStatusKey | null>(null);
 
   categoryToggle = output<string>();
   priceApply = output<DealPriceRange>();
-  statusChange = output<DealStatusKey>();
   reset = output<void>();
-
-  statusOptions = [
-    { key: 'ending-soon' as DealStatusKey, label: 'Ending Soon', icon: 'timer' },
-    { key: 'most-joined' as DealStatusKey, label: 'Most Joined', icon: 'group' },
-    { key: 'newest' as DealStatusKey, label: 'Newest', icon: 'history' },
-  ];
 
   priceMin = '';
   priceMax = '';
