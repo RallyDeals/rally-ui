@@ -4,6 +4,7 @@ import { SellerManagement } from './seller-management/seller-management';
 import { SellerDetails } from './seller-management/seller-details/seller-details';
 import { ProductApprovals } from './product-approvals/product-approvals';
 import { CategoriesManagement } from './categories-management/categories-management';
+import { DealsManagement } from './deals-management/deals-management';
 
 export const ADMIN_ROUTES: Routes = [
   {
@@ -18,6 +19,10 @@ export const ADMIN_ROUTES: Routes = [
   {
     path: 'categories-management',
     component: CategoriesManagement,
+  },
+  {
+    path: 'deals-management',
+    component: DealsManagement,
   },
   {
     path: 'seller-management',
