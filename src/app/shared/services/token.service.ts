@@ -19,7 +19,8 @@ export class TokenService {
     return environment.devTokens[this.activeRole()] ?? environment.devToken ?? '';
   }
 
-  getSellerId(): string | null {
+  // The token's `sub` claim is the current user's id, whichever role is active — seller, buyer, or admin.
+  getUserId(): string | null {
     const token = this.getToken();
     if (!token) {
       return null;
@@ -31,6 +32,10 @@ export class TokenService {
     } catch {
       return null;
     }
+  }
+
+  getSellerId(): string | null {
+    return this.getUserId();
   }
 
   setRole(role: DevRole) {
