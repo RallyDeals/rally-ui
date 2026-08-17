@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { PageResponse } from '../products/page-response';
 import { DealStatus } from '../../shared/models/deal';
 import { DealOverview } from './interfaces/DealOverview';
@@ -10,12 +11,16 @@ import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
 import { DealsQueryParams } from './interfaces/DealsQueryParams';
 import { CreateDealRequest } from './interfaces/CreateDealRequest';
 import { DUMMY_DEALS, DUMMY_DEALS_ANALYTICS } from '../../shared/mocks/deals.mock';
+import { ProductsService } from '../products/products.service';
 
 @Injectable({ providedIn: 'root' })
 export class DealsService {
   private readonly baseUrl = `${environment.apiUrl}/deals`;
 
-  constructor(private readonly http: HttpClient) {}
+  constructor(
+    private readonly http: HttpClient,
+    private readonly productsService: ProductsService,
+  ) {}
 
   getDealsAnalytics(): Observable<DealsAnalyticsResponse> {
     return new Observable(observer => {
@@ -109,32 +114,33 @@ export class DealsService {
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {
-    return new Observable(observer => {
-      const deal: DealOverview = {
-        id: crypto.randomUUID(),
-        productId: request.productId,
-        productName: `Product ${request.productId.slice(0, 8)}`,
-        productImageUrl: '',
-        category: 'Uncategorized',
-        sku: request.productId.slice(0, 8).toUpperCase(),
-        sellerId: '',
-        sellerName: '',
-        originalPrice: request.dealPrice,
-        dealPrice: request.dealPrice,
-        dealStock: request.dealStock,
-        currentParticipants: 0,
-        neededCount: request.minParticipants,
-        progressPercent: 0,
-        minParticipants: request.minParticipants,
-        status: DealStatus.PENDING,
-        durationMinutes: request.durationMinutes,
-        endTime: new Date(Date.now() + request.durationMinutes * 60000),
-        timeRemainingInSeconds: request.durationMinutes * 60,
-      };
-      DUMMY_DEALS.push(deal);
-      observer.next(deal);
-      observer.complete();
-    });
+    return this.productsService.getProduct(request.productId).pipe(
+      map((product) => {
+        const deal: DealOverview = {
+          id: crypto.randomUUID(),
+          productId: request.productId,
+          productName: product.name,
+          productImageUrl: product.imageUrl ?? '',
+          category: product.category?.name ?? 'Uncategorized',
+          sku: product.sku ?? '',
+          sellerId: product.sellerId,
+          sellerName: product.sellerName,
+          originalPrice: product.basePrice,
+          dealPrice: request.dealPrice,
+          dealStock: request.dealStock,
+          currentParticipants: 0,
+          neededCount: request.minParticipants,
+          progressPercent: 0,
+          minParticipants: request.minParticipants,
+          status: DealStatus.PENDING,
+          durationMinutes: request.durationMinutes,
+          endTime: new Date(Date.now() + request.durationMinutes * 60000),
+          timeRemainingInSeconds: request.durationMinutes * 60,
+        };
+        DUMMY_DEALS.push(deal);
+        return deal;
+      }),
+    );
     // return this.http.post<DealOverview>(this.baseUrl, request);
   }
 

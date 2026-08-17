@@ -61,8 +61,8 @@ export class SellerDealForm implements OnInit {
   dealStock = signal('');
   minParticipants = signal('');
   currentParticipants = signal(0);
-  startAt = signal('');
-  endAt = signal('');
+  durationDays = signal('1');
+  durationHours = signal('0');
 
   readonly isEdit = computed(() => this.dealId() !== null);
 
@@ -96,6 +96,51 @@ export class SellerDealForm implements OnInit {
     return Math.round((1 - deal / original) * 100);
   });
 
+  readonly dealPriceError = computed<string | null>(() => {
+    if (this.dealPrice().trim() === '') {
+      return 'Deal price is required.';
+    }
+    const value = Number(this.dealPrice());
+    if (!Number.isFinite(value) || value <= 0) {
+      return 'Deal price must be greater than 0.';
+    }
+    const original = Number(this.originalPrice());
+    if (original > 0 && value >= original) {
+      return 'Deal price must be less than the original price.';
+    }
+    return null;
+  });
+
+  readonly dealStockError = computed<string | null>(() => {
+    if (this.dealStock().trim() === '') {
+      return 'Deal stock is required.';
+    }
+    const value = Number(this.dealStock());
+    if (!Number.isInteger(value) || value <= 0) {
+      return 'Deal stock must be a whole number greater than 0.';
+    }
+    const min = Number(this.minParticipants());
+    if (min > 0 && value < min) {
+      return 'Deal stock must be at least the minimum participants.';
+    }
+    return null;
+  });
+
+  readonly minParticipantsError = computed<string | null>(() => {
+    if (this.minParticipants().trim() === '') {
+      return 'Minimum participants is required.';
+    }
+    const value = Number(this.minParticipants());
+    if (!Number.isInteger(value) || value <= 0) {
+      return 'Minimum participants must be a whole number greater than 0.';
+    }
+    const stock = Number(this.dealStock());
+    if (stock > 0 && value > stock) {
+      return 'Minimum participants cannot exceed deal stock.';
+    }
+    return null;
+  });
+
   readonly percent = computed(() => {
     const stock = Number(this.dealStock());
     if (stock <= 0) {
@@ -125,57 +170,27 @@ export class SellerDealForm implements OnInit {
   }
 
   readonly durationMinutes = computed<number | null>(() => {
-    const start = this.startAt();
-    const end = this.endAt();
-    if (!start || !end) {
+    const days = Number(this.durationDays());
+    const hours = Number(this.durationHours());
+    if (!Number.isFinite(days) || !Number.isFinite(hours)) {
       return null;
     }
-    const ms = Date.parse(end) - Date.parse(start);
-    if (Number.isNaN(ms) || ms <= 0) {
-      return null;
-    }
-    return Math.round(ms / 60000);
+    const minutes = Math.round(days * 1440 + hours * 60);
+    return minutes > 0 ? minutes : null;
   });
 
   submitted = signal(false);
 
-  readonly startAtError = computed<string | null>(() => {
-    const value = this.startAt();
-    if (!value) {
-      return 'Start time is required.';
+  readonly durationError = computed<string | null>(() => {
+    const daysRaw = this.durationDays();
+    const hoursRaw = this.durationHours();
+    const days = Number(daysRaw || 0);
+    const hours = Number(hoursRaw || 0);
+    if (!Number.isInteger(days) || days < 0 || !Number.isInteger(hours) || hours < 0) {
+      return 'Duration must be whole, non-negative numbers.';
     }
-    const start = new Date(value);
-    if (Number.isNaN(start.getTime())) {
-      return 'Invalid start time.';
-    }
-    const now = new Date();
-
-    const sameDay =
-      start.getFullYear() === now.getFullYear() &&
-      start.getMonth() === now.getMonth() &&
-      start.getDate() === now.getDate();
-
-    if (!sameDay) {
-      return start.getTime() < now.getTime() ? 'Start time cannot be in the past.' : null;
-    }
-
-    if (start.getHours() < now.getHours()) {
-      return 'Start time cannot be in the past.';
-    }
-    if (start.getHours() === now.getHours() && start.getMinutes() <= now.getMinutes()) {
-      return 'Start time must be at least one minute ahead.';
-    }
-    return null;
-  });
-
-  readonly endAtError = computed<string | null>(() => {
-    const start = this.startAt();
-    const end = this.endAt();
-    if (!end) {
-      return 'End time is required.';
-    }
-    if (start && Date.parse(end) <= Date.parse(start)) {
-      return 'End time must be after the start time.';
+    if (days === 0 && hours === 0) {
+      return 'Duration must be greater than 0.';
     }
     return null;
   });
@@ -184,7 +199,12 @@ export class SellerDealForm implements OnInit {
     if (!this.productId()) {
       return 'Select an approved product to continue.';
     }
-    return this.startAtError() ?? this.endAtError();
+    return (
+      this.dealPriceError() ??
+      this.dealStockError() ??
+      this.minParticipantsError() ??
+      this.durationError()
+    );
   });
 
   ngOnInit() {
@@ -201,11 +221,8 @@ export class SellerDealForm implements OnInit {
   }
 
   private initDefaults() {
-    const durationMinutes = 1440;
-    const start = new Date();
-    start.setHours(start.getHours() + 1, 0, 0, 0);
-    this.startAt.set(this.formatToDatetimeLocal(start));
-    this.endAt.set(this.formatToDatetimeLocal(new Date(start.getTime() + durationMinutes * 60000)));
+    this.durationDays.set('1');
+    this.durationHours.set('0');
   }
 
   private resetForm() {
@@ -219,8 +236,8 @@ export class SellerDealForm implements OnInit {
     this.dealStock.set('');
     this.minParticipants.set('');
     this.currentParticipants.set(0);
-    this.startAt.set('');
-    this.endAt.set('');
+    this.durationDays.set('1');
+    this.durationHours.set('0');
     this.error.set(null);
     this.submitted.set(false);
   }
@@ -246,10 +263,8 @@ export class SellerDealForm implements OnInit {
         this.dealStock.set(String(deal.dealStock));
         this.minParticipants.set(String(deal.minParticipants));
         this.currentParticipants.set(deal.currentParticipants);
-
-        const startDate = new Date(deal.endTime.getTime() - deal.durationMinutes * 60000);
-        this.startAt.set(this.formatToDatetimeLocal(startDate));
-        this.endAt.set(this.formatToDatetimeLocal(deal.endTime));
+        this.durationDays.set(String(Math.floor(deal.durationMinutes / 1440)));
+        this.durationHours.set(String(Math.floor((deal.durationMinutes % 1440) / 60)));
 
         this.loading.set(false);
       },
@@ -292,29 +307,6 @@ export class SellerDealForm implements OnInit {
 
   cancel = () => {
     this.router.navigate(['/seller/deals']);
-  };
-
-  private formatToDatetimeLocal(d: Date): string {
-    const pad = (n: number) => String(n).padStart(2, '0');
-    const yyyy = d.getFullYear();
-    const mm = pad(d.getMonth() + 1);
-    const dd = pad(d.getDate());
-    const hh = pad(d.getHours());
-    const min = pad(d.getMinutes());
-    return `${yyyy}-${mm}-${dd}T${hh}:${min}`;
-  }
-
-  onStartAtInput = (value: string) => {
-    const minutes = this.durationMinutes();
-    this.startAt.set(value);
-    if (minutes && value) {
-      const end = new Date(Date.parse(value) + minutes * 60000);
-      this.endAt.set(this.formatToDatetimeLocal(end));
-    }
-  };
-
-  onEndAtInput = (value: string) => {
-    this.endAt.set(value);
   };
 
   pickerOpen = signal(false);
