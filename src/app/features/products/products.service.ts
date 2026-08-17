@@ -4,39 +4,14 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PageResponse } from './page-response';
 import { Product } from '../../shared/models/product';
-
-export interface ProductQueryParams {
-  q?: string;
-  tag?: string;
-  categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}
-
-export interface UpsertProductRequest {
-  name: string;
-  description: string;
-  categoryId?: string;
-  basePrice: number;
-  sku?: string;
-  visible?: boolean;
-  tags?: string[];
-  imageUrl?: string;
-  images?: string[];
-  initialStock?: number;
-}
+import { ProductQueryParams } from './interfaces/product-query-params';
+import { UpsertProductRequest } from './interfaces/upsert-product-request';
+import { ImageUploadResponse } from './interfaces/image-upload-response';
 
 export enum ProductStatus {
   PENDING_APPROVAL = 'PENDING_APPROVAL',
   APPROVED = 'APPROVED',
   REJECTED = 'REJECTED',
-}
-
-export interface ImageUploadResponse {
-  path: string;
 }
 
 @Injectable({ providedIn: 'root' })

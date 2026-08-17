@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Countdown } from '../../../../shared/components/countdown/countdown';
-import { DealView, progressPercent } from '../../../../shared/models/deal';
+import { DealOverview } from '../../interfaces/DealOverview';
 import { dealBadge } from '../../deal-badge';
 
 @Component({
@@ -10,7 +10,7 @@ import { dealBadge } from '../../deal-badge';
   templateUrl: './deal-card.html',
 })
 export class ActiveDealCard {
-  deal = input.required<DealView>();
+  deal = input.required<DealOverview>();
 
   badge = computed(() => dealBadge(this.deal()));
 
@@ -24,5 +24,5 @@ export class ActiveDealCard {
 
   spotsLeft = computed(() => Math.max(0, this.deal().dealStock - this.deal().currentParticipants));
 
-  progress = computed(() => progressPercent(this.deal()));
+  progress = computed(() => this.deal().progressPercent);
 }

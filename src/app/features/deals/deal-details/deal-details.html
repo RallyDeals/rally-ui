@@ -28,7 +28,7 @@
             <img
               class="w-full h-full object-contain p-4 transition-transform duration-500 group-hover:scale-105"
               [src]="activeImage()"
-              [alt]="deal.imageAlt"
+              [alt]="deal.productName"
             />
             <span
               class="absolute top-rally-sm left-rally-sm bg-surface/80 backdrop-blur-sm px-3 py-1 rounded-full font-label-sm text-label-sm text-on-surface flex items-center gap-1 shadow-sm"
@@ -50,7 +50,7 @@
                   <img
                     class="w-full h-full object-cover"
                     [src]="image"
-                    [alt]="deal.imageAlt + ' ' + (i + 1)"
+                    [alt]="deal.productName + ' ' + (i + 1)"
                   />
                 </button>
               }
@@ -78,10 +78,10 @@
               }
             </div>
             <h1 class="font-display-lg text-display-lg-mobile md:text-display-lg text-on-surface">
-              {{ deal.title }}
+              {{ deal.productName }}
             </h1>
             <p class="font-body-md text-body-md text-on-surface-variant line-clamp-2">
-              {{ deal.description }}
+              {{ deal.productDescription }}
             </p>
           </div>
 
@@ -112,7 +112,7 @@
                     Ends In
                   </div>
                   <div class="font-headline-md text-headline-md text-on-surface tabular-nums">
-                    <app-countdown [endAt]="deal.endTime ?? ''" />
+                    <app-countdown [endAt]="deal.endTime.toISOString()" />
                   </div>
                 </div>
               </div>
@@ -238,7 +238,7 @@
             @case ('description') {
               <div class="md:col-span-2 font-body-md text-body-md text-on-surface-variant space-y-rally-md">
                 <p class="text-body-lg text-body-lg text-on-surface leading-relaxed">
-                  {{ deal.description }}
+                  {{ deal.productDescription }}
                 </p>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-md">
                   <div

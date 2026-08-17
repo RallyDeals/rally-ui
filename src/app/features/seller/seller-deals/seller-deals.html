@@ -1,31 +1,4 @@
 <section class="flex-1 space-y-rally-md">
-  @if (menu()) {
-    <div class="fixed inset-0 z-20" (click)="closeMenu()"></div>
-    <div
-      class="fixed z-50 w-48 rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg p-1 mt-0!"
-      [style.left.px]="menuX"
-      [style.top.px]="menuY"
-    >
-      <button
-        type="button"
-        class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors"
-        (click)="openDeal(menuId)"
-      >
-        <span class="material-symbols-outlined text-base text-primary-container">edit</span>
-        Edit Deal
-      </button>
-      @if (menuDeal()?.status === 'ACTIVE') {
-        <button
-          type="button"
-          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-error hover:bg-error/10 transition-colors"
-          (click)="deleteDeal(menuId)"
-        >
-          <span class="material-symbols-outlined text-base">delete</span>
-          Delete Deal
-        </button>
-      }
-    </div>
-  }
   <!-- Page Top Bar (search + actions) -->
   <header
     class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
@@ -45,7 +18,7 @@
       <button
         type="button"
         class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
-        (click)="goToCreate()"
+        routerLink="/seller/deals/new"
       >
         <span class="material-symbols-outlined text-lg sm:text-xl">add</span>
         <span class="hidden sm:inline">New Deal</span>
@@ -82,7 +55,7 @@
     </div>
     <div class="flex items-center gap-rally-sm self-end sm:self-auto">
       <p class="text-xs text-on-surface-variant hidden md:block">
-        Showing {{ fromIndex }}-{{ toIndex }} of {{ visibleDeals().length }}
+        Showing {{ pageRange().from }}-{{ pageRange().to }} of {{ total() }}
       </p>
       <app-pagination
         [page]="page()"
@@ -96,7 +69,7 @@
   <!-- Deals Table -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
     <div class="overflow-x-auto no-scrollbar">
-      @if (pagedDeals().length === 0) {
+      @if (deals().length === 0) {
         <div class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-primary mb-4 block">group_off</span>
           <h3 class="section-title mb-1">No deals found</h3>
@@ -115,18 +88,20 @@
             </tr>
           </thead>
           <tbody class="divide-y divide-outline-variant/30">
-            @for (deal of pagedDeals(); track deal.id) {
+            @for (deal of deals(); track deal.id) {
+              @let isPending = deal.status === DealStatus.PENDING;
               <tr
-                class="product-row-hover cursor-pointer"
-                (click)="openDeal(deal.id)"
+                [class.product-row-hover]="isPending"
+                [class.cursor-pointer]="isPending"
+                [routerLink]="isPending ? ['/seller/deals', deal.id, 'edit'] : null"
               >
                 <td class="table-cell">
-                  <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === 'FAILED' || deal.status === 'CANCELLED'">
+                  <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === DealStatus.FAILED || deal.status === DealStatus.CANCELLED">
                     <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
                       <img
                         alt="Deal Product"
                         class="w-full h-full object-cover"
-                        [class.grayscale]="deal.status === 'FAILED' || deal.status === 'CANCELLED'"
+                        [class.grayscale]="deal.status === DealStatus.FAILED || deal.status === DealStatus.CANCELLED"
                         [src]="deal.image"
                       />
                     </div>
@@ -144,12 +119,12 @@
                     [joined]="deal.currentParticipants"
                     [required]="deal.dealStock"
                     [tone]="progressToneFor(deal.status)"
-                    [pulse]="deal.status === 'ACTIVE'"
+                    [pulse]="deal.status === DealStatus.ACTIVE"
                   />
                   <p class="text-[11px] text-on-surface-variant mt-1">min {{ deal.minParticipants }} to succeed</p>
                 </td>
                 <td class="table-cell">
-                  <p class="font-bold" [class]="deal.status === 'ACTIVE' ? 'text-primary' : 'text-on-surface'">
+                  <p class="font-bold" [class]="deal.status === DealStatus.ACTIVE ? 'text-primary' : 'text-on-surface'">
                     ${{ deal.dealPrice }}
                   </p>
                   <p class="text-label-sm text-on-surface-variant line-through">${{ deal.originalPrice }}</p>
@@ -163,24 +138,26 @@
                         : 'text-on-surface-variant text-label-sm font-medium'
                     "
                   >
-                    @if (deal.status === 'ACTIVE') {
+                    @if (deal.status === DealStatus.ACTIVE) {
                       <span class="material-symbols-outlined text-[18px]">timer</span>
+                      <span class="tabular-nums">{{ countdownLabel(deal.endTime) }}</span>
+                    } @else {
+                      {{ deal.time }}
                     }
-                    {{ deal.time }}
                   </div>
-<div class="flex flex-col items-center gap-0.5">
-                  <span class="text-label-sm text-on-surface-variant">Ends {{ formatDate(endOf(deal)) }}</span>
-                  <span class="text-label-sm text-on-surface">{{ formatTime(endOf(deal)) }}</span>
-                </div>
+                  @if (deal.endTime) {
+                    <div class="flex flex-col items-start gap-0.5 mt-1">
+                      <span class="text-label-sm text-on-surface-variant">Ends {{ deal.endTime | date: 'MMM d' }}</span>
+                      <span class="text-label-sm text-on-surface">{{ deal.endTime | date: 'HH:mm' }}</span>
+                    </div>
+                  }
                 </td>
                 <td class="table-cell text-right">
-                  <div class="relative inline-block" (click)="$event.stopPropagation()">
-                    <app-icon-button
-                      symbol="more_vert"
-                      label="Deal actions"
-                      (click)="toggleMenu($event, deal.id)"
-                    />
-                  </div>
+                  <app-deal-row-actions
+                    [editLink]="['/seller/deals', deal.id, 'edit']"
+                    [editable]="isPending"
+                    (delete)="deleteDeal(deal.id)"
+                  />
                 </td>
               </tr>
             }
@@ -194,9 +171,15 @@
       class="bg-surface-container-low px-4 py-3 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-4"
     >
       <p class="text-xs text-on-surface-variant text-center sm:text-left">
-        Showing {{ fromIndex }}-{{ toIndex }} of {{ visibleDeals().length }} campaigns
+        Showing {{ pageRange().from }}-{{ pageRange().to }} of {{ total() }} campaigns
       </p>
       <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
     </div>
   </div>
+
+  <app-confirm-dialog
+    [confirm]="deleteRequest()"
+    (confirmed)="onDeleteConfirmed()"
+    (closed)="closeDeleteDialog()"
+  />
 </section>

@@ -5,8 +5,8 @@
   <div class="h-48 relative bg-surface-container-low overflow-hidden">
     <img
       class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-500"
-      [src]="deal().image"
-      [alt]="deal().imageAlt"
+      [src]="deal().productImageUrl"
+      [alt]="deal().productName"
     />
     <div
       [class]="'absolute top-4 left-4 z-10 flex gap-2 px-2 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm ' + badge().bgClass + ' ' + badge().textClass"
@@ -20,7 +20,7 @@
     <h3
       class="font-headline-md text-[20px] leading-[28px] text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors"
     >
-      {{ deal().title }}
+      {{ deal().productName }}
     </h3>
 
     <div class="mb-4">
@@ -55,7 +55,7 @@
         <span class="font-body-md text-[14px] text-on-surface-variant">
           <strong class="text-on-surface">{{ spotsLeft() }}</strong> spots left
         </span>
-        <app-countdown [endAt]="deal().endTime ?? ''" />
+        <app-countdown [endAt]="deal().endTime.toISOString()" />
       </div>
     </div>
   </div>

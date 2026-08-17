@@ -2,7 +2,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
-import { DealStatus, DealStatusDisplay } from '../../../shared/models/deal';
+import { DealStatus } from '../../../shared/models/deal';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
 import { DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealsService } from '../../deals/deals.service';
@@ -14,11 +14,19 @@ import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
-  PENDING: 'neutral',
-  ACTIVE: 'primary',
-  SUCCEEDED: 'secondary',
-  FAILED: 'error',
-  CANCELLED: 'neutral',
+  [DealStatus.PENDING]: 'neutral',
+  [DealStatus.ACTIVE]: 'primary',
+  [DealStatus.SUCCEEDED]: 'secondary',
+  [DealStatus.FAILED]: 'error',
+  [DealStatus.CANCELLED]: 'neutral',
+};
+
+const STATUS_DESCRIPTIONS: Record<DealStatus, string> = {
+  [DealStatus.PENDING]: 'This deal has not started yet and can still be edited.',
+  [DealStatus.ACTIVE]: 'This deal is live and accepting participants.',
+  [DealStatus.SUCCEEDED]: 'This deal reached its goal and is now closed.',
+  [DealStatus.FAILED]: 'This deal did not reach its goal and is now closed.',
+  [DealStatus.CANCELLED]: 'This deal was cancelled.',
 };
 
 @Component({
@@ -33,6 +41,7 @@ export class SellerDealForm implements OnInit {
   private readonly tokenService = inject(TokenService);
   private readonly dealsService = inject(DealsService);
 
+  readonly DealStatus = DealStatus;
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
@@ -46,7 +55,7 @@ export class SellerDealForm implements OnInit {
   productName = signal('');
   sku = signal('');
   image = signal('');
-  status = signal<DealStatus>('PENDING');
+  status = signal<DealStatus>(DealStatus.PENDING);
   dealPrice = signal('');
   originalPrice = signal('');
   dealStock = signal('');
@@ -58,10 +67,10 @@ export class SellerDealForm implements OnInit {
   readonly isEdit = computed(() => this.dealId() !== null);
 
   readonly isFormDisabled = computed(
-    () => this.isEdit() && (this.status() !== 'PENDING' || this.currentParticipants() > 0),
+    () => this.isEdit() && (this.status() !== DealStatus.PENDING || this.currentParticipants() > 0),
   );
 
-  readonly statusHint = computed(() => DealStatusDisplay[this.status()].description);
+  readonly statusHint = computed(() => STATUS_DESCRIPTIONS[this.status()]);
 
   readonly lockMessage = computed<string | null>(() => {
     if (!this.isFormDisabled()) {
@@ -70,7 +79,7 @@ export class SellerDealForm implements OnInit {
     if (this.currentParticipants() > 0) {
       return 'This deal already has participants joined, so it cannot be edited.';
     }
-    return DealStatusDisplay[this.status()].description;
+    return STATUS_DESCRIPTIONS[this.status()];
   });
 
   readonly breadcrumbs = computed<BreadcrumbItem[]>(() => [
@@ -204,7 +213,7 @@ export class SellerDealForm implements OnInit {
     this.productName.set('');
     this.sku.set('');
     this.image.set('');
-    this.status.set('PENDING');
+    this.status.set(DealStatus.PENDING);
     this.dealPrice.set('');
     this.originalPrice.set('');
     this.dealStock.set('');
@@ -228,8 +237,9 @@ export class SellerDealForm implements OnInit {
           return;
         }
         this.productId.set(deal.productId);
-        this.productName.set(deal.title);
-        this.image.set(deal.image);
+        this.productName.set(deal.productName);
+        this.sku.set(deal.sku);
+        this.image.set(deal.productImageUrl);
         this.status.set(deal.status);
         this.dealPrice.set(String(deal.dealPrice));
         this.originalPrice.set(String(deal.originalPrice));
@@ -237,26 +247,13 @@ export class SellerDealForm implements OnInit {
         this.minParticipants.set(String(deal.minParticipants));
         this.currentParticipants.set(deal.currentParticipants);
 
-        const startDate = deal.startTime ? new Date(deal.startTime) : null;
-        const startOk = !!startDate && !Number.isNaN(startDate.getTime());
-        const endDate = deal.endTime ? new Date(deal.endTime) : null;
-        const endOk = !!endDate && !Number.isNaN(endDate.getTime());
-
-        this.startAt.set(startOk ? this.formatToDatetimeLocal(startDate!) : '');
-
-        if (endOk) {
-          this.endAt.set(this.formatToDatetimeLocal(endDate!));
-        } else if (startOk && deal.durationMinutes > 0) {
-          this.endAt.set(
-            this.formatToDatetimeLocal(new Date(startDate!.getTime() + deal.durationMinutes * 60000)),
-          );
-        } else {
-          this.endAt.set('');
-        }
+        const startDate = new Date(deal.endTime.getTime() - deal.durationMinutes * 60000);
+        this.startAt.set(this.formatToDatetimeLocal(startDate));
+        this.endAt.set(this.formatToDatetimeLocal(deal.endTime));
 
         this.loading.set(false);
       },
-      error: (err) => {
+      error: () => {
         this.error.set('Failed to load deal.');
         this.loading.set(false);
       },
@@ -279,13 +276,15 @@ export class SellerDealForm implements OnInit {
       durationMinutes: this.durationMinutes() ?? 1440,
     };
     this.saving.set(true);
-    this.dealsService.createDeal(payload).subscribe({
+    const id = this.dealId();
+    const request$ = id ? this.dealsService.updateDeal(id, payload) : this.dealsService.createDeal(payload);
+    request$.subscribe({
       next: () => {
         this.saving.set(false);
         this.router.navigate(['/seller/deals']);
       },
-      error: (err) => {
-        this.error.set('Failed to create deal.');
+      error: () => {
+        this.error.set('Failed to save deal.');
         this.saving.set(false);
       },
     });

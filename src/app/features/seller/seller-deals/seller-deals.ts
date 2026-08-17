@@ -1,161 +1,33 @@
 import { Component, DestroyRef, NgZone, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { DatePipe } from '@angular/common';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Pagination } from '../../../shared/components/pagination/pagination';
-import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
+import { FilterPills } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
-import {
-  DealStatus,
-  DealStatusBadge,
-} from '../components/deal-status-badge/deal-status-badge';
+import { DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
 import { MetricCard } from '../components/metric-card/metric-card';
-import {
-  ConfirmDialogRequest,
-} from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { DealsService, Page } from '../../deals/deals.service';
-import { DealView, DealStatus as ModelDealStatus } from '../../../shared/models/deal';
+import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
+import { DealsService } from '../../deals/deals.service';
+import { DealStatus } from '../../../shared/models/deal';
+import { PageResponse } from '../../products/page-response';
+import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { TokenService } from '../../../shared/services/token.service';
+import { DealRowActions } from './deal-row-actions/deal-row-actions';
+import { DEAL_STATUS_OPTIONS, DealRow, PROGRESS_TONES, StatusFilter, formatCountdown, toDealRow } from './seller-deals.model';
 
-export interface DealRow {
-  id: string;
-  code: string;
-  productId: string;
-  sellerId: string;
-  name: string;
-  image: string;
-  status: DealStatus;
-  currentParticipants: number;
-  authorizedCount: number;
-  dealStock: number;
-  minParticipants: number;
-  durationMinutes: number;
-  startTime: string;
-  endTime: string;
-  dealPrice: number;
-  originalPrice: number;
-  timeRemainingSeconds: number | null;
-  createdAt: string;
-  time: string;
-  urgent: boolean;
-}
-
-export const DEAL_STATUS_OPTIONS: FilterPillOption[] = [
-  { value: 'ALL', label: 'All' },
-  { value: 'ACTIVE', label: 'Active' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'SUCCEEDED', label: 'Succeeded' },
-  { value: 'FAILED', label: 'Failed' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-];
-
-const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
-  PENDING: 'neutral',
-  ACTIVE: 'primary',
-  SUCCEEDED: 'secondary',
-  FAILED: 'error',
-  CANCELLED: 'neutral',
-};
-
-function formatCountdown(endTime: string): string {
-  const end = new Date(endTime).getTime();
-  if (Number.isNaN(end)) {
-    return '—';
-  }
-  const seconds = Math.max(0, Math.floor((end - Date.now()) / 1000));
-  if (seconds === 0) {
-    return 'Ended';
-  }
-  const h = Math.floor(seconds / 3600);
-  const m = Math.floor((seconds % 3600) / 60);
-  const s = seconds % 60;
-  const pad = (n: number) => String(n).padStart(2, '0');
-  if (h > 99) {
-    return `${Math.floor(h / 24)}d ${pad(h % 24)}h`;
-  }
-  return `${pad(h)}:${pad(m)}:${pad(s)}`;
-}
-
-function timeLabel(deal: DealView): string {
-  switch (deal.status) {
-    case 'ACTIVE':
-      return deal.endTime ? formatCountdown(deal.endTime) : 'Live';
-    case 'PENDING': {
-      const start = deal.startTime ? new Date(deal.startTime).getTime() : NaN;
-      if (Number.isNaN(start)) {
-        return 'Starting soon';
-      }
-      const minutes = Math.round((start - Date.now()) / 60000);
-      if (minutes <= 0) {
-        return 'Starting soon';
-      }
-      const h = Math.floor(minutes / 60);
-      const m = minutes % 60;
-      return h > 0 ? `Starts in ${h}h ${m}m` : `Starts in ${m}m`;
-    }
-    case 'SUCCEEDED':
-      return 'Ended';
-    case 'FAILED':
-      return 'Failed';
-    case 'CANCELLED':
-      return 'Cancelled';
-  }
-}
-
-function urgentLabel(deal: DealView): boolean {
-  if (deal.status !== 'ACTIVE' || !deal.endTime) {
-    return false;
-  }
-  const remaining = new Date(deal.endTime).getTime() - Date.now();
-  return Number.isFinite(remaining) && remaining > 0 && remaining < 6 * 3600 * 1000;
-}
-
-function toDealRow(deal: DealView): DealRow {
-  return {
-    id: deal.id,
-    code: `GD-${deal.id.slice(-4).toUpperCase()}`,
-    productId: deal.productId,
-    sellerId: deal.sellerId,
-    name: deal.title,
-    image: deal.image,
-    status: deal.status,
-    currentParticipants: deal.currentParticipants,
-    authorizedCount: deal.authorizedCount,
-    dealStock: deal.dealStock,
-    minParticipants: deal.minParticipants,
-    durationMinutes: deal.durationMinutes,
-    startTime: deal.startTime ?? '',
-    endTime: deal.endTime ?? '',
-    dealPrice: deal.dealPrice,
-    originalPrice: deal.originalPrice,
-    timeRemainingSeconds: deal.timeRemainingSeconds,
-    createdAt: deal.createdAt,
-    time: timeLabel(deal),
-    urgent: urgentLabel(deal),
-  };
-}
-
-const VALID_STATUSES: Array<'ALL' | DealStatus> = [
-  'ALL',
-  'ACTIVE',
-  'PENDING',
-  'SUCCEEDED',
-  'FAILED',
-  'CANCELLED',
-];
-
-interface DealMenu {
-  id: string;
-  x: number;
-  y: number;
-}
+const COUNTDOWN_TICK_MS = 1_000;
 
 const DEALS_POLL_INTERVAL_MS = 30_000;
+const PAGE_SIZE = 5;
 
 @Component({
   selector: 'app-seller-deals',
   imports: [
+    DatePipe,
+    RouterLink,
     Pagination,
     FilterPills,
     SearchInput,
@@ -163,12 +35,13 @@ const DEALS_POLL_INTERVAL_MS = 30_000;
     DealStatusBadge,
     DealProgress,
     MetricCard,
+    ConfirmDialog,
+    DealRowActions,
   ],
   templateUrl: './seller-deals.html',
   styleUrl: './seller-deals.css',
 })
 export class SellerDeals implements OnInit, OnDestroy {
-  private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
   private readonly dealsService = inject(DealsService);
   private readonly tokenService = inject(TokenService);
@@ -176,109 +49,25 @@ export class SellerDeals implements OnInit, OnDestroy {
   private readonly ngZone = inject(NgZone);
 
   private dealsPollSub: Subscription | null = null;
+  private countdownTimer: ReturnType<typeof setInterval> | null = null;
+
+  // Ticks once a second so active rows show a live countdown between the 30s polls
+  // instead of a value frozen until the next fetch. endTime itself is always the
+  // backend's value (re-synced on every poll); this only re-renders it per second.
+  private readonly now = signal(Date.now());
 
   readonly statusOptions = DEAL_STATUS_OPTIONS;
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
+  readonly DealStatus = DealStatus;
 
-  statusFilter = signal<'ALL' | DealStatus>('ALL');
+  statusFilter = signal<StatusFilter>('ALL');
   searchQuery = signal('');
   page = signal(1);
-  limit = 5;
+  limit = PAGE_SIZE;
+  total = signal(0);
   deals = signal<DealRow[]>([]);
   loading = signal(true);
-  menu = signal<DealMenu | null>(null);
   deleteTarget = signal<DealRow | null>(null);
-
-  get menuId(): string | null {
-    return this.menu()?.id ?? null;
-  }
-
-  get menuX(): number {
-    return this.menu()?.x ?? 0;
-  }
-
-  get menuY(): number {
-    return this.menu()?.y ?? 0;
-  }
-
-  readonly menuDeal = computed<DealRow | undefined>(() =>
-    this.deals().find((deal) => deal.id === this.menu()?.id),
-  );
-
-  readonly visibleDeals = computed(() => {
-    const status = this.statusFilter();
-    const query = this.searchQuery().trim().toLowerCase();
-    return this.deals().filter(
-      (deal) =>
-        (status === 'ALL' || deal.status === status) &&
-        (query === '' || deal.name.toLowerCase().includes(query) || deal.id.toLowerCase().includes(query)),
-    );
-  });
-
-  formatDuration(totalMinutes: number): string {
-    if (!totalMinutes || totalMinutes <= 0) {
-      return '0 minutes';
-    }
-    const days = Math.floor(totalMinutes / 1440);
-    const hours = Math.floor((totalMinutes % 1440) / 60);
-    const minutes = totalMinutes % 60;
-    const parts: string[] = [];
-    if (days) {
-      parts.push(`${days} day${days > 1 ? 's' : ''}`);
-    }
-    if (hours) {
-      parts.push(`${hours} hour${hours > 1 ? 's' : ''}`);
-    }
-    if (minutes) {
-      parts.push(`${minutes} minute${minutes !== 1 ? 's' : ''}`);
-    }
-    return parts.join(' and ') || '0 minutes';
-  }
-
-  formatDateTime(iso: string): string {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) {
-      return '—';
-    }
-    return date.toLocaleString(undefined, {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  }
-
-  formatDate(iso: string): string {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) {
-      return '—';
-    }
-    return date.toLocaleDateString(undefined, {
-      month: 'short',
-      day: 'numeric',
-    });
-  }
-
-  formatTime(iso: string): string {
-    const date = new Date(iso);
-    if (Number.isNaN(date.getTime())) {
-      return '';
-    }
-    return date.toLocaleTimeString(undefined, {
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false,
-    });
-  }
-
-  endOf = (deal: DealRow): string => {
-    const start = new Date(deal.startTime);
-    if (Number.isNaN(start.getTime())) {
-      return deal.startTime;
-    }
-    return new Date(start.getTime() + deal.durationMinutes * 60000).toISOString();
-  };
 
   readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
     const deal = this.deleteTarget();
@@ -287,43 +76,86 @@ export class SellerDeals implements OnInit, OnDestroy {
     }
     return {
       title: `Delete "${deal.name}"?`,
-      message: 'This active deal will be ended and participants notified.',
+      message: "This deal hasn't started yet and has no participants — it will be permanently cancelled.",
       icon: 'delete',
       confirmLabel: 'Delete',
     };
   });
 
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
+
+  readonly pageRange = computed(() => {
+    const total = this.total();
+    if (total === 0) {
+      return { from: 0, to: 0 };
+    }
+    return { from: (this.page() - 1) * this.limit + 1, to: Math.min(this.page() * this.limit, total) };
+  });
+
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       const status = params['status'] as string | undefined;
-      if (status && VALID_STATUSES.includes(status as 'ALL' | DealStatus)) {
-        this.statusFilter.set(status as 'ALL' | DealStatus);
+      if (status && this.isValidStatus(status)) {
+        this.statusFilter.set(status);
         this.page.set(1);
       }
     });
     this.loadDeals();
+    this.countdownTimer = setInterval(() => this.now.set(Date.now()), COUNTDOWN_TICK_MS);
     this.destroyRef.onDestroy(() => this.stopDealsPoll());
   }
 
   ngOnDestroy() {
     this.stopDealsPoll();
+    if (this.countdownTimer) {
+      clearInterval(this.countdownTimer);
+    }
+  }
+
+  countdownLabel(endTime: string | null): string {
+    if (!endTime) {
+      return '';
+    }
+    const secondsLeft = Math.max(0, Math.round((new Date(endTime).getTime() - this.now()) / 1000));
+    return formatCountdown(secondsLeft);
+  }
+
+  private isValidStatus(value: string): value is StatusFilter {
+    return value === 'ALL' || Object.values(DealStatus).includes(value as DealStatus);
   }
 
   loadDeals() {
     this.loading.set(true);
-    const sellerId = this.tokenService.getSellerId() ?? '3e2c1b0a-2222-4000-9000-000000000001';
+    const sellerId = this.tokenService.getSellerId() ?? 'a1b2c3d4-1111-4a1b-8c2d-000000000001';
 
-    this.dealsService.getSellerDeals(sellerId, { page: this.page() - 1, size: this.limit }).subscribe({
-      next: (page) => {
-        this.deals.set(page.content.map(toDealRow));
+    this.dealsService.getSellerDeals(sellerId, this.currentParams()).subscribe({
+      next: (response) => {
+        this.applyResponse(response);
         this.loading.set(false);
         this.startDealsPoll(sellerId);
       },
       error: () => {
         this.deals.set([]);
+        this.total.set(0);
         this.loading.set(false);
       },
     });
+  }
+
+  private applyResponse(response: PageResponse<DealOverview>) {
+    this.deals.set(response.items.map(toDealRow));
+    this.total.set(response.total);
+  }
+
+  private currentParams() {
+    const status = this.statusFilter();
+    const search = this.searchQuery().trim();
+    return {
+      status: status === 'ALL' ? undefined : status,
+      search: search || undefined,
+      page: this.page(),
+      limit: this.limit,
+    };
   }
 
   private startDealsPoll(sellerId: string) {
@@ -332,15 +164,11 @@ export class SellerDeals implements OnInit, OnDestroy {
       this.dealsPollSub = interval(DEALS_POLL_INTERVAL_MS)
         .pipe(
           startWith(0),
-          switchMap(() =>
-            this.dealsService.getSellerDeals(sellerId, { page: this.page() - 1, size: this.limit }),
-          ),
+          switchMap(() => this.dealsService.getSellerDeals(sellerId, this.currentParams())),
         )
         .subscribe({
-          next: (page) => {
-            this.ngZone.run(() => {
-              this.deals.set(page.content.map(toDealRow));
-            });
+          next: (response) => {
+            this.ngZone.run(() => this.applyResponse(response));
           },
         });
     });
@@ -351,83 +179,30 @@ export class SellerDeals implements OnInit, OnDestroy {
     this.dealsPollSub = null;
   }
 
-  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.visibleDeals().length / this.limit)));
-
-  readonly pagedDeals = computed(() => {
-    const start = (this.page() - 1) * this.limit;
-    return this.visibleDeals().slice(start, start + this.limit);
-  });
-
-  get fromIndex(): number {
-    return this.visibleDeals().length === 0 ? 0 : (this.page() - 1) * this.limit + 1;
-  }
-
-  get toIndex(): number {
-    return Math.min(this.page() * this.limit, this.visibleDeals().length);
-  }
-
   onStatusChange = (status: string) => {
-    this.statusFilter.set(status as 'ALL' | DealStatus);
+    this.statusFilter.set(this.isValidStatus(status) ? status : 'ALL');
     this.page.set(1);
+    this.loadDeals();
   };
 
   onSearchInput = (value: string) => {
     this.searchQuery.set(value);
     this.page.set(1);
+    this.loadDeals();
   };
 
   clearSearch = () => {
     this.searchQuery.set('');
     this.page.set(1);
+    this.loadDeals();
   };
 
   goToPage = (page: number) => {
     this.page.set(page);
+    this.loadDeals();
   };
 
-  goToCreate = () => {
-    this.router.navigate(['/seller/deals/new']);
-  };
-
-  openDeal = (id: string | null) => {
-    if (!id) {
-      return;
-    }
-    this.menu.set(null);
-    this.router.navigate(['/seller/deals', id, 'edit']);
-  };
-
-  toggleMenu = (event: Event, id: string) => {
-    if (!(event.currentTarget instanceof HTMLButtonElement)) {
-      return;
-    }
-    if (this.menu()?.id === id) {
-      this.menu.set(null);
-      return;
-    }
-    const rect = event.currentTarget.getBoundingClientRect();
-    const vw = window.innerWidth;
-    const vh = window.innerHeight;
-    const x =
-      rect && isFinite(rect.right) && rect.right > 0
-        ? Math.min(rect.right, vw - 200)
-        : Math.max(8, vw - 208);
-    const y =
-      rect && isFinite(rect.bottom) && rect.bottom > 0
-        ? Math.min(rect.bottom + 4, vh - 130)
-        : 8;
-    this.menu.set({ id, x, y });
-  };
-
-  closeMenu = () => {
-    this.menu.set(null);
-  };
-
-  deleteDeal = (id: string | null) => {
-    if (!id) {
-      return;
-    }
-    this.menu.set(null);
+  deleteDeal = (id: string) => {
     this.deleteTarget.set(this.deals().find((deal) => deal.id === id) ?? null);
   };
 
@@ -441,8 +216,8 @@ export class SellerDeals implements OnInit, OnDestroy {
     if (!deal) {
       return;
     }
-    // The backend only supports cancel while PENDING
-    // We'll just remove from local state for now
-    this.deals.set(this.deals().filter((d) => d.id !== deal.id));
+    this.dealsService.cancelDeal(deal.id).subscribe({
+      next: () => this.loadDeals(),
+    });
   };
 }

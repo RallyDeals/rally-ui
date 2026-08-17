@@ -13,7 +13,8 @@ import {
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
 import { DealsService } from '../deals.service';
-import { DealView, DealStatus } from '../../../shared/models/deal';
+import { DealStatus } from '../../../shared/models/deal';
+import { DealOverview } from '../interfaces/DealOverview';
 
 export type DealSortKey = DealStatusKey | 'relevance' | 'price-asc' | 'price-desc' | 'discount';
 
@@ -26,7 +27,7 @@ const DEALS_PER_PAGE = 6;
   templateUrl: './browse-deals.html',
 })
 export class BrowseDeals implements OnInit {
-  deals = signal<DealView[]>([]);
+  deals = signal<DealOverview[]>([]);
   categories = signal<Category[]>([]);
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
@@ -49,15 +50,17 @@ export class BrowseDeals implements OnInit {
   ];
 
   filteredDeals = computed(() => {
-    const categories = this.selectedCategoryIds();
+    const categoryIds = this.selectedCategoryIds();
     const min = this.minPrice();
     const max = this.maxPrice();
+    const selectedCategoryNames = new Set(
+      this.categories()
+        .filter((category) => categoryIds.has(category.id))
+        .map((category) => category.name),
+    );
     const list = this.deals().filter((deal) => {
-      if (categories.size > 0) {
-        const categoryId = deal.category?.id;
-        if (!categoryId || !categories.has(categoryId)) {
-          return false;
-        }
+      if (selectedCategoryNames.size > 0 && !selectedCategoryNames.has(deal.category)) {
+        return false;
       }
       if (min !== null && deal.dealPrice < min) {
         return false;
@@ -137,9 +140,9 @@ export class BrowseDeals implements OnInit {
   loadDeals() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.dealsService.getActiveDeals().subscribe({
-      next: (deals) => {
-        this.deals.set(deals);
+    this.dealsService.getDealsOverview({ status: DealStatus.ACTIVE, limit: 100 }).subscribe({
+      next: (response) => {
+        this.deals.set(response.items);
         this.loading.set(false);
       },
       error: (err) => {
@@ -201,7 +204,7 @@ export class BrowseDeals implements OnInit {
     this.page.set(page);
   };
 
-  private sortDeals(list: DealView[]): DealView[] {
+  private sortDeals(list: DealOverview[]): DealOverview[] {
     const copy = [...list];
     switch (this.sortBy()) {
       case 'price-asc':
@@ -211,26 +214,25 @@ export class BrowseDeals implements OnInit {
       case 'discount':
         return copy.sort((a, b) => savingsOf(b) - savingsOf(a));
       case 'ending-soon':
-        return copy.sort(
-          (a, b) =>
-            (a.endTime ? new Date(a.endTime).getTime() : Number.POSITIVE_INFINITY) -
-            (b.endTime ? new Date(b.endTime).getTime() : Number.POSITIVE_INFINITY),
-        );
+        return copy.sort((a, b) => a.endTime.getTime() - b.endTime.getTime());
       case 'most-joined':
         return copy.sort((a, b) => b.currentParticipants - a.currentParticipants);
       case 'newest':
-        return copy.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-        );
+        return copy.sort((a, b) => startTimeOf(b) - startTimeOf(a));
       default:
         return copy;
     }
   }
 }
 
-function savingsOf(deal: DealView): number {
+function savingsOf(deal: DealOverview): number {
   if (!deal.originalPrice || deal.originalPrice <= 0) {
     return 0;
   }
   return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
+}
+
+// Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran.
+function startTimeOf(deal: DealOverview): number {
+  return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }

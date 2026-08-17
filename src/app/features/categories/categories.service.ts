@@ -3,12 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { Category } from '../../shared/models/category';
-
-export interface CreateCategoryRequest {
-  name: string;
-  description?: string;
-  icon: string;
-}
+import { CreateCategoryRequest } from './interfaces/create-category-request';
 
 @Injectable({ providedIn: 'root' })
 export class CategoriesService {

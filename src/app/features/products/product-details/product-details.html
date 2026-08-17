@@ -164,7 +164,7 @@
                   Active Group Deal
                 </p>
                 <span class="font-label-sm text-label-sm text-on-surface-variant">
-                  <app-countdown [endAt]="deal.endTime ?? ''" />
+                  <app-countdown [endAt]="deal.endTime.toISOString()" />
                 </span>
               </div>
               <div class="flex items-center justify-between gap-2">
@@ -185,12 +185,12 @@
                 <span class="text-on-surface-variant font-medium">
                   {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
                 </span>
-                <span class="text-primary font-bold">{{ neededCount(deal) }} needed</span>
+                <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
               </div>
               <div class="progress-track">
                 <div
                   class="h-full progress-gradient rounded-full"
-                  [style.width.%]="progressPercent(deal)"
+                  [style.width.%]="deal.progressPercent"
                 ></div>
               </div>
             </div>
@@ -272,10 +272,10 @@
               <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-4 flex flex-col gap-3">
                 <div class="flex items-start justify-between gap-2">
                   <p class="font-body-md font-semibold text-on-surface leading-snug">
-                    {{ deal.title }}
+                    {{ deal.productName }}
                   </p>
                   <span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">
-                    <app-countdown [endAt]="deal.endTime ?? ''" />
+                    <app-countdown [endAt]="deal.endTime.toISOString()" />
                   </span>
                 </div>
                 <div class="flex items-end justify-between">
@@ -295,12 +295,12 @@
                   <span class="text-on-surface-variant font-medium">
                     {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
                   </span>
-                  <span class="text-primary font-bold">{{ neededCount(deal) }} needed</span>
+                  <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
                 </div>
                 <div class="progress-track">
                   <div
                     class="h-full progress-gradient rounded-full"
-                    [style.width.%]="progressPercent(deal)"
+                    [style.width.%]="deal.progressPercent"
                   ></div>
                 </div>
                 <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal">

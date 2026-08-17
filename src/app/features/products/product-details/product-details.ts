@@ -13,8 +13,9 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
-import { getActiveDealsForProduct } from '../../../shared/mocks/deals';
-import { DealView, neededCount, progressPercent } from '../../../shared/models/deal';
+import { DealsService } from '../../deals/deals.service';
+import { DealStatus } from '../../../shared/models/deal';
+import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { Countdown } from '../../../shared/components/countdown/countdown';
 
 @Component({
@@ -26,7 +27,7 @@ import { Countdown } from '../../../shared/components/countdown/countdown';
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  activeDeals = signal<DealView[]>([]);
+  activeDeals = signal<DealOverview[]>([]);
   inventory = signal<Inventory | null>(null);
   selectedImage = signal('');
   loading = signal(true);
@@ -36,8 +37,6 @@ export class ProductDetails implements OnInit, OnDestroy {
   private addTimer: ReturnType<typeof setTimeout> | undefined;
 
   readonly resolveImageUrl = resolveImageUrl;
-  readonly neededCount = neededCount;
-  readonly progressPercent = progressPercent;
 
   readonly primaryDeal = computed(() => this.activeDeals()[0] ?? null);
   readonly availableStock = computed(() => {
@@ -49,7 +48,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   });
   readonly outOfStock = computed(() => this.availableStock() <= 0);
 
-  dealDiscount = (deal: DealView): number => {
+  dealDiscount = (deal: DealOverview): number => {
     if (!deal.originalPrice || deal.originalPrice <= 0) {
       return 0;
     }
@@ -104,6 +103,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     private readonly productsService: ProductsService,
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
+    private readonly dealsService: DealsService,
   ) {}
 
   get imageSrc(): string {
@@ -130,16 +130,23 @@ export class ProductDetails implements OnInit, OnDestroy {
     this.productsService.getProduct(id).subscribe({
       next: (product) => {
         this.product.set(product);
-        this.activeDeals.set(getActiveDealsForProduct(product.id));
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
         this.loadRelatedProducts(product);
         this.loadInventory(product.id);
+        this.loadActiveDeals(product.id);
       },
       error: (err) => {
         this.error.set(toApiError(err));
         this.loading.set(false);
       },
+    });
+  }
+
+  loadActiveDeals(productId: string) {
+    this.dealsService.getDealsOverview({ productId, status: DealStatus.ACTIVE, limit: 10 }).subscribe({
+      next: (response) => this.activeDeals.set(response.items),
+      error: () => this.activeDeals.set([]),
     });
   }
 

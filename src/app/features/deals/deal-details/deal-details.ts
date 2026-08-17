@@ -8,9 +8,17 @@ import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/prima
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { DealsService } from '../deals.service';
-import { DealView, DealStatus, DealStatusDisplay } from '../../../shared/models/deal';
+import { DealStatus } from '../../../shared/models/deal';
+import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { dealBadge } from '../deal-badge';
-import { neededCount } from '../../../shared/models/deal';
+
+const STATUS_LABELS: Record<DealStatus, string> = {
+  [DealStatus.PENDING]: 'Gathering',
+  [DealStatus.ACTIVE]: 'Live',
+  [DealStatus.SUCCEEDED]: 'Succeeded',
+  [DealStatus.FAILED]: 'Failed',
+  [DealStatus.CANCELLED]: 'Cancelled',
+};
 
 const NOT_FOUND_ERROR: ApiError = {
   message: "This group deal doesn't exist or has already ended.",
@@ -19,6 +27,11 @@ const NOT_FOUND_ERROR: ApiError = {
   timestamp: new Date().toISOString(),
   title: 'Not found',
 };
+
+// Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran.
+function dealStartTime(deal: DealDetailsModel): number {
+  return deal.endTime.getTime() - deal.durationMinutes * 60000;
+}
 
 type DealTab = 'description' | 'specifications' | 'activity' | 'faq';
 
@@ -56,7 +69,7 @@ export class DealDetails implements OnInit {
   private dealPollSub: Subscription | null = null;
   private currentDealId: string | null = null;
 
-  deal = signal<DealView | null>(null);
+  deal = signal<DealDetailsModel | null>(null);
   loading = signal(true);
   error = signal<ApiError | null>(null);
   joined = signal(false);
@@ -73,11 +86,13 @@ export class DealDetails implements OnInit {
     if (!deal) {
       return [];
     }
-    const extras = (deal.images ?? []).filter((image) => image && image !== deal.image);
-    return [deal.image, ...extras];
+    const extras = (deal.productImages ?? []).filter(
+      (image) => image && image !== deal.productImageUrl,
+    );
+    return [deal.productImageUrl, ...extras];
   });
 
-  activeImage = computed(() => this.selectedImage() ?? this.deal()?.image ?? '');
+  activeImage = computed(() => this.selectedImage() ?? this.deal()?.productImageUrl ?? '');
 
   participants = computed(() => {
     const deal = this.deal();
@@ -101,14 +116,11 @@ export class DealDetails implements OnInit {
       return [];
     }
     return [
-      { label: 'Category', value: deal.category?.name ?? '—' },
+      { label: 'Category', value: deal.category },
       { label: 'Original Price', value: `$${deal.originalPrice.toFixed(2)}` },
       { label: 'Rally Price', value: `$${deal.dealPrice.toFixed(2)}` },
-      { label: 'Status', value: deal.status },
-      {
-        label: 'Listed On',
-        value: deal.createdAt ? new Date(deal.createdAt).toLocaleDateString() : '—',
-      },
+      { label: 'Status', value: STATUS_LABELS[deal.status] },
+      { label: 'Listed On', value: new Date(dealStartTime(deal)).toLocaleDateString() },
     ];
   });
 
@@ -117,8 +129,8 @@ export class DealDetails implements OnInit {
     if (!deal) {
       return [];
     }
-    const created = new Date(deal.createdAt).getTime();
-    const ended = deal.endTime ? new Date(deal.endTime).getTime() : Date.now();
+    const created = dealStartTime(deal);
+    const ended = deal.endTime.getTime();
     const unlocked = created + (ended - created) * 0.35;
     const isLive = deal.currentParticipants >= deal.minParticipants;
     return [
@@ -136,7 +148,7 @@ export class DealDetails implements OnInit {
           }
         : {
             icon: 'hourglass_top',
-            text: `Waiting for ${neededCount(deal)} more to unlock`,
+            text: `Waiting for ${deal.neededCount} more to unlock`,
             time: 'just now',
           },
       {
@@ -202,7 +214,7 @@ export class DealDetails implements OnInit {
   breadcrumbs = computed<BreadcrumbItem[]>(() => [
     { label: 'Home', link: '/home' },
     { label: 'Deals', link: '/deals' },
-    { label: this.deal()?.title ?? 'Deal' },
+    { label: this.deal()?.productName ?? 'Deal' },
   ]);
 
   savingsPercent = computed(() => {
@@ -233,7 +245,7 @@ export class DealDetails implements OnInit {
 
   isClosed = computed(() => {
     const deal = this.deal();
-    return !!deal && deal.status !== 'ACTIVE';
+    return !!deal && deal.status !== DealStatus.ACTIVE;
   });
 
   badge = computed(() => {
@@ -241,12 +253,9 @@ export class DealDetails implements OnInit {
     return deal ? dealBadge(deal) : null;
   });
 
-statusText = computed(() => {
+  statusText = computed(() => {
     const deal = this.deal();
-    if (!deal) {
-      return '';
-    }
-    return DealStatusDisplay[deal.status].label;
+    return deal ? STATUS_LABELS[deal.status] : '';
   });
 
   constructor() {
@@ -274,7 +283,7 @@ statusText = computed(() => {
     this.copied.set(false);
     this.selectedImage.set(null);
     this.selectedTab.set('description');
-    this.dealsService.getActiveDeal(id).subscribe({
+    this.dealsService.getDeal(id).subscribe({
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
@@ -299,7 +308,7 @@ statusText = computed(() => {
       this.dealPollSub = interval(DEAL_POLL_INTERVAL_MS)
         .pipe(
           startWith(0),
-          switchMap(() => this.dealsService.getActiveDeal(dealId)),
+          switchMap(() => this.dealsService.getDeal(dealId)),
         )
         .subscribe((deal) => {
           if (deal) {

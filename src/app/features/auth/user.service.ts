@@ -2,24 +2,12 @@ import { Injectable } from '@angular/core';
 import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
-import { BuyerStatus, User, UserType } from '../../shared/models/user';
+import { User } from '../../shared/models/user';
 import { Seller } from '../admin/interfaces/seller';
 import { PageResponse } from '../products/page-response';
 import { MOCK_SELLERS, MOCK_USERS } from '../../shared/mocks/user.mock';
-
-export interface UserQueryParams {
-  search?: string;
-  types?: UserType[];
-  statuses?: BuyerStatus[];
-  page?: number;
-  limit?: number;
-}
-
-export interface SellerQueryParams {
-  search?: string;
-  page?: number;
-  limit?: number;
-}
+import { UserQueryParams } from './interfaces/user-query-params';
+import { SellerQueryParams } from './interfaces/seller-query-params';
 
 function paginate<T>(items: T[], page: number, limit: number): PageResponse<T> {
   const start = (page - 1) * limit;
