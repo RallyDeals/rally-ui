@@ -175,26 +175,52 @@
                 <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
               }
             </div>
-            <div>
-              <label class="field-label" for="product-stock">
-                Stock Quantity
-              </label>
-              <input
-                id="product-stock"
-                type="number"
-                min="1"
-                step="1"
-                class="product-form__input"
-                placeholder="0"
-                required
-                [value]="stockQuantity()"
-                [class.product-form__input-error]="(submitted() || stockQuantity()) && stockError()"
-                (input)="stockQuantity.set($any($event.target).value)"
-              />
-              @if ((submitted() || stockQuantity()) && stockError(); as msg) {
-                <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
-              }
-            </div>
+            @if (isEdit()) {
+              <div>
+                <label class="field-label" for="product-stock-add">
+                  Add Stock
+                </label>
+                <input
+                  id="product-stock-add"
+                  type="number"
+                  min="0"
+                  step="1"
+                  class="product-form__input"
+                  placeholder="0"
+                  required
+                  [value]="stockToAdd()"
+                  [class.product-form__input-error]="(submitted() || stockToAdd()) && stockError()"
+                  (input)="stockToAdd.set($any($event.target).value)"
+                />
+                <p class="mt-1 ml-1 text-xs text-on-surface-variant">
+                  Current stock: {{ originalStock() ?? 0 }}. Enter the quantity to add on top of it.
+                </p>
+                @if ((submitted() || stockToAdd()) && stockError(); as msg) {
+                  <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+                }
+              </div>
+            } @else {
+              <div>
+                <label class="field-label" for="product-stock">
+                  Stock Quantity
+                </label>
+                <input
+                  id="product-stock"
+                  type="number"
+                  min="1"
+                  step="1"
+                  class="product-form__input"
+                  placeholder="0"
+                  required
+                  [value]="stockQuantity()"
+                  [class.product-form__input-error]="(submitted() || stockQuantity()) && stockError()"
+                  (input)="stockQuantity.set($any($event.target).value)"
+                />
+                @if ((submitted() || stockQuantity()) && stockError(); as msg) {
+                  <p class="mt-1 ml-1 text-error text-sm font-medium">{{ msg }}</p>
+                }
+              </div>
+            }
             <div>
               <label class="field-label" for="product-sku">
                 SKU
