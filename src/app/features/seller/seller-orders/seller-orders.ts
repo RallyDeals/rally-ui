@@ -1,19 +1,18 @@
 import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { map } from 'rxjs';
-import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
+import {
+  FilterPills,
+  FilterPillOption,
+} from '../../../shared/components/filter-pills/filter-pills';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { MetricCard } from '../components/metric-card/metric-card';
 import { OrderPhaseBadge } from '../components/order-phase-badge/order-phase-badge';
-import {
-  SellerOrder,
-  SellerOrderPhase,
-} from '../../../shared/models/seller-order';
-import { SellerOrderService } from './seller-order.service';
+import { SellerOrder, SellerOrderPhase } from '../../../shared/models/seller-order';
+import { OrderService } from '../../orders/order.service';
 import { formatMoney } from '../../../shared/utils/money.util';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { orderCode, productCode } from '../../../shared/utils/order-code.util';
@@ -48,7 +47,7 @@ const RANGE_LABEL = 'Last 30 Days';
 })
 export class SellerOrders implements OnInit {
   private readonly router = inject(Router);
-  private readonly orderService = inject(SellerOrderService);
+  private readonly orderService = inject(OrderService);
 
   readonly phaseOptions = ORDER_PHASE_OPTIONS;
 
@@ -56,7 +55,7 @@ export class SellerOrders implements OnInit {
   searchQuery = signal('');
   page = signal(1);
   limit = 5;
-  orders = toSignal(this.orderService.listOrders(), { initialValue: [] as SellerOrder[] });
+  orders = toSignal(this.orderService.listSellerOrders(), { initialValue: [] as SellerOrder[] });
 
   readonly rangeOrders = computed(() =>
     this.orders().filter((order) => dateInRange(order.createdAt, RANGE_START, RANGE_END)),
@@ -101,12 +100,12 @@ export class SellerOrders implements OnInit {
     return `$${formatMoney(total)}`;
   });
 
-  readonly pendingValue = computed(
-    () => String(this.rangeOrders().filter((order) => order.phase === 'PENDING').length),
+  readonly pendingValue = computed(() =>
+    String(this.rangeOrders().filter((order) => order.phase === 'PENDING').length),
   );
 
-  readonly deliveredValue = computed(
-    () => String(this.rangeOrders().filter((order) => order.phase === 'DELIVERED').length),
+  readonly deliveredValue = computed(() =>
+    String(this.rangeOrders().filter((order) => order.phase === 'DELIVERED').length),
   );
 
   orderNumber = (id: string): string => orderCode(id);

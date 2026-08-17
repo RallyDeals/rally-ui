@@ -1,11 +1,9 @@
 import { Component, computed, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { map } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
-import { ORDER_TYPE_LABELS } from '../../../shared/models/order-type';
 import { OrderPhaseBadge } from '../components/order-phase-badge/order-phase-badge';
-import { SellerOrderService } from '../seller-orders/seller-order.service';
+import { OrderService } from '../../orders/order.service';
 import { SellerOrderDetail as SellerOrderDetailModel } from '../../../shared/models/seller-order';
 import { formatMoney } from '../../../shared/utils/money.util';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
@@ -19,10 +17,10 @@ import { orderCode } from '../../../shared/utils/order-code.util';
 })
 export class SellerOrderDetail {
   private readonly route = inject(ActivatedRoute);
-  private readonly orderService = inject(SellerOrderService);
+  private readonly orderService = inject(OrderService);
 
   private readonly orderId = this.route.snapshot.paramMap.get('id') ?? '';
-  readonly order = toSignal(this.orderService.getOrderById(this.orderId), {
+  readonly order = toSignal(this.orderService.getSellerOrderById(this.orderId), {
     initialValue: undefined as SellerOrderDetailModel | undefined,
   });
 
