@@ -1,7 +1,7 @@
-<aside class="product-filters">
+<aside class="filter-panel">
   <h2 class="section-title mb-rally-md">Filters</h2>
 
-  <div class="product-filters__section">
+  <div class="filter-section">
     <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Category</h3>
     <div class="flex flex-col gap-rally-xs">
       @for (category of categories(); track category.id) {
@@ -22,11 +22,11 @@
     </div>
   </div>
 
-  <div class="product-filters__section">
+  <div class="filter-section">
     <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Price Range</h3>
     <div class="flex items-center gap-rally-xs">
       <input
-        class="product-filters__price"
+        class="filter-price-input"
         type="number"
         min="0"
         placeholder="Min"
@@ -36,7 +36,7 @@
       />
       <span class="text-on-surface-variant">-</span>
       <input
-        class="product-filters__price"
+        class="filter-price-input"
         type="number"
         min="0"
         placeholder="Max"
@@ -45,10 +45,10 @@
         (keyup.enter)="onPriceApply()"
       />
     </div>
-    <button class="product-filters__apply" (click)="onPriceApply()">Apply</button>
+    <button class="filter-apply-btn" (click)="onPriceApply()">Apply</button>
   </div>
 
-  <div class="product-filters__section">
+  <div class="filter-section">
     <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Tag</h3>
     @if (selectedTag(); as tag) {
       <span
@@ -66,7 +66,7 @@
       </span>
     }
     <input
-      class="product-filters__price w-full"
+      class="filter-price-input w-full"
       type="text"
       placeholder="e.g. wireless"
       [value]="tagInput"
@@ -75,7 +75,7 @@
     />
   </div>
 
-  <button class="product-filters__clear" (click)="reset.emit()">
+  <button class="filter-clear-btn" (click)="reset.emit()">
     <span class="icon-md">filter_alt_off</span>
     Clear all filters
   </button>

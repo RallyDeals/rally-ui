@@ -125,7 +125,7 @@
                   <span
                     class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"
                   >
-                    {{ product.category.name }}
+                    {{ product.category?.name ?? 'Uncategorized' }}
                   </span>
                 </td>
                 <td class="table-cell text-right">
@@ -147,9 +147,14 @@
                 <td class="table-cell text-center">
                   <div class="flex items-center justify-center gap-2">
                     <span class="w-2 h-2 rounded-full" [class]="stockStatusConfig[product.stockStatus].dot"></span>
-                    <span class="text-sm font-semibold" [class]="stockStatusConfig[product.stockStatus].text">
-                      {{ stockStatusConfig[product.stockStatus].label }}
-                    </span>
+                    <div class="flex flex-col items-start">
+                      <span class="text-sm font-semibold" [class]="stockStatusConfig[product.stockStatus].text">
+                        {{ stockStatusConfig[product.stockStatus].label }}
+                      </span>
+                      <span class="text-[10px] text-on-surface-variant">
+                        {{ product.availableStock }}/{{ product.totalStock }} available
+                      </span>
+                    </div>
                   </div>
                 </td>
                 <td class="table-cell text-sm text-on-surface-variant">
@@ -213,6 +218,7 @@
       body="See which of your listings are part of live RALLY events."
       cta="Manage Deals"
       tone="secondary"
+      (ctaClick)="goToDeals()"
     />
     <app-insight-card
       symbol="rocket_launch"

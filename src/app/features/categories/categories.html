@@ -34,7 +34,7 @@
             <span
               class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform"
             >
-              {{ categoryIcon(category.name) }}
+              {{ category.icon }}
             </span>
             <h2
               class="section-title mb-1 group-hover:text-primary transition-colors"
@@ -43,6 +43,9 @@
             </h2>
             <p class="font-body-md text-sm text-on-surface-variant mb-4">
               {{ category.description }}
+            </p>
+            <p class="text-xs text-on-surface-variant/80 mb-4">
+              {{ category.productsCount }} product{{ category.productsCount !== 1 ? 's' : '' }}
             </p>
             <span
               class="mt-auto inline-flex items-center gap-1 text-primary font-semibold group-hover:gap-2 transition-all"

@@ -20,6 +20,7 @@ export class DevRoleSwitcher {
   private readonly roleRoutes: Partial<Record<DevRole, string>> = {
     seller: '/seller',
     buyer: '/home',
+    admin: '/admin'
   };
 
   setRole = (role: DevRole) => {

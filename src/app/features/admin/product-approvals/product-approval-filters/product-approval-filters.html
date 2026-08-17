@@ -1,0 +1,20 @@
+<div class="flex flex-wrap gap-rally-md rounded-xl">
+  <div class="flex flex-col gap-rally-xs w-60">
+    <app-searchable-select
+      [options]="categoryOptions()"
+      [selected]="selectedCategoryId()"
+      (selectedChange)="categoryChange.emit($event)"
+      placeholder="All Categories"
+      searchPlaceholder="Search categories..."
+    />
+  </div>
+  <div class="flex flex-col gap-rally-xs w-60">
+    <app-searchable-select
+      [options]="sellerOptions()"
+      [selected]="selectedSellerId()"
+      (selectedChange)="sellerChange.emit($event)"
+      placeholder="All Sellers"
+      searchPlaceholder="Search sellers..."
+    />
+  </div>
+</div>

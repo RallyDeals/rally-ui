@@ -1,1 +1,166 @@
-<p>browse-deals works!</p>
+<section class="bg-surface py-rally-xl md:pb-24 min-h-screen">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    <app-page-header
+      title="Active Group Deals"
+      [subtitle]="total() + ' deals currently active'"
+    />
+
+    <div class="mt-rally-lg flex flex-col lg:grid lg:grid-cols-[minmax(15rem,22%)_1fr] gap-rally-lg items-start">
+      <aside class="w-full min-w-0 lg:sticky lg:top-32">
+        <app-deal-filters
+          [categories]="categories()"
+          [selectedCategoryIds]="selectedCategoryIdsArray()"
+          [minPrice]="minPrice()"
+          [maxPrice]="maxPrice()"
+          (categoryToggle)="onCategoryToggle($event)"
+          (priceApply)="onPriceApply($event)"
+          (reset)="resetFilters()"
+        />
+      </aside>
+
+      <div class="min-w-0">
+        <div class="filter-toolbar">
+          <div class="search-box">
+            <button
+              class="search-icon hover:cursor-pointer"
+              (mousedown)="$event.preventDefault()"
+              (click)="search()"
+              aria-label="Search"
+            >
+              <span class="material-symbols-outlined">search</span>
+            </button>
+            <input
+              class="search-input"
+              placeholder="Search deals..."
+              [value]="searchQuery()"
+              (input)="onSearchInput($any($event.target).value)"
+              (keyup.enter)="search()"
+            />
+            @if (searchQuery()) {
+              <button
+                class="search-clear hover:cursor-pointer"
+                (mousedown)="$event.preventDefault()"
+                (click)="clearSearch()"
+              >
+                <span class="icon-lg">close</span>
+              </button>
+            }
+          </div>
+
+          <p class="result-count font-body-md text-body-md">
+            Showing {{ fromIndex() }}–{{ toIndex() }} of {{ total() }}
+          </p>
+
+          <select
+            class="filter-select"
+            [value]="sortBy()"
+            (change)="onSortChange($any($event.target).value)"
+            aria-label="Sort deals"
+          >
+            @for (option of sortOptions; track option.key) {
+              <option [value]="option.key">{{ option.label }}</option>
+            }
+          </select>
+        </div>
+
+        @if (activeFilterCount() > 0) {
+          <div class="flex flex-wrap items-center gap-rally-xs mb-rally-md">
+            <span class="font-body-md text-body-md text-on-surface-variant">Active filters:</span>
+            @for (categoryId of selectedCategoryIds(); track categoryId) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                {{ categoryName(categoryId) }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove category filter"
+                  (click)="onCategoryToggle(categoryId)"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            @if (minPrice() !== null || maxPrice() !== null) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Price: {{ priceLabel() }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove price filter"
+                  (click)="onPriceApply({ minPrice: null, maxPrice: null })"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            @if (sortBy() !== 'relevance') {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Sort: {{ sortLabel(sortBy()) }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Reset sort"
+                  (click)="resetSort()"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            <button
+              type="button"
+              class="inline-flex items-center gap-rally-xs font-body-md text-body-md text-primary hover:text-on-primary hover:bg-primary transition-colors px-2 py-1 rounded-md hover:cursor-pointer"
+              (click)="resetFilters()"
+            >
+              <span class="icon-md">filter_alt_off</span>
+              Clear all
+            </button>
+          </div>
+        }
+
+        @if (loadError(); as loadError) {
+          <app-error-state [error]="loadError" [showRetry]="true" (retry)="loadDeals()" />
+        } @else if (loading()) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
+            @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
+              <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant soft-shadow animate-pulse">
+                <div class="h-48 bg-surface-container-low"></div>
+                <div class="p-rally-md">
+                  <div class="h-3 bg-surface-container-low rounded mb-2 w-3/4"></div>
+                  <div class="h-5 bg-surface-container-low rounded mb-2 w-1/3"></div>
+                  <div class="h-3 bg-surface-container-low rounded w-1/2"></div>
+                </div>
+              </div>
+            }
+          </div>
+        } @else if (deals().length === 0) {
+          <div class="text-center py-16">
+            <span class="material-symbols-outlined text-5xl text-primary mb-4 block">search_off</span>
+            <h2 class="section-title mb-1">No deals found</h2>
+            <p class="body-subtle">Try adjusting your filters or search.</p>
+          </div>
+        } @else {
+          <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
+            @for (deal of deals(); track deal.id) {
+              <app-active-deal-card [deal]="deal" />
+            }
+          </div>
+
+          @if (totalPages() > 1) {
+            <div class="flex justify-center mt-10">
+              <app-pagination
+                [page]="page()"
+                [totalPages]="totalPages()"
+                (pageChange)="goToPage($event)"
+              />
+            </div>
+          }
+        }
+      </div>
+    </div>
+  </div>
+</section>

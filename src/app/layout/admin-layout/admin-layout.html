@@ -1,0 +1,33 @@
+<div class="h-screen flex overflow-hidden bg-surface body-text">
+  <!-- Mobile Drawer Overlay -->
+  <div
+    class="fixed inset-0 bg-on-background/40 z-[60] md:hidden transition-opacity duration-300"
+    [ngClass]="drawerOpen() ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+    (click)="closeDrawer()"
+  ></div>
+
+  <!-- Mobile Drawer -->
+  <aside
+    class="fixed inset-y-0 left-0 h-full w-72 bg-surface-container-low z-[70] shadow-2xl p-rally-md flex flex-col md:hidden transition-transform duration-300"
+    [ngClass]="drawerOpen() ? 'translate-x-0' : '-translate-x-full'"
+  >
+    <app-admin-sidebar class="flex-1 min-h-0" [showClose]="true" (close)="closeDrawer()" />
+  </aside>
+
+  <!-- Top bar (Mobile) -->
+  <app-admin-header (menuToggle)="openDrawer()" />
+
+  <!-- Sidebar (Desktop) -->
+  <aside
+    class="hidden md:flex flex-col h-full fixed left-0 top-0 w-72 bg-surface-container-low shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-50 p-rally-md"
+  >
+    <app-admin-sidebar class="flex-1 min-h-0" />
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 h-full overflow-y-auto md:ml-72 pt-16 md:pt-0 bg-background">
+    <div class="p-rally-md lg:p-rally-xl">
+      <router-outlet />
+    </div>
+  </main>
+</div>

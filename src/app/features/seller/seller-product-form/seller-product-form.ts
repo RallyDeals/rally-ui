@@ -1,17 +1,21 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { lastValueFrom } from 'rxjs';
+import { EMPTY, Observable, lastValueFrom, of } from 'rxjs';
+import { switchMap } from 'rxjs/operators';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
-import { Breadcrumbs, BreadcrumbItem } from '../../products/product-details/breadcrumbs/breadcrumbs';
+import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { CategoriesService } from '../../categories/categories.service';
-import { ProductsService, UpsertProductRequest } from '../../products/products.service';
+import { ProductsService } from '../../products/products.service';
+import { UpsertProductRequest } from '../../products/interfaces/upsert-product-request';
+import { InventoryService } from '../../../shared/services/inventory.service';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 
 const MAX_IMAGE_SIZE_MB = 5;
 const MAX_IMAGE_SIZE_BYTES = MAX_IMAGE_SIZE_MB * 1024 * 1024;
 const ALLOWED_IMAGE_TYPES = ['image/svg+xml', 'image/png', 'image/jpeg'];
+const MAX_DESCRIPTION_LENGTH = 500;
 
 export interface ProductImage {
   id: string;
@@ -34,11 +38,13 @@ function newImageId(): string {
 export class SellerProductForm implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly categoriesService = inject(CategoriesService);
+  private readonly inventoryService = inject(InventoryService);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
 
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
+  readonly maxDescriptionLength = MAX_DESCRIPTION_LENGTH;
   productId = signal<string | null>(null);
   loading = signal(false);
   saving = signal(false);
@@ -52,12 +58,67 @@ export class SellerProductForm implements OnInit {
 
   basePrice = signal('');
   stockQuantity = signal('');
+  stockToAdd = signal('0');
   sku = signal('');
   active = signal(true);
   tags = signal<string[]>([]);
   tagInput = signal('');
   images = signal<ProductImage[]>([]);
   imageError = signal<string | null>(null);
+  submitted = signal(false);
+  originalStock = signal<number | null>(null);
+
+  readonly nameError = computed(() => (this.name().trim() ? null : 'Product name is required.'));
+  readonly descriptionError = computed(() => {
+    const value = this.description();
+    if (!value.trim()) {
+      return 'Description is required.';
+    }
+    if (value.length > MAX_DESCRIPTION_LENGTH) {
+      return `Description must be at most ${MAX_DESCRIPTION_LENGTH} characters.`;
+    }
+    return null;
+  });
+  readonly categoryError = computed(() => (this.categoryId() ? null : 'Select a category.'));
+  readonly priceError = computed(() => {
+    if (this.basePrice().trim() === '') {
+      return 'Original price is required.';
+    }
+    const value = Number(this.basePrice());
+    if (!Number.isFinite(value) || value <= 0) {
+      return 'Price must be greater than 0.';
+    }
+    return null;
+  });
+  readonly stockError = computed(() => {
+    if (this.isEdit()) {
+      if (this.stockToAdd().trim() === '') {
+        return 'Enter a quantity to add (use 0 for no change).';
+      }
+      const value = Number(this.stockToAdd());
+      if (!Number.isInteger(value) || value < 0) {
+        return 'Additional stock must be a whole number of 0 or more.';
+      }
+      return null;
+    }
+    if (this.stockQuantity().trim() === '') {
+      return 'Stock quantity is required.';
+    }
+    const value = Number(this.stockQuantity());
+    if (!Number.isInteger(value) || value <= 0) {
+      return 'Stock quantity must be a whole number greater than 0.';
+    }
+    return null;
+  });
+
+  readonly canSave = computed(
+    () =>
+      !this.nameError() &&
+      !this.descriptionError() &&
+      !this.categoryError() &&
+      !this.priceError() &&
+      !this.stockError(),
+  );
 
   readonly isEdit = computed(() => this.productId() !== null);
 
@@ -97,7 +158,17 @@ export class SellerProductForm implements OnInit {
             (url) => ({ id: newImageId(), url }),
           ),
         ]);
-        this.loading.set(false);
+        this.inventoryService.getInventory(id).subscribe({
+          next: (inv) => {
+            this.originalStock.set(inv.totalStock);
+            this.stockToAdd.set('0');
+            this.loading.set(false);
+          },
+          error: () => {
+            this.originalStock.set(null);
+            this.loading.set(false);
+          },
+        });
       },
       error: () => {
         this.error.set('Failed to load product. Please try again later.');
@@ -173,8 +244,14 @@ export class SellerProductForm implements OnInit {
   };
 
   save = async () => {
-    this.saving.set(true);
+    this.submitted.set(true);
     this.error.set(null);
+    if (!this.canSave()) {
+      this.error.set('Please fix the highlighted fields before saving.');
+      return;
+    }
+
+    this.saving.set(true);
 
     let images: string[] = [];
     try {
@@ -184,6 +261,8 @@ export class SellerProductForm implements OnInit {
       this.error.set('Failed to upload images. Please try again later.');
       return;
     }
+
+    const id = this.productId();
 
     const request: UpsertProductRequest = {
       name: this.name().trim(),
@@ -195,12 +274,25 @@ export class SellerProductForm implements OnInit {
       tags: this.tags(),
       imageUrl: images[0],
       images,
+      ...(id ? {} : { initialStock: Number(this.stockQuantity()) || 0 }),
     };
 
-    const id = this.productId();
-    const operation = id
-      ? this.productsService.updateProduct(id, request)
-      : this.productsService.createProduct(request);
+    let operation: Observable<Product>;
+    if (id) {
+      const addQuantity = Number(this.stockToAdd()) || 0;
+      operation = this.productsService.updateProduct(id, request).pipe(
+        switchMap(() => {
+          if (addQuantity > 0) {
+            return this.inventoryService.restock(id, addQuantity).pipe(
+              switchMap(() => this.productsService.getProduct(id)),
+            );
+          }
+          return of(null as any);
+        }),
+      );
+    } else {
+      operation = this.productsService.createProduct(request);
+    }
 
     operation.subscribe({
       next: () => {

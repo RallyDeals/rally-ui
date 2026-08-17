@@ -11,7 +11,7 @@
       <app-logo />
     </div>
     <!-- Center: Navigation Links (Desktop) -->
-    <app-desktop-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink" [setSelectedLink]="setSelectedLink" />
+    <app-desktop-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink()" [setSelectedLink]="setSelectedLink" />
     <!-- Right: Actions -->
     @if (loggedIn) {
       <div class="flex items-center gap-1 sm:gap-rally-sm justify-self-end">
@@ -37,6 +37,6 @@
     class="absolute top-full left-0 w-full bg-surface border-b border-outline-variant/30 flex flex-col overflow-hidden px-rally-gutter shadow-lg transition-all duration-500 ease-out md:hidden"
     id="mobile-menu"
   >
-    <app-mobile-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink" [setSelectedLink]="setSelectedLink" />
+    <app-mobile-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink()" [setSelectedLink]="setSelectedLink" />
   </div>
 </nav>

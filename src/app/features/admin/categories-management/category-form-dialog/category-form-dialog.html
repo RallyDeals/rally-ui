@@ -1,0 +1,73 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 px-rally-gutter py-rally-xl overflow-y-auto"
+    (click)="dismiss()"
+  >
+    <div
+      class="bg-surface-container-lowest rounded-lg shadow-lg w-full max-w-md p-rally-lg flex flex-col gap-rally-md"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between">
+        <h2 class="section-title-plain">{{ isEditMode() ? 'Edit Category' : 'New Category' }}</h2>
+        <button
+          type="button"
+          aria-label="Close"
+          (click)="dismiss()"
+          class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors"
+        >
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <div class="flex flex-col gap-rally-xs">
+        <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Name</label>
+        <input
+          type="text"
+          class="bg-surface-container-low border-none rounded-lg px-rally-md py-rally-sm text-body-md outline-none focus:ring-2 focus:ring-primary-container transition-all"
+          placeholder="e.g. Electronics"
+          [value]="name()"
+          (input)="name.set($any($event.target).value)"
+        />
+      </div>
+
+      <div class="flex flex-col gap-rally-xs">
+        <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Description</label>
+        <textarea
+          rows="3"
+          class="bg-surface-container-low border-none rounded-lg px-rally-md py-rally-sm text-body-md outline-none focus:ring-2 focus:ring-primary-container transition-all resize-none"
+          placeholder="Optional short description"
+          [value]="description()"
+          (input)="description.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      <div class="flex flex-col gap-rally-xs">
+        <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Icon</label>
+        <app-icon-picker [selected]="icon()" (selectedChange)="icon.set($event)" placeholder="Choose icon (optional)" />
+      </div>
+
+      @if (error()) {
+        <p class="text-label-sm text-error px-rally-xs">{{ error() }}</p>
+      }
+
+      <div class="flex items-center gap-rally-sm mt-rally-xs">
+        <button
+          type="button"
+          (click)="dismiss()"
+          [disabled]="saving()"
+          class="flex-1 py-2 rounded-lg border border-outline text-on-surface font-label-sm text-label-sm hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="save()"
+          [disabled]="!canSave()"
+          class="flex-1 py-2 rounded-lg font-label-sm text-label-sm font-bold bg-primary text-on-primary hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+        >
+          {{ saving() ? (isEditMode() ? 'Saving…' : 'Creating…') : (isEditMode() ? 'Save Changes' : 'Create Category') }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

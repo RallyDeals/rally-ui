@@ -1,0 +1,34 @@
+import { DealStatus } from '../../../shared/models/deal';
+
+export type DealSortKey =
+  | 'relevance'
+  | 'price-asc'
+  | 'price-desc'
+  | 'discount'
+  | 'ending-soon'
+  | 'most-joined'
+  | 'newest';
+
+export interface DealsQueryParams {
+  // buyer browse + dashboards
+  search?: string; // product name/seller name
+
+  // buyer browse
+  categories?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  sort?: DealSortKey;
+
+  // dashboards + buyer profile
+  sellerId?: string;
+  status?: DealStatus;
+
+  // buyer profile ("my deals" — all statuses, scoped to deals this buyer joined)
+  userId?: string;
+
+  // product details
+  productId?: string;
+
+  page?: number;
+  limit?: number;
+}

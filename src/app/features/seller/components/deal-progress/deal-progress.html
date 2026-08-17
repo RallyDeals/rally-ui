@@ -1,0 +1,13 @@
+<div class="w-full">
+  <div class="flex items-center justify-between mb-1">
+    <span class="text-label-sm font-medium">{{ joined() }} / {{ required() }}</span>
+    <span class="text-label-sm font-bold" [class]="textClass()">{{ percent() }}%</span>
+  </div>
+  <div class="h-2 w-full bg-surface-container rounded-full overflow-hidden">
+    <div class="h-full relative transition-all" [class]="barClass()" [style.width.%]="percent()">
+      @if (pulse()) {
+        <div class="absolute right-0 top-0 bottom-0 w-1 bg-white/40 pulse-tip"></div>
+      }
+    </div>
+  </div>
+</div>

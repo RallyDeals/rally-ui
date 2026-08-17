@@ -1,0 +1,5 @@
+@if (shippingStatus(); as shipping) {
+  <app-shipping-status-badge [status]="shipping" />
+} @else {
+  <app-order-status-badge [status]="status()" />
+}

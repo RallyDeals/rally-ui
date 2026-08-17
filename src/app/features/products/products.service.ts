@@ -4,32 +4,14 @@ import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { PageResponse } from './page-response';
 import { Product } from '../../shared/models/product';
+import { ProductQueryParams } from './interfaces/product-query-params';
+import { UpsertProductRequest } from './interfaces/upsert-product-request';
+import { ImageUploadResponse } from './interfaces/image-upload-response';
 
-export interface ProductQueryParams {
-  q?: string;
-  tag?: string;
-  categoryId?: string;
-  minPrice?: number;
-  maxPrice?: number;
-  sort?: string;
-  page?: number;
-  limit?: number;
-}
-
-export interface UpsertProductRequest {
-  name: string;
-  description: string;
-  categoryId?: string;
-  basePrice: number;
-  sku?: string;
-  visible?: boolean;
-  tags?: string[];
-  imageUrl?: string;
-  images?: string[];
-}
-
-export interface ImageUploadResponse {
-  path: string;
+export enum ProductStatus {
+  PENDING_APPROVAL = 'PENDING_APPROVAL',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
 }
 
 @Injectable({ providedIn: 'root' })
@@ -68,21 +50,53 @@ export class ProductsService {
       limit?: number;
     } = {},
   ): Observable<PageResponse<Product>> {
-    return this.http.get<PageResponse<Product>>(
-      `${this.apiUrl}/products/sellers/${sellerId}`,
-      {
-        params: {
-          page: params.page ?? 1,
-          limit: params.limit ?? 20,
-          ...(params.status && { status: params.status }),
-          ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
-          ...(params.includeDeleted !== undefined && {
-            includeDeleted: String(params.includeDeleted),
-          }),
-          ...(params.sort && { sort: params.sort }),
-        },
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/sellers/${sellerId}`, {
+      params: {
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+        ...(params.status && { status: params.status }),
+        ...(params.deleted !== undefined && { deleted: String(params.deleted) }),
+        ...(params.includeDeleted !== undefined && {
+          includeDeleted: String(params.includeDeleted),
+        }),
+        ...(params.sort && { sort: params.sort }),
       },
-    );
+    });
+  }
+
+  getPendingApprovalProducts(
+    params: { categoryId?: string; sellerId?: string; page?: number; limit?: number } = {},
+  ): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
+      params: {
+        status: ProductStatus.PENDING_APPROVAL,
+        page: params.page ?? 1,
+        limit: params.limit ?? 20,
+        ...(params.categoryId && { categoryId: params.categoryId }),
+        ...(params.sellerId && { sellerId: params.sellerId }),
+      },
+    });
+  }
+
+  getAdminProductsBySeller(
+    sellerId: string,
+    params: { page?: number; limit?: number } = {},
+  ): Observable<PageResponse<Product>> {
+    return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
+      params: {
+        sellerId,
+        page: params.page ?? 1,
+        limit: params.limit ?? 10,
+      },
+    });
+  }
+
+  approveProduct(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/approve`, {});
+  }
+
+  rejectProduct(id: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/reject`, {});
   }
 
   deleteProduct(id: string): Observable<void> {

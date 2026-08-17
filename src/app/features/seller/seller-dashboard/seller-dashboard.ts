@@ -1,7 +1,25 @@
-import { Component } from '@angular/core';
+import { Component, computed, inject, signal, OnInit } from '@angular/core';
 import { NgClass } from '@angular/common';
+import { Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { map } from 'rxjs';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { DealStatus } from '../../../shared/models/deal';
+import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { MetricCard } from '../components/metric-card/metric-card';
+import { DealsService } from '../../deals/deals.service';
+import { TokenService } from '../../../shared/services/token.service';
+import {
+  dateInRange,
+  todayISO,
+  daysAgoISO,
+} from '../../../shared/utils/date-range.util';
+import { formatMoney } from '../../../shared/utils/money.util';
+
+const RANGE_START = daysAgoISO(30);
+const RANGE_END = todayISO();
+const RANGE_LABEL = 'Last 30 Days';
 
 interface ActivityItem {
   icon: string;
@@ -14,40 +32,134 @@ interface ActivityItem {
 
 interface DealRow {
   name: string;
-  image?: string;
-  status: string;
+  image: string;
+  status: DealStatus;
   statusLabel: string;
-  joined: number;
-  required: number;
+  currentParticipants: number;
+  dealStock: number;
   progress: number;
   revenue: string;
 }
 
+const STATUS_LABELS: Record<DealStatus, string> = {
+  [DealStatus.PENDING]: 'Pending',
+  [DealStatus.ACTIVE]: 'Active',
+  [DealStatus.SUCCEEDED]: 'Succeeded',
+  [DealStatus.FAILED]: 'Failed',
+  [DealStatus.CANCELLED]: 'Cancelled',
+};
+
+const STATUS_CLASSES: Record<DealStatus, string> = {
+  [DealStatus.ACTIVE]: 'bg-surface-container-high text-on-surface-variant',
+  [DealStatus.SUCCEEDED]: 'bg-secondary-container text-on-secondary-container',
+  [DealStatus.PENDING]: 'bg-surface-container text-on-surface-variant',
+  [DealStatus.FAILED]: 'bg-error-container text-on-error-container',
+  [DealStatus.CANCELLED]: 'bg-surface-container-high text-on-surface-variant',
+};
+
+const BAR_CLASSES: Record<DealStatus, string> = {
+  [DealStatus.ACTIVE]: 'bg-primary-container',
+  [DealStatus.SUCCEEDED]: 'bg-secondary',
+  [DealStatus.PENDING]: 'bg-outline-variant',
+  [DealStatus.FAILED]: 'bg-error',
+  [DealStatus.CANCELLED]: 'bg-outline-variant',
+};
+
+/** Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran. */
+function dealStartIso(deal: DealOverview): string {
+  return new Date(deal.endTime.getTime() - deal.durationMinutes * 60000).toISOString();
+}
+
+function toDealRow(deal: DealOverview): DealRow {
+  const progress = deal.dealStock > 0
+    ? Math.min(100, Math.round((deal.currentParticipants / deal.dealStock) * 100))
+    : 0;
+  return {
+    name: deal.productName,
+    image: deal.productImageUrl,
+    status: deal.status,
+    statusLabel: STATUS_LABELS[deal.status],
+    currentParticipants: deal.currentParticipants,
+    dealStock: deal.dealStock,
+    progress,
+    revenue: `$${formatMoney(deal.dealPrice * deal.currentParticipants)}`,
+  };
+}
+
 @Component({
   selector: 'app-seller-dashboard',
-  imports: [NgClass],
+  imports: [NgClass, MetricCard],
   templateUrl: './seller-dashboard.html',
   styleUrl: './seller-dashboard.css',
 })
-export class SellerDashboard {
+export class SellerDashboard implements OnInit {
+  private readonly router = inject(Router);
+  private readonly dealsService = inject(DealsService);
+  private readonly tokenService = inject(TokenService);
+
   readonly productImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
+  readonly statusClasses = STATUS_CLASSES;
+  readonly barClasses = BAR_CLASSES;
+
+  private readonly allDeals = toSignal(
+    this.dealsService.getSellerDeals(this.getSellerId(), { limit: 100 }).pipe(
+      map((page) => page.items)
+    ),
+    { initialValue: [] as DealOverview[] }
+  );
+
+  deals = computed(() => this.allDeals().map(toDealRow));
+
+  readonly rangeDeals = computed(() =>
+    this.allDeals()
+      .filter((deal) => dateInRange(dealStartIso(deal), RANGE_START, RANGE_END))
+      .map(toDealRow),
+  );
+
+  readonly rangeLabel = computed(() => RANGE_LABEL);
+
+  readonly totalRevenueValue = computed(() => {
+    const total = this.allDeals()
+      .filter((deal) => dateInRange(dealStartIso(deal), RANGE_START, RANGE_END))
+      .reduce((sum, deal) => sum + deal.dealPrice * deal.currentParticipants, 0);
+    return `$${formatMoney(total)}`;
+  });
+
+  readonly participantsValue = computed(() =>
+    this.rangeDeals().reduce((sum, deal) => sum + deal.currentParticipants, 0).toLocaleString(),
+  );
+
+  readonly successRateValue = computed(() => {
+    const deals = this.rangeDeals();
+    if (deals.length === 0) {
+      return '0%';
+    }
+    const succeeded = deals.filter((deal) => deal.status === DealStatus.SUCCEEDED).length;
+    return `${Math.round((succeeded / deals.length) * 100)}%`;
+  });
+
+  readonly pendingOrdersValue = computed(
+    () => String(this.rangeDeals().filter((deal) => deal.status === DealStatus.ACTIVE).length),
+  );
+
+  goToCreateDeal = () => {
+    this.router.navigate(['/seller/deals/new']);
+  };
+
+  getStatusClass(status: DealStatus): string {
+    return this.statusClasses[status];
+  }
+
+  getBarClass(status: DealStatus): string {
+    return this.barClasses[status];
+  }
 
   readonly toneClasses: Record<string, string> = {
     primary: 'bg-surface-container-high text-primary',
     secondary: 'bg-secondary-container text-secondary',
     tertiary: 'bg-tertiary-container text-tertiary',
     'primary-fixed': 'bg-primary-fixed text-primary',
-  };
-
-  readonly statusClasses: Record<string, string> = {
-    active: 'bg-surface-container-high text-on-surface-variant',
-    success: 'bg-secondary-container text-on-secondary-container',
-  };
-
-  readonly barClasses: Record<string, string> = {
-    active: 'bg-primary-container',
-    success: 'bg-secondary',
   };
 
   readonly activity: ActivityItem[] = [
@@ -77,8 +189,9 @@ export class SellerDashboard {
     },
   ];
 
-  readonly deals: DealRow[] = [
-    { name: 'Wireless Earbuds PRO', status: 'active', statusLabel: 'Active', joined: 42, required: 50, progress: 84, revenue: '$2,100' },
-    { name: 'Smart Home Hub', status: 'success', statusLabel: 'Success', joined: 100, required: 100, progress: 100, revenue: '$8,900' },
-  ];
+  ngOnInit() {}
+
+  private getSellerId(): string {
+    return this.tokenService.getSellerId() ?? '';
+  }
 }

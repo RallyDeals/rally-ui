@@ -1,0 +1,37 @@
+<div class="relative inline-block" (click)="$event.stopPropagation()">
+  @if (editable()) {
+    <app-icon-button symbol="more_vert" label="Deal actions" (click)="toggle($event)" />
+    @if (open()) {
+      <div class="fixed inset-0 z-20" (click)="close()"></div>
+      <div
+        class="fixed z-50 w-48 rounded-xl border border-outline-variant bg-surface-container-lowest shadow-lg p-1 mt-0!"
+        [style.left.px]="position().x"
+        [style.top.px]="position().y"
+      >
+        <a
+          [routerLink]="editLink()"
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-on-surface hover:bg-surface-container-high transition-colors"
+          (click)="close()"
+        >
+          <span class="material-symbols-outlined text-base text-primary-container">edit</span>
+          Edit Deal
+        </a>
+        <button
+          type="button"
+          class="w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium text-error hover:bg-error/10 transition-colors"
+          (click)="onDelete()"
+        >
+          <span class="material-symbols-outlined text-base">delete</span>
+          Delete Deal
+        </button>
+      </div>
+    }
+  } @else {
+    <span
+      class="inline-flex p-2 rounded-lg text-on-surface-variant/40 cursor-not-allowed"
+      title="Only pending deals can be edited or deleted"
+    >
+      <span class="material-symbols-outlined text-lg">lock</span>
+    </span>
+  }
+</div>

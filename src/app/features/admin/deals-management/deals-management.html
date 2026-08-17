@@ -1,0 +1,61 @@
+<main class="bg-background">
+  <div class="flex flex-col w-full px-rally-lg gap-rally-md">
+    <app-page-header
+      title="Deals Management"
+      subtitle="Monitor and manage group buying deals across the platform." />
+
+    <app-deals-stats
+      [totalDeals]="totalDeals()"
+      [dealsCreatedThisMonth]="dealsCreatedThisMonth()"
+      [activeDeals]="activeDeals()"
+      [dealsCreatedToday]="dealsCreatedToday()"
+      [completedDeals]="completedDeals()"
+      [successRate]="successRate()" />
+
+    <app-deals-toolbar
+      [search]="search()"
+      [status]="status()"
+      (searchChange)="onSearchChange($event)"
+      (statusChange)="onStatusChange($event)" />
+
+    <div class="bg-surface rounded-2xl shadow-xl overflow-hidden relative group">
+      <div
+        class="absolute inset-0 bg-gradient-to-b from-surface-container-low/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"
+      ></div>
+
+      @if (loadError(); as err) {
+        <app-error-state [error]="err" [showRetry]="true" (retry)="loadDeals()" />
+      } @else {
+        <div class="w-full overflow-x-auto relative z-10">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low/50">
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Product</th>
+                <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Orig. Price</th>
+                <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Deal Price</th>
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Seller</th>
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Status</th>
+                <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="font-body-md text-body-md text-on-surface">
+              @for (deal of deals(); track deal.id) {
+                <tr app-deal-row [deal]="deal" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>
+              } @empty {
+                <tr>
+                  <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="6">No deals yet.</td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+        <div class="p-rally-sm bg-surface-container-low/50 flex items-center justify-between relative z-10">
+          <p class="text-label-sm font-label-sm text-on-surface-variant">
+            Showing {{ rangeStart() }} to {{ rangeEnd() }} of {{ total() }} entries
+          </p>
+          <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
+        </div>
+      }
+    </div>
+  </div>
+</main>

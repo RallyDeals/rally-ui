@@ -1,4 +1,4 @@
-<section>
+﻿<section>
   <!-- Page Header -->
   <div class="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-rally-md mb-rally-lg">
     <div>
@@ -8,16 +8,16 @@
       </p>
     </div>
     <div class="flex gap-rally-sm w-full sm:w-auto">
-      <button
-        type="button"
-        class="flex-1 sm:flex-none px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface hover:bg-surface-container transition-colors flex items-center justify-center gap-2 bg-surface-container-lowest"
+      <div
+        class="flex items-center gap-2 px-rally-md py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest"
       >
-        <span class="material-symbols-outlined text-sm">calendar_month</span>
-        Last 30 Days
-      </button>
+        <span class="material-symbols-outlined text-sm text-primary-container">calendar_month</span>
+        <span>Last 30 Days</span>
+      </div>
       <button
         type="button"
         class="flex-1 sm:flex-none px-rally-md py-2 bg-primary-container text-on-primary rounded-lg font-label-sm font-semibold hover:opacity-90 transition-all shadow-sm flex items-center justify-center gap-2"
+        (click)="goToCreateDeal()"
       >
         <span class="material-symbols-outlined text-sm">add</span>
         Create Deal
@@ -27,67 +27,33 @@
 
   <!-- Key Metrics -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md mb-rally-lg">
-    <!-- Revenue -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Total Revenue</p>
-        <span class="material-symbols-outlined text-primary bg-primary-fixed p-1.5 rounded-lg">payments</span>
-      </div>
-      <div>
-        <h3 class="section-title">$45.2k</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          12.5% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Participants -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Active Participants</p>
-        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">groups</span>
-      </div>
-      <div>
-        <h3 class="section-title">1,204</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          8.2% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Success Rate -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Success Rate</p>
-        <span class="material-symbols-outlined text-secondary bg-secondary-container p-1.5 rounded-lg">check_circle</span>
-      </div>
-      <div>
-        <h3 class="section-title">92%</h3>
-        <p class="font-label-sm text-secondary flex items-center gap-1 mt-1">
-          <span class="icon-sm">arrow_upward</span>
-          2.1% vs last month
-        </p>
-      </div>
-    </div>
-    <!-- Pending -->
-    <div
-      class="bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm hover:shadow-md transition-shadow group flex flex-col justify-between h-32"
-    >
-      <div class="flex justify-between items-start">
-        <p class="label-caps">Pending Orders</p>
-        <span class="material-symbols-outlined text-tertiary bg-tertiary-container p-1.5 rounded-lg">pending_actions</span>
-      </div>
-      <div>
-        <h3 class="section-title">18</h3>
-        <p class="font-label-sm text-on-surface-variant mt-1">Needs attention</p>
-      </div>
-    </div>
+    <app-metric-card
+      label="Total Revenue"
+      [value]="totalRevenueValue()"
+      symbol="payments"
+      trend="positive"
+      [trendLabel]="rangeLabel()"
+    />
+    <app-metric-card
+      label="Participants"
+      [value]="participantsValue()"
+      symbol="groups"
+      trend="positive"
+      [trendLabel]="rangeLabel()"
+    />
+    <app-metric-card
+      label="Success Rate"
+      [value]="successRateValue()"
+      symbol="check_circle"
+      trend="positive"
+      [trendLabel]="rangeLabel()"
+    />
+    <app-metric-card
+      label="Active Deals"
+      [value]="pendingOrdersValue()"
+      symbol="pending_actions"
+      [trendLabel]="rangeLabel()"
+    />
   </div>
 
   <!-- Main Charts Row -->
@@ -185,7 +151,7 @@
           </tr>
         </thead>
         <tbody class="body-text divide-y divide-outline-variant/30">
-          @for (deal of deals; track deal.name) {
+          @for (deal of rangeDeals(); track deal.name) {
             <tr class="hover:bg-surface-container/30 transition-colors">
               <td class="px-rally-md py-4">
                 <div class="flex items-center gap-rally-sm">
@@ -198,17 +164,17 @@
               <td class="px-rally-md py-4">
                 <span
                   class="inline-flex px-2 py-0.5 rounded text-[11px] font-bold"
-                  [ngClass]="statusClasses[deal.status]"
+                  [ngClass]="getStatusClass(deal.status)"
                 >
                   {{ deal.statusLabel }}
                 </span>
               </td>
               <td class="px-rally-md py-4">
-                <span class="font-semibold">{{ deal.joined }}</span> / {{ deal.required }}
+                <span class="font-semibold">{{ deal.currentParticipants }}</span> / {{ deal.dealStock }}
               </td>
               <td class="px-rally-md py-4 w-48">
                 <div class="w-full bg-surface-container rounded-full h-2">
-                  <div class="h-2 rounded-full" [ngClass]="barClasses[deal.status]" [style.width.%]="deal.progress"></div>
+                  <div class="h-2 rounded-full" [ngClass]="getBarClass(deal.status)" [style.width.%]="deal.progress"></div>
                 </div>
               </td>
               <td class="px-rally-md py-4 text-right font-semibold">{{ deal.revenue }}</td>
@@ -219,3 +185,4 @@
     </div>
   </div>
 </section>
+

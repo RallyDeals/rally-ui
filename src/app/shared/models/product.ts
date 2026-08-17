@@ -5,6 +5,7 @@ export type ProductStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
 export interface Product {
   id: string;
   sellerId: string;
+  sellerName: string;
   name: string;
   description: string;
   category: Category;
@@ -20,4 +21,5 @@ export interface Product {
   updatedAt: string;
   deleted: boolean;
   deletedAt: string | null;
+  availableStock?: number;
 }

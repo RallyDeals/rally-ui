@@ -1,5 +1,5 @@
 export interface MyDeal {
-  id: number;
+  id: string;
   image: string;
   imageAlt: string;
   title: string;
