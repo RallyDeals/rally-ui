@@ -35,7 +35,7 @@ export class DealsService {
     const status = params.status;
     const categories = params.categories?.length ? params.categories : undefined;
     const sellerId = params.sellerId;
-    const participantId = params.participantId;
+    const participantId = params.userId;
     const productId = params.productId;
     const minPrice = params.minPrice;
     const maxPrice = params.maxPrice;
@@ -110,8 +110,8 @@ export class DealsService {
   }
 
   // Buyer profile "My Deals": all statuses, scoped to deals this buyer has joined.
-  getMyDeals(buyerId: string, params: Omit<DealsQueryParams, 'participantId'> = {}): Observable<PageResponse<DealOverview>> {
-    return this.getDealsOverview({ ...params, participantId: buyerId });
+  getMyDeals(buyerId: string, params: Omit<DealsQueryParams, 'userId'> = {}): Observable<PageResponse<DealOverview>> {
+    return this.getDealsOverview({ ...params, userId: buyerId });
   }
 
   getDealsDetails(id: string): Observable<DealDetails | null> {

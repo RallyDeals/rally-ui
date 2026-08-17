@@ -10,19 +10,21 @@ export type DealSortKey =
   | 'newest';
 
 export interface DealsQueryParams {
-  // buyer browse
+  // buyer browse + dashboards
   search?: string; // product name/seller name
+
+  // buyer browse
   categories?: string[];
   minPrice?: number;
   maxPrice?: number;
   sort?: DealSortKey;
 
-  // dashboards
+  // dashboards + buyer profile
   sellerId?: string;
   status?: DealStatus;
 
   // buyer profile ("my deals" — all statuses, scoped to deals this buyer joined)
-  participantId?: string;
+  userId?: string;
 
   // product details
   productId?: string;
