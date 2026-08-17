@@ -58,6 +58,7 @@ export class SellerProductForm implements OnInit {
 
   basePrice = signal('');
   stockQuantity = signal('');
+  stockToAdd = signal('0');
   sku = signal('');
   active = signal(true);
   tags = signal<string[]>([]);
@@ -90,6 +91,16 @@ export class SellerProductForm implements OnInit {
     return null;
   });
   readonly stockError = computed(() => {
+    if (this.isEdit()) {
+      if (this.stockToAdd().trim() === '') {
+        return 'Enter a quantity to add (use 0 for no change).';
+      }
+      const value = Number(this.stockToAdd());
+      if (!Number.isInteger(value) || value < 0) {
+        return 'Additional stock must be a whole number of 0 or more.';
+      }
+      return null;
+    }
     if (this.stockQuantity().trim() === '') {
       return 'Stock quantity is required.';
     }
@@ -150,7 +161,7 @@ export class SellerProductForm implements OnInit {
         this.inventoryService.getInventory(id).subscribe({
           next: (inv) => {
             this.originalStock.set(inv.totalStock);
-            this.stockQuantity.set(String(inv.totalStock));
+            this.stockToAdd.set('0');
             this.loading.set(false);
           },
           error: () => {
@@ -251,6 +262,8 @@ export class SellerProductForm implements OnInit {
       return;
     }
 
+    const id = this.productId();
+
     const request: UpsertProductRequest = {
       name: this.name().trim(),
       description: this.description().trim(),
@@ -261,19 +274,16 @@ export class SellerProductForm implements OnInit {
       tags: this.tags(),
       imageUrl: images[0],
       images,
-      initialStock: Number(this.stockQuantity()) || 0,
+      ...(id ? {} : { initialStock: Number(this.stockQuantity()) || 0 }),
     };
-
-    const id = this.productId();
-    const newStock = Number(this.stockQuantity()) || 0;
-    const oldStock = this.originalStock();
 
     let operation: Observable<Product>;
     if (id) {
+      const addQuantity = Number(this.stockToAdd()) || 0;
       operation = this.productsService.updateProduct(id, request).pipe(
         switchMap(() => {
-          if (oldStock !== null && newStock !== oldStock) {
-            return this.inventoryService.adjust(id, newStock - oldStock).pipe(
+          if (addQuantity > 0) {
+            return this.inventoryService.restock(id, addQuantity).pipe(
               switchMap(() => this.productsService.getProduct(id)),
             );
           }

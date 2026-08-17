@@ -120,11 +120,6 @@ export class SellerProducts implements OnInit, OnDestroy {
     () => this.products().filter((product) => !product.deleted && product.stockStatus !== 'IN_STOCK').length,
   );
 
-  readonly allSelected = computed(() => {
-    const items = this.visibleProducts();
-    return items.length > 0 && items.every((product) => this.selectedIds().has(product.id));
-  });
-
   get fromIndex(): number {
     return this.total() === 0 ? 0 : (this.page() - 1) * this.limit + 1;
   }
@@ -263,33 +258,6 @@ export class SellerProducts implements OnInit, OnDestroy {
     this.router.navigate(['/seller/deals'], { queryParams: { status: 'active' } });
   };
 
-  toggleSelect = (id: string) => {
-    const next = new Set(this.selectedIds());
-    if (next.has(id)) {
-      next.delete(id);
-    } else {
-      next.add(id);
-    }
-    this.selectedIds.set(next);
-  };
-
-  toggleSelectAll = () => {
-    const items = this.visibleProducts();
-    const next = new Set(this.selectedIds());
-    if (this.allSelected()) {
-      for (const product of items) {
-        next.delete(product.id);
-      }
-    } else {
-      for (const product of items) {
-        next.add(product.id);
-      }
-    }
-    this.selectedIds.set(next);
-  };
-
-  isSelected = (id: string): boolean => this.selectedIds().has(id);
-
   deleteTarget = signal<Product | null>(null);
 
   readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
@@ -319,17 +287,19 @@ export class SellerProducts implements OnInit, OnDestroy {
     if (!product) {
       return;
     }
-    this.productsService.deleteProduct(product.id).subscribe({
-      next: () => {
-        const next = new Set(this.selectedIds());
-        next.delete(product.id);
-        this.selectedIds.set(next);
-        this.loadProducts();
-      },
-      error: (err) => {
-        this.actionError.set(toApiError(err));
-      },
-    });
+    this.productsService
+      .deleteProduct(product.id)
+      .subscribe({
+        next: () => {
+          const next = new Set(this.selectedIds());
+          next.delete(product.id);
+          this.selectedIds.set(next);
+          this.loadProducts();
+        },
+        error: (err) => {
+          this.actionError.set(toApiError(err));
+        },
+      });
   };
 
   restoreTarget = signal<Product | null>(null);
