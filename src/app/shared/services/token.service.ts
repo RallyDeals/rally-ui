@@ -3,9 +3,17 @@ import { environment } from '../../../environments/environment';
 
 export type DevRole = 'seller' | 'buyer' | 'admin';
 
+const DEV_ROLE_STORAGE_KEY = 'devRole';
+const DEV_ROLES: DevRole[] = ['seller', 'buyer', 'admin'];
+
+function readStoredRole(): DevRole | null {
+  const stored = localStorage.getItem(DEV_ROLE_STORAGE_KEY);
+  return (DEV_ROLES as string[]).includes(stored ?? '') ? (stored as DevRole) : null;
+}
+
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-  readonly activeRole = signal<DevRole>('seller');
+  readonly activeRole = signal<DevRole>(readStoredRole() ?? 'seller');
 
   getToken(): string {
     return environment.devTokens[this.activeRole()] ?? environment.devToken ?? '';
@@ -27,5 +35,6 @@ export class TokenService {
 
   setRole(role: DevRole) {
     this.activeRole.set(role);
+    localStorage.setItem(DEV_ROLE_STORAGE_KEY, role);
   }
 }
