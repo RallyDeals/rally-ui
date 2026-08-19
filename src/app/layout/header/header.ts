@@ -8,6 +8,7 @@ import { DesktopNavLinks } from './desktop-nav-links/desktop-nav-links';
 import { MobileNavLinks } from './mobile-nav-links/mobile-nav-links';
 import { RouterLink } from '@angular/router';
 import { PrimaryBtn } from '../../shared/components/buttons/primary-btn/primary-btn';
+import { TokenService } from '../../shared/services/token.service';
 
 @Component({
   selector: 'app-header',
@@ -17,6 +18,7 @@ import { PrimaryBtn } from '../../shared/components/buttons/primary-btn/primary-
 })
 export class Header {
   private readonly router = inject(Router);
+  private readonly tokenService = inject(TokenService);
 
   constructor(private elementRef: ElementRef) {}
 
@@ -27,6 +29,8 @@ export class Header {
     { name: 'Deals', path: '/deals', symbol: 'local_offer' },
     { name: 'Categories', path: '/categories', symbol: 'category' },
   ];
+
+  readonly isSeller = computed(() => this.tokenService.activeRole() === 'seller');
 
   // Reactive so it stays correct for any navigation (breadcrumbs, in-page links,
   // programmatic router.navigate) — not just clicks on these nav links themselves.

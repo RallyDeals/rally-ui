@@ -36,6 +36,7 @@ export class SellerSidebar {
   ];
 
   readonly settingsItem: NavItem = { label: 'Settings', symbol: 'settings', path: null };
+  readonly storeItem: NavItem = { label: 'Back to Store', symbol: 'storefront', path: '/home' };
 
   readonly storeName = 'Alex Store';
   readonly avatarUrl =
