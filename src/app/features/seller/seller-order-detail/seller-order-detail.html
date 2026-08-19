@@ -29,13 +29,13 @@
               <h2
                 class="font-display-lg-mobile text-display-lg-mobile font-bold text-on-surface tracking-tight"
               >
-                {{ orderNumber(order.id) }}
+                {{ orderNumber(order.orderId) }}
               </h2>
             </div>
           </div>
           <div class="flex items-center gap-2 flex-wrap self-start lg:self-center">
             <app-order-phase-badge
-              [phase]="order.phase"
+              [phase]="order.status"
             />
           </div>
         </div>
@@ -46,7 +46,7 @@
       >
         <div>
           <p class="label-caps mb-1">Placed</p>
-          <p class="font-body-md text-body-md text-on-surface">{{ formatDate(order.createdAt) }}</p>
+          <p class="font-body-md text-body-md text-on-surface">{{ order.createdAt | date }}</p>
         </div>
         <div>
           <p class="label-caps mb-1">Items</p>
@@ -54,7 +54,7 @@
         </div>
         <div>
           <p class="label-caps mb-1">Total</p>
-          <p class="font-body-md text-body-md text-on-surface font-semibold">${{ price(order.totalPrice) }}</p>
+          <p class="font-body-md text-body-md text-on-surface font-semibold">{{ order.totalPrice | currency }}</p>
         </div>
       </div>
 
@@ -100,7 +100,8 @@
                       <img
                         class="w-full h-full object-cover"
                         [alt]="entry.productName"
-                        [src]="entry.productImageUrl"
+                        [src]="resolveImageUrl(entry.productImageUrl, placeholderImage)"
+                        fallbackSrc="/assets/placeholder.svg"
                       />
                     </div>
                     <p class="font-bold text-on-surface">{{ entry.productName }}</p>
@@ -108,31 +109,15 @@
                 </td>
                 <td class="table-cell text-center text-on-surface-variant">{{ entry.quantity }}</td>
                 <td class="table-cell text-center text-on-surface-variant">
-                  ${{ price(entry.unitPrice) }}
+                  {{ entry.unitPrice | currency }}
                 </td>
                 <td class="table-cell text-center font-semibold text-on-surface">
-                  ${{ lineTotal(entry.unitPrice, entry.quantity) }}
+                  {{ (entry.unitPrice * entry.quantity) | currency }}
                 </td>
               </tr>
             }
           </tbody>
         </table>
-      </div>
-      <div
-        class="bg-surface-container-low px-rally-md py-rally-md border-t border-outline-variant flex justify-center sm:justify-end"
-      >
-        <div class="w-full sm:w-80 flex flex-col gap-rally-xs">
-          <div class="flex justify-between font-body-md text-body-md text-on-surface-variant">
-            <span>Items total</span>
-            <span>${{ price(order.totalPrice) }}</span>
-          </div>
-          <div
-            class="flex justify-between font-body-lg text-body-lg font-semibold text-on-surface border-t border-outline-variant/30 pt-rally-xs"
-          >
-            <span>Total</span>
-            <span>${{ price(order.totalPrice) }}</span>
-          </div>
-        </div>
       </div>
     </div>
   } @else {

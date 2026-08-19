@@ -34,6 +34,7 @@ export class AdminSidebar {
     { label: 'User Management', symbol: 'group', path: '/admin/user-management' },
     { label: 'Seller Management', symbol: 'storefront', path: '/admin/seller-management' },
     { label: 'Categories Management', symbol: 'category', path: '/admin/categories-management' },
+    { label: 'Deals Management', symbol: 'local_fire_department', path: '/admin/deals-management' }
   ];
 
   readonly settingsItem: NavItem = { label: 'Platform Settings', symbol: 'settings', path: null };

@@ -1,7 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { NgClass } from '@angular/common';
-import { SellerOrderPhase } from '../../../../shared/models/seller-order';
-import { ShippingStatusBadge } from '../../../../shared/components/shipping-status-badge/shipping-status-badge';
+import { CompactedOrderStatus } from '../../../../shared/models/compacted-order-status';
 
 interface PhaseMeta {
   label: string;
@@ -9,7 +8,7 @@ interface PhaseMeta {
   badgeClass: string;
 }
 
-const PHASE_META: Record<SellerOrderPhase, PhaseMeta> = {
+const PHASE_META: Record<CompactedOrderStatus, PhaseMeta> = {
   PENDING: {
     label: 'Pending',
     icon: 'hourglass_top',
@@ -51,7 +50,7 @@ const PHASE_META: Record<SellerOrderPhase, PhaseMeta> = {
   `,
 })
 export class OrderPhaseBadge {
-  phase = input.required<SellerOrderPhase>();
+  phase = input.required<CompactedOrderStatus>();
 
   meta = computed(() => PHASE_META[this.phase()]);
 }

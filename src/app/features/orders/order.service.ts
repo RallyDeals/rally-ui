@@ -1,20 +1,16 @@
 import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { BriefOrderPageResponse } from './interfaces/brief-order-page-response';
 import { DetailedOrderResponse } from './interfaces/detailed-order-response';
 import { CheckoutOrderRequest } from './interfaces/checkout-order-request';
 import { CheckoutOrderResponse } from './interfaces/checkout-order-response';
-import {
-  BackendSellerOrderDetail,
-  mapBackendOrder,
-  mapBackendOrderDetail,
-  SellerOrder,
-  SellerOrderDetail,
-  SellerOrderPageResponse,
-} from '../../shared/models/seller-order';
 import { TokenService } from '../../shared/services/token.service';
+import { BriefSellerOrdersPageResponse } from './interfaces/brief-seller-orders-page-response';
+import { SellerOrdersParams } from './interfaces/seller-orders-params';
+import { DetailedSellerOrderResponse } from './interfaces/detailed-seller-order-response';
+import { SellerOrdersStatistics } from './interfaces/seller-orders-statistics';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -33,39 +29,40 @@ export class OrderService {
   }
 
   checkout(request: CheckoutOrderRequest): Observable<CheckoutOrderResponse> {
-    return this.http.post<CheckoutOrderResponse>(
-      `${this.baseUrl}/checkout`,
-      request,
-    );
+    return this.http.post<CheckoutOrderResponse>(`${this.baseUrl}/checkout`, request);
   }
 
-  listSellerOrders(
-    params: { status?: string; page?: number; limit?: number } = {},
-  ): Observable<SellerOrder[]> {
+  listSellerOrders(params: SellerOrdersParams): Observable<BriefSellerOrdersPageResponse> {
     let url = `${this.baseUrl}/sellers/${this.sellerId}`;
     const queryParams: Record<string, string | number> = {};
     if (params.status && params.status !== 'ALL') {
       queryParams['status'] = params.status;
     }
-    if (params.page !== undefined) {
-      queryParams['page'] = params.page;
+    if (params.startDate) {
+      queryParams['startDate'] = params.startDate;
     }
-    if (params.limit !== undefined) {
-      queryParams['limit'] = params.limit;
+    if (params.search && params.search.trim() !== '') {
+      queryParams['search'] = params.search.trim();
     }
+    queryParams['limit'] = params.limit;
+    queryParams['page'] = params.page;
 
-    return this.http
-      .get<SellerOrderPageResponse>(url, { params: queryParams })
-      .pipe(map((response) => response.orders.map(mapBackendOrder)));
+    return this.http.get<BriefSellerOrdersPageResponse>(url, { params: queryParams });
   }
 
-  getSellerOrderById(id: string): Observable<SellerOrderDetail | undefined> {
-    return this.http
-      .get<BackendSellerOrderDetail>(`${this.baseUrl}/sellers/${this.sellerId}/${id}`)
-      .pipe(
-        map((response) => mapBackendOrderDetail(response)),
-        // Return undefined on 404
-      );
+  getSellerOrderById(id: string): Observable<DetailedSellerOrderResponse | undefined> {
+    return this.http.get<DetailedSellerOrderResponse>(
+      `${this.baseUrl}/sellers/${this.sellerId}/${id}`,
+    );
+  }
+
+  getSellerOrdersAnalytics(startDate: string): Observable<SellerOrdersStatistics> {
+    return this.http.get<SellerOrdersStatistics>(
+      `${this.baseUrl}/sellers/${this.sellerId}/analytics`,
+      {
+        params: { startDate: startDate },
+      },
+    );
   }
 
   private get sellerId(): string {

@@ -1,35 +1,25 @@
-import { Component, computed, inject, signal, OnInit } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { Router } from '@angular/router';
+import { Component, computed, inject, signal } from '@angular/core';
 import {
   FilterPills,
   FilterPillOption,
 } from '../../../shared/components/filter-pills/filter-pills';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
-import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { MetricCard } from '../components/metric-card/metric-card';
-import { OrderPhaseBadge } from '../components/order-phase-badge/order-phase-badge';
-import { SellerOrder, SellerOrderPhase } from '../../../shared/models/seller-order';
 import { OrderService } from '../../orders/order.service';
-import { formatMoney } from '../../../shared/utils/money.util';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
-import { orderCode, productCode } from '../../../shared/utils/order-code.util';
-import { dateInRange, todayISO, daysAgoISO } from '../../../shared/utils/date-range.util';
+import { daysAgoISO } from '../../../shared/utils/date-range.util';
+import { CompactedOrderStatus } from '../../../shared/models/compacted-order-status';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { ApiError } from '../../../shared/models/api-error';
+import { BriefSellerOrdersResponse } from '../../orders/interfaces/brief-seller-orders-response';
+import { SellerOrdersParams } from '../../orders/interfaces/seller-orders-params';
+import { SellerOrdersStatistics } from '../../orders/interfaces/seller-orders-statistics';
+import { SellerOrderRow } from './seller-order-row/seller-order-row';
 
-export const ORDER_PHASE_OPTIONS: FilterPillOption[] = [
-  { value: 'ALL', label: 'All' },
-  { value: 'PENDING', label: 'Pending' },
-  { value: 'PROCESSING', label: 'Processing' },
-  { value: 'SHIPPING', label: 'Shipping' },
-  { value: 'DELIVERED', label: 'Delivered' },
-  { value: 'CANCELLED', label: 'Cancelled' },
-];
 
-const RANGE_START = daysAgoISO(30);
-const RANGE_END = todayISO();
-const RANGE_LABEL = 'Last 30 Days';
+const PAGE_SIZE = 5;
 
 @Component({
   selector: 'app-seller-orders',
@@ -37,113 +27,126 @@ const RANGE_LABEL = 'Last 30 Days';
     FilterPills,
     Pagination,
     SearchInput,
-    IconButton,
     PageHeader,
     MetricCard,
-    OrderPhaseBadge,
+    SellerOrderRow,
   ],
   templateUrl: './seller-orders.html',
   styleUrl: './seller-orders.css',
 })
-export class SellerOrders implements OnInit {
-  private readonly router = inject(Router);
+export class SellerOrders {
   private readonly orderService = inject(OrderService);
 
-  readonly phaseOptions = ORDER_PHASE_OPTIONS;
-
-  phaseFilter = signal<'ALL' | SellerOrderPhase>('ALL');
+  orders = signal<BriefSellerOrdersResponse[]>([]);
+  analytics = signal<SellerOrdersStatistics>({
+    pendingOrders: 0,
+    deliveredOrders: 0,
+    totalOrders: 0,
+    revenue: 0,
+  });
+  startDate = signal<string>(daysAgoISO(7));
+  dateLabel = signal<string>('Last 7 Days');
+  isLoading = signal(false);
+  loadError = signal<ApiError | null>(null);
+  analyticsError = signal<ApiError | null>(null);
+  loadMoreError = signal<ApiError | null>(null);
+  phaseFilter = signal<'ALL' | CompactedOrderStatus>('ALL');
   searchQuery = signal('');
   page = signal(1);
-  limit = 5;
-  orders = toSignal(this.orderService.listSellerOrders(), { initialValue: [] as SellerOrder[] });
+  total = signal(0);
+  totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
+  rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1));
+  rangeEnd = computed(() => Math.min(this.page() * PAGE_SIZE, this.total()));
 
-  readonly rangeOrders = computed(() =>
-    this.orders().filter((order) => dateInRange(order.createdAt, RANGE_START, RANGE_END)),
-  );
+  phaseOptions: FilterPillOption[] = [
+    { label: 'All', value: 'ALL' },
+    { label: 'Pending', value: 'PROCESSING' },
+    { label: 'Delivered', value: 'DELIVERED' },
+    { label: 'Cancelled', value: 'CANCELLED' },
+  ];
 
-  readonly rangeLabel = computed(() => RANGE_LABEL);
+  dateRangeOptions: FilterPillOption[] = [
+    { label: 'Last 7 Days', value: '7' },
+    { label: 'Last 30 Days', value: '30' },
+    { label: 'Last 90 Days', value: '90' },
+  ];
 
-  readonly visibleOrders = computed(() => {
-    const phase = this.phaseFilter();
-    const query = this.searchQuery().trim().toLowerCase();
-    return this.rangeOrders().filter((order) => {
-      const matchesPhase = phase === 'ALL' || order.phase === phase;
-      const matchesQuery =
-        query === '' ||
-        order.id.toLowerCase().includes(query) ||
-        order.items.some((entry) => entry.productName.toLowerCase().toLowerCase().includes(query));
-      return matchesPhase && matchesQuery;
-    });
-  });
-
-  readonly totalPages = computed(() =>
-    Math.max(1, Math.ceil(this.visibleOrders().length / this.limit)),
-  );
-
-  readonly pagedOrders = computed(() => {
-    const start = (this.page() - 1) * this.limit;
-    return this.visibleOrders().slice(start, start + this.limit);
-  });
-
-  get fromIndex(): number {
-    return this.visibleOrders().length === 0 ? 0 : (this.page() - 1) * this.limit + 1;
-  }
-
-  get toIndex(): number {
-    return Math.min(this.page() * this.limit, this.visibleOrders().length);
-  }
-
-  readonly totalOrdersValue = computed(() => String(this.rangeOrders().length));
-
-  readonly revenueValue = computed(() => {
-    const total = this.rangeOrders().reduce((sum, order) => sum + order.totalPrice, 0);
-    return `$${formatMoney(total)}`;
-  });
-
-  readonly pendingValue = computed(() =>
-    String(this.rangeOrders().filter((order) => order.phase === 'PENDING').length),
-  );
-
-  readonly deliveredValue = computed(() =>
-    String(this.rangeOrders().filter((order) => order.phase === 'DELIVERED').length),
-  );
-
-  orderNumber = (id: string): string => orderCode(id);
-  productNumber = (productId: string): string => productCode(productId);
-  price = (amount: number): string => formatMoney(amount);
   formatDate = (iso: string): string => formatShortDate(iso);
 
-  totalQuantity(order: SellerOrder): number {
-    return order.items.reduce((sum, entry) => sum + entry.quantity, 0);
-  }
-
-  extraItemsLabel(order: SellerOrder): string {
-    const extras = order.items.length - 1;
-    return extras > 0 ? ` · +${extras} more item${extras > 1 ? 's' : ''}` : '';
+  constructor() {
+    this.loadPage();
+    this.loadAnalytics();
   }
 
   onPhaseChange = (phase: string) => {
-    this.phaseFilter.set(phase as 'ALL' | SellerOrderPhase);
+    this.phaseFilter.set(phase as 'ALL' | CompactedOrderStatus);
     this.page.set(1);
+    this.loadPage();
+  };
+
+  onDateRangeChange = (days: string) => {
+    const daysNum = parseInt(days, 10);
+    this.startDate.set(daysAgoISO(daysNum));
+    this.dateLabel.set(this.dateRangeOptions.find(opt => opt.value === days)?.label || 'Last 30 Days');
+    this.page.set(1);
+    this.loadPage();
   };
 
   onSearchInput = (value: string) => {
     this.searchQuery.set(value);
     this.page.set(1);
+    this.loadPage();
+  };
+
+  onPageChange = (page: number) => {
+    this.page.set(page);
+    this.loadPage();
   };
 
   clearSearch = () => {
     this.searchQuery.set('');
     this.page.set(1);
+    this.loadPage();
   };
 
-  goToPage = (page: number) => {
-    this.page.set(page);
-  };
+  loadPage() {
+    const isFirstPage = this.page() === 1;
+    this.isLoading.set(true);
+    const queryParams: SellerOrdersParams = {
+      page: this.page(),
+      limit: PAGE_SIZE,
+      status: this.phaseFilter(),
+      search: this.searchQuery(),
+      startDate: this.startDate(),
+    };
+    this.orderService.listSellerOrders(queryParams).subscribe({
+      next: (response) => {
+        this.orders.set(response.orders);
+        this.total.set(response.total);
+        this.isLoading.set(false);
+      },
+      error: (err) => {
+        this.isLoading.set(false);
+        const apiError = toApiError(err);
+        if (isFirstPage) {
+          this.loadError.set(apiError);
+        } else {
+          this.page.update((page) => page - 1);
+          this.loadMoreError.set(apiError);
+        }
+      },
+    });
+  }
 
-  viewOrder = (id: string) => {
-    this.router.navigate(['/seller/orders', id]);
-  };
-
-  ngOnInit() {}
+  loadAnalytics() {
+    this.orderService.getSellerOrdersAnalytics(this.startDate()).subscribe({
+      next: (response) => {
+        this.analytics.set(response);
+      },
+      error: (err) => {
+        const apiError = toApiError(err);
+        this.analyticsError.set(apiError);
+      },
+    });
+  }
 }

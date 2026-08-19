@@ -2,7 +2,7 @@ import { OrderStatus } from '../../../shared/models/order-status';
 import { OrderType } from '../../../shared/models/order-type';
 import { ShippingStatus } from '../../../shared/models/shipping-status';
 import { OrderItem } from './order-item';
-import { CancelReason } from './cancel-reason';
+import { CancelReason } from '../../../shared/models/cancel-reason';
 
 export interface DetailedOrderResponse {
   orderId: string;

@@ -1,5 +1,5 @@
 import { Component, computed, input } from '@angular/core';
-import { CancelReason } from '../../../interfaces/cancel-reason';
+import { CancelReason } from '../../../../../shared/models/cancel-reason';
 
 const CANCEL_REASON_LABELS: Record<CancelReason, string> = {
   INSUFFICIENT_STOCK: 'Insufficient Stock',
