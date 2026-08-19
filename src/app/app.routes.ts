@@ -76,7 +76,7 @@ export const routes: Routes = [
   {
     path: 'seller',
     component: SellerLayout,
-    canActivate: [authGuard, sellerGuard],
+    // canActivate: [authGuard, sellerGuard], // TODO: uncomment when auth service is wired
     children: SELLER_ROUTES
   },
   {
