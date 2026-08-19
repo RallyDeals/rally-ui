@@ -43,43 +43,21 @@ export class DealsService {
     const page = params.page ?? 1;
     const limit = params.limit ?? 10;
 
-    return new Observable(observer => {
-      const filtered = DUMMY_DEALS.filter((deal) => {
-        const matchesSearch =
-          !search ||
-          deal.productName.toLowerCase().includes(search) ||
-          deal.sku.toLowerCase().includes(search) ||
-          deal.sellerName.toLowerCase().includes(search);
-        const matchesStatus = !status || deal.status === status;
-        const matchesCategory = !categories || categories.includes(deal.category);
-        const matchesSeller = !sellerId || deal.sellerId === sellerId;
-        const matchesParticipant =
-          !participantId || (DUMMY_DEAL_PARTICIPANTS[deal.id]?.includes(participantId) ?? false);
-        const matchesProduct = !productId || deal.productId === productId;
-        const matchesMinPrice = minPrice === undefined || deal.dealPrice >= minPrice;
-        const matchesMaxPrice = maxPrice === undefined || deal.dealPrice <= maxPrice;
-        return matchesSearch && matchesStatus && matchesCategory && matchesSeller && matchesParticipant && matchesProduct && matchesMinPrice && matchesMaxPrice;
-      });
-      const sorted = this.sortDeals(filtered, sort);
-      const start = (page - 1) * limit;
-      observer.next({ items: sorted.slice(start, start + limit), total: sorted.length, page, limit });
-      observer.complete();
+    return this.http.get<PageResponse<DealOverview>>(this.baseUrl, {
+      params: {
+        page,
+        limit,
+        ...(search && { search }),
+        ...(status && { status }),
+        ...(categories && { categories }),
+        ...(sellerId && { sellerId }),
+        ...(participantId && { participantId }),
+        ...(productId && { productId }),
+        ...(minPrice !== undefined && { minPrice }),
+        ...(maxPrice !== undefined && { maxPrice }),
+        ...(sort && sort !== 'relevance' && { sort }),
+      },
     });
-    // return this.http.get<PageResponse<DealOverview>>(this.baseUrl, {
-    //   params: {
-    //     page,
-    //     limit,
-    //     ...(search && { search }),
-    //     ...(status && { status }),
-    //     ...(categories && { categories }),
-    //     ...(sellerId && { sellerId }),
-    //     ...(participantId && { participantId }),
-    //     ...(productId && { productId }),
-    //     ...(minPrice !== undefined && { minPrice }),
-    //     ...(maxPrice !== undefined && { maxPrice }),
-    //     ...(sort && sort !== 'relevance' && { sort }),
-    //   },
-    // });
   }
 
   private sortDeals(list: DealOverview[], sort?: DealSortKey): DealOverview[] {
