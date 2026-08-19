@@ -16,6 +16,7 @@ import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 import { OrderDetails } from './features/orders/order-details/order-details';
 import { authGuard } from './core/guards/auth.guard';
+import { sellerGuard } from './core/guards/seller.guard';
 import { adminGuard } from './core/guards/admin.guard';
 
 
@@ -75,6 +76,7 @@ export const routes: Routes = [
   {
     path: 'seller',
     component: SellerLayout,
+    canActivate: [authGuard, sellerGuard],
     children: SELLER_ROUTES
   },
   {
