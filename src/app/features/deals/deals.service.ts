@@ -10,6 +10,7 @@ import { DealDetails } from './interfaces/DealDetails';
 import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
 import { DealsQueryParams, DealSortKey } from './interfaces/DealsQueryParams';
 import { CreateDealRequest } from './interfaces/CreateDealRequest';
+import { ActivityEvent } from './interfaces/ActivityEvent';
 import { DUMMY_DEALS, DUMMY_DEALS_ANALYTICS, DUMMY_DEAL_PARTICIPANTS } from '../../shared/mocks/deals.mock';
 import { ProductsService } from '../products/products.service';
 
@@ -93,41 +94,23 @@ export class DealsService {
   }
 
   getDealsDetails(id: string): Observable<DealDetails | null> {
-    return new Observable(observer => {
-      const deal = DUMMY_DEALS.find((item) => item.id === id);
-      observer.next(deal ? this.toDealDetails(deal) : null);
-      observer.complete();
-    });
-    // return this.http.get<DealDetails>(`${this.baseUrl}/${id}`);
+    return this.http.get<DealDetails>(`${this.baseUrl}/${id}`);
   }
 
   getDeal(id: string): Observable<DealDetails | null> {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string, buyerId: string): Observable<DealDetails | null> {
-    return new Observable(observer => {
-      const deal = DUMMY_DEALS.find((item) => item.id === id);
-      if (deal && deal.currentParticipants < deal.dealStock) {
-        const isFirstJoin = deal.status === DealStatus.PENDING && deal.currentParticipants === 0;
-        deal.currentParticipants += 1;
-        deal.neededCount = Math.max(0, deal.minParticipants - deal.currentParticipants);
-        deal.progressPercent = deal.dealStock > 0 ? Math.min(100, Math.round((deal.currentParticipants / deal.dealStock) * 100)) : 0;
-        const participants = (DUMMY_DEAL_PARTICIPANTS[id] ??= []);
-        if (!participants.includes(buyerId)) {
-          participants.push(buyerId);
-        }
-        if (isFirstJoin) {
-          // Pending deals have no timer until the first participant joins; that join starts the clock.
-          deal.status = DealStatus.ACTIVE;
-          deal.endTime = new Date(Date.now() + deal.durationMinutes * 60000);
-          deal.timeRemainingInSeconds = deal.durationMinutes * 60;
-        }
-      }
-      observer.next(deal ? this.toDealDetails(deal) : null);
-      observer.complete();
-    });
-    // return this.http.post<DealDetails>(`${this.baseUrl}/${id}/join`, {});
+  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<unknown> {
+    return this.http.post(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
+  }
+
+  leaveDeal(id: string): Observable<unknown> {
+    return this.http.delete(`${this.baseUrl}/${id}/leave`);
+  }
+
+  getDealActivity(id: string): Observable<ActivityEvent[]> {
+    return this.http.get<ActivityEvent[]>(`${environment.apiUrl}/deals/${id}/activity`);
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {

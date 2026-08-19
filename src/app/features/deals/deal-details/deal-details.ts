@@ -11,6 +11,7 @@ import { DealsService } from '../deals.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
+import { ActivityEvent } from '../interfaces/ActivityEvent';
 import { dealBadge } from '../deal-badge';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
@@ -126,52 +127,9 @@ export class DealDetails implements OnInit {
     ];
   });
 
-  activity = computed(() => {
-    const deal = this.deal();
-    if (!deal) {
-      return [];
-    }
-    const created = dealStartTime(deal);
-    const ended = deal.endTime.getTime();
-    const unlocked = created + (ended - created) * 0.35;
-    const isLive = deal.currentParticipants >= deal.minParticipants;
-    return [
-      { icon: 'rocket_launch', text: 'Rally created', time: this.formatTimeAgo(created) },
-      {
-        icon: 'flag',
-        text: `Goal set: ${deal.minParticipants} minimum participants`,
-        time: this.formatTimeAgo(created),
-      },
-      isLive
-        ? {
-            icon: 'check_circle',
-            text: `Minimum reached — rally is live at $${deal.dealPrice.toFixed(2)}`,
-            time: this.formatTimeAgo(unlocked),
-          }
-        : {
-            icon: 'hourglass_top',
-            text: `Waiting for ${deal.neededCount} more to unlock`,
-            time: 'just now',
-          },
-      {
-        icon: 'link',
-        text: `${Math.min(Math.max(deal.currentParticipants - deal.minParticipants, 3), 12)} friends joined via invite links`,
-        time: this.formatTimeAgo(ended - 60 * 60 * 1000),
-      },
-      {
-        icon: 'person_remove',
-        text: '1 participant left this rally',
-        time: this.formatTimeAgo(ended - 90 * 60 * 1000),
-      },
-      {
-        icon: 'group_add',
-        text: `${deal.currentParticipants} people joined this rally so far`,
-        time: 'just now',
-      },
-    ];
-  });
+  activity = signal<ActivityEvent[]>([]);
 
-  private formatTimeAgo(timestamp: number): string {
+  formatTimeAgo(timestamp: number): string {
     const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000));
     if (minutes < 1) {
       return 'just now';
@@ -184,6 +142,10 @@ export class DealDetails implements OnInit {
       return `${hours}h ago`;
     }
     return `${Math.round(hours / 24)}d ago`;
+  }
+
+  formatTimestampAgo(timestamp: string): string {
+    return this.formatTimeAgo(new Date(timestamp).getTime());
   }
 
   milestones = computed(() => {
@@ -285,11 +247,13 @@ export class DealDetails implements OnInit {
     this.copied.set(false);
     this.selectedImage.set(null);
     this.selectedTab.set('description');
+    this.activity.set([]);
     this.dealsService.getDeal(id).subscribe({
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
           this.startDealPoll(id);
+          this.loadActivity(id);
         } else {
           this.error.set(NOT_FOUND_ERROR);
           this.stopDealPoll();
@@ -301,6 +265,12 @@ export class DealDetails implements OnInit {
         this.error.set(toApiError(err));
         this.stopDealPoll();
       },
+    });
+  }
+
+  private loadActivity(dealId: string) {
+    this.dealsService.getDealActivity(dealId).subscribe({
+      next: (events) => this.activity.set(events),
     });
   }
 
@@ -326,17 +296,31 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    this.joined.set(true);
     const deal = this.deal();
-    const buyerId = this.tokenService.getUserId();
-    if (!deal || !buyerId) {
+    const userId = this.tokenService.getUserId();
+    if (!deal || !userId) {
       return;
     }
-    this.dealsService.joinDeal(deal.id, buyerId).subscribe({
-      next: (updated) => {
-        if (updated) {
-          this.deal.set(updated);
-        }
+    this.joined.set(true);
+    this.dealsService.joinDeal(deal.id, 'pm_default', 'TBD').subscribe({
+      next: () => {
+        this.loadDeal(deal.id);
+      },
+      error: () => {
+        this.joined.set(false);
+      },
+    });
+  };
+
+  leaveDeal = () => {
+    const deal = this.deal();
+    if (!deal) {
+      return;
+    }
+    this.dealsService.leaveDeal(deal.id).subscribe({
+      next: () => {
+        this.joined.set(false);
+        this.loadDeal(deal.id);
       },
     });
   };
