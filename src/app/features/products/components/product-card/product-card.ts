@@ -1,13 +1,9 @@
-import { Component, OnDestroy, effect, input, output, signal } from '@angular/core';
+import { Component, OnDestroy, input, output, signal } from '@angular/core';
 import { Router } from '@angular/router';
-import { Subscription } from 'rxjs';
 import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { Product } from '../../../../shared/models/product';
 import { CartService } from '../../../cart/cart.service';
-import { DealsService } from '../../../deals/deals.service';
-import { DealStatus } from '../../../../shared/models/deal';
-import { DealOverview } from '../../../deals/interfaces/DealOverview';
 import { ImageFallbackDirective } from '../../../../shared/directives/image-fallback.directive';
 
 @Component({
@@ -23,27 +19,19 @@ export class ProductCard implements OnDestroy {
   added = signal(false);
   addedToCart = output<string>();
   private addTimer: ReturnType<typeof setTimeout> | undefined;
-  private dealSub: Subscription | null = null;
 
-  deal = signal<DealOverview | null>(null);
-
-  constructor(
-    private readonly router: Router,
-    private readonly cartService: CartService,
-    private readonly dealsService: DealsService,
-  ) {
-    effect(() => {
-      const productId = this.product().id;
-      this.dealSub?.unsubscribe();
-      this.dealSub = this.dealsService
-        .getDealsOverview({ productId, status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`, limit: 1 })
-        .subscribe((response) => this.deal.set(response.items[0] ?? null));
-    });
+  get hasActiveDeal(): boolean {
+    return (this.product().activeDeals?.length ?? 0) > 0;
   }
 
   get imageSrc(): string {
     return resolveImageUrl(this.product().imageUrl, PLACEHOLDER_IMAGE);
   }
+
+  constructor(
+    private readonly router: Router,
+    private readonly cartService: CartService,
+  ) {}
 
   openDetails = () => {
     this.router.navigate(['/products', this.product().id]);
@@ -60,6 +48,5 @@ export class ProductCard implements OnDestroy {
 
   ngOnDestroy() {
     clearTimeout(this.addTimer);
-    this.dealSub?.unsubscribe();
   }
 }

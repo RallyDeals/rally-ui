@@ -12,6 +12,13 @@ import { CreateDealRequest } from './interfaces/CreateDealRequest';
 import { ActivityEvent } from './interfaces/ActivityEvent';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 
+export interface InviteLinkResponse {
+  code: string;
+  dealId: string;
+  referrerUserId: string;
+  expiresAt: string;
+}
+
 interface DealResponse {
   id: string;
   productId: string;
@@ -49,9 +56,9 @@ export class DealsService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getDealsAnalytics(sellerId: string): Observable<DealsAnalyticsResponse> {
+  getDealsAnalytics(sellerId?: string): Observable<DealsAnalyticsResponse> {
     return this.http.get<DealsAnalyticsResponse>(`${this.baseUrl}/analytics`, {
-      headers: { 'X-User-Id': sellerId },
+      ...(sellerId && { headers: { 'X-User-Id': sellerId } }),
     });
   }
 
@@ -124,6 +131,10 @@ export class DealsService {
 
   getDealActivity(id: string): Observable<ActivityEvent[]> {
     return this.http.get<ActivityEvent[]>(`${environment.apiUrl}/deals/${id}/activity`);
+  }
+
+  createInviteLink(dealId: string): Observable<InviteLinkResponse> {
+    return this.http.post<InviteLinkResponse>(`${environment.apiUrl}/deals/${dealId}/invite-link`, {});
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {

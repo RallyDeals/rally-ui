@@ -1,0 +1,100 @@
+<div class="backdrop" (click)="cancel()">
+  <div class="dialog" (click)="$event.stopPropagation()" style="position: relative;">
+    <button class="btn-close" (click)="cancel()">&times;</button>
+    <h2 style="margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1a1a2e;">Complete Your Join</h2>
+    <p style="margin: 0 0 20px; font-size: 14px; color: #64748b;">Select a payment method and enter your shipping address.</p>
+
+    @if (loading()) {
+      <div style="text-align: center; padding: 32px 0; color: #94a3b8;">Loading saved cards...</div>
+    } @else {
+      <!-- Saved Cards Section -->
+      @if (savedCards().length > 0 && !addingNewCard()) {
+        <div style="margin-bottom: 16px;">
+          <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 8px;">Saved Cards</label>
+          <div style="display: flex; flex-direction: column; gap: 8px;">
+            @for (card of savedCards(); track card.id) {
+              <div
+                class="card-item"
+                [class.selected]="selectedCardId() === card.id"
+                (click)="selectCard(card.id)"
+              >
+                <div class="card-icon" [class]="getCardBrandClass(card.brand)">
+                  {{ getCardBrandLabel(card.brand) }}
+                </div>
+                <div style="flex: 1;">
+                  <div style="font-size: 14px; font-weight: 600; color: #1a1a2e;">
+                    {{ card.brand }} &bull;&bull;&bull;&bull;{{ card.lastFourDigits }}
+                  </div>
+                  <div style="font-size: 12px; color: #94a3b8;">Expires {{ card.expiry }}</div>
+                </div>
+                @if (card.isDefault) {
+                  <span style="font-size: 11px; color: #5B5FC7; font-weight: 600; background: #f0f0ff; padding: 2px 8px; border-radius: 4px;">Default</span>
+                }
+                @if (selectedCardId() === card.id) {
+                  <span style="color: #5B5FC7; font-size: 18px;">&#10003;</span>
+                }
+              </div>
+            }
+          </div>
+          <button class="btn-secondary" style="margin-top: 12px;" (click)="showAddCard()">
+            + Add New Card
+          </button>
+        </div>
+      }
+
+      <!-- Add New Card Section -->
+      @if (addingNewCard()) {
+        <div style="margin-bottom: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <label style="font-size: 13px; font-weight: 600; color: #475569;">New Card</label>
+            @if (savedCards().length > 0) {
+              <button (click)="cancelAddCard()" style="background: none; border: none; color: #5B5FC7; font-size: 13px; cursor: pointer; font-weight: 600;">Use saved card</button>
+            }
+          </div>
+          <div class="card-element-box">
+            <div #cardElementContainer></div>
+          </div>
+        </div>
+      }
+
+      <!-- No saved cards and not adding new -->
+      @if (savedCards().length === 0 && !addingNewCard()) {
+        <div style="margin-bottom: 16px;">
+          <p style="font-size: 14px; color: #64748b; margin-bottom: 12px;">No saved payment methods. Add a card to continue.</p>
+          <div class="card-element-box">
+            <div #cardElementContainer></div>
+          </div>
+        </div>
+      }
+
+      <!-- Address Input -->
+      <div style="margin-bottom: 20px;">
+        <label style="display: block; font-size: 13px; font-weight: 600; color: #475569; margin-bottom: 6px;">Shipping Address</label>
+        <textarea
+          [(ngModel)]="address"
+          rows="3"
+          maxlength="500"
+          placeholder="Enter your full shipping address..."
+          style="width: 100%; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 12px; font-size: 14px; resize: vertical; font-family: inherit; box-sizing: border-box;"
+        ></textarea>
+      </div>
+
+      @if (error(); as err) {
+        <div class="error-text" style="margin-bottom: 12px;">{{ err }}</div>
+      }
+
+      <!-- Actions -->
+      <button
+        class="btn-primary"
+        [disabled]="processing() || (!selectedCardId() && !addingNewCard())"
+        (click)="confirm()"
+      >
+        @if (processing()) {
+          Processing...
+        } @else {
+          Confirm &amp; Join Rally
+        }
+      </button>
+    }
+  </div>
+</div>

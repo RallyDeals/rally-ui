@@ -13,6 +13,7 @@ import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { ActivityEvent } from '../interfaces/ActivityEvent';
 import { dealBadge } from '../deal-badge';
+import { PaymentDialog } from '../payment-dialog/payment-dialog';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',
@@ -59,7 +60,7 @@ const DEAL_POLL_INTERVAL_MS = 15_000;
 
 @Component({
   selector: 'app-deal-details',
-  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn],
+  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog],
   templateUrl: './deal-details.html',
 })
 export class DealDetails implements OnInit {
@@ -77,6 +78,7 @@ export class DealDetails implements OnInit {
   error = signal<ApiError | null>(null);
   joined = signal(false);
   copied = signal(false);
+  showPaymentDialog = signal(false);
   selectedTab = signal<DealTab>('description');
   selectedImage = signal<string | null>(null);
   private copyTimer: ReturnType<typeof setTimeout> | undefined;
@@ -209,7 +211,7 @@ export class DealDetails implements OnInit {
 
   isClosed = computed(() => {
     const deal = this.deal();
-    return !!deal && deal.status !== DealStatus.ACTIVE;
+    return !!deal && deal.status !== DealStatus.ACTIVE && deal.status !== DealStatus.PENDING;
   });
 
   badge = computed(() => {
@@ -270,8 +272,27 @@ export class DealDetails implements OnInit {
 
   private loadActivity(dealId: string) {
     this.dealsService.getDealActivity(dealId).subscribe({
-      next: (events) => this.activity.set(events),
+      next: (events) => {
+        this.activity.set(events);
+        this.checkJoinedFromActivity(events);
+      },
     });
+  }
+
+  private checkJoinedFromActivity(events: ActivityEvent[]) {
+    const userId = this.tokenService.getUserId();
+    if (!userId) return;
+    const sorted = [...events].sort((a, b) =>
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    let joined = false;
+    for (const event of sorted) {
+      if (event.userId === userId) {
+        if (event.type === 'JOINED') joined = true;
+        if (event.type === 'LEFT') joined = false;
+      }
+    }
+    this.joined.set(joined);
   }
 
   private startDealPoll(dealId: string) {
@@ -296,13 +317,19 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    const deal = this.deal();
     const userId = this.tokenService.getUserId();
-    if (!deal || !userId) {
+    if (!userId) {
       return;
     }
+    this.showPaymentDialog.set(true);
+  };
+
+  onPaymentConfirmed = (data: { paymentMethodId: string; address: string }) => {
+    const deal = this.deal();
+    if (!deal) return;
+    this.showPaymentDialog.set(false);
     this.joined.set(true);
-    this.dealsService.joinDeal(deal.id, 'pm_default', 'TBD').subscribe({
+    this.dealsService.joinDeal(deal.id, data.paymentMethodId, data.address).subscribe({
       next: () => {
         this.loadDeal(deal.id);
       },
@@ -310,6 +337,10 @@ export class DealDetails implements OnInit {
         this.joined.set(false);
       },
     });
+  };
+
+  onPaymentCancelled = () => {
+    this.showPaymentDialog.set(false);
   };
 
   leaveDeal = () => {
@@ -334,13 +365,26 @@ export class DealDetails implements OnInit {
   };
 
   inviteFriends = () => {
-    const url = window.location.href;
+    const deal = this.deal();
+    if (!deal) return;
+    this.dealsService.createInviteLink(deal.id).subscribe({
+      next: (link) => {
+        const inviteUrl = `${window.location.origin}/deals/${deal.id}?invite=${link.code}`;
+        this.copyToClipboard(inviteUrl);
+      },
+      error: () => {
+        this.copyToClipboard(window.location.href);
+      },
+    });
+  };
+
+  private copyToClipboard(url: string): void {
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(url).then(() => this.showCopied(), () => this.fallbackCopy(url));
     } else {
       this.fallbackCopy(url);
     }
-  };
+  }
 
   private showCopied() {
     this.copied.set(true);

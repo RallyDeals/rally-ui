@@ -139,7 +139,7 @@
             </p>
           }
 
-          @if (activeDeals().length > 1) {
+          @if (displayDeals().length > 1) {
             <button
               type="button"
               class="w-full rounded-xl border border-tertiary/30 bg-tertiary/10 px-3 py-2 flex items-center justify-between gap-2 hover:cursor-pointer hover:bg-tertiary/20 transition-colors"
@@ -147,7 +147,7 @@
             >
               <p class="flex items-center gap-2 text-sm font-semibold text-on-surface">
                 <span class="material-symbols-outlined text-tertiary text-[18px]">groups</span>
-                {{ activeDeals().length }} active group deals
+                {{ displayDeals().length }} active group deals
               </p>
               <p class="font-label-sm text-label-sm text-primary font-bold flex items-center gap-rally-xs">
                 from ${{ minDealPrice() }} · save up to {{ maxDealDiscount() }}%
@@ -164,7 +164,9 @@
                   Active Group Deal
                 </p>
                 <span class="font-label-sm text-label-sm text-on-surface-variant">
-                  <app-countdown [endAt]="deal.endTime.toISOString()" />
+                  @if (deal.endTime) {
+                    <app-countdown [endAt]="deal.endTime" />
+                  }
                 </span>
               </div>
               <div class="flex items-center justify-between gap-2">
@@ -255,7 +257,7 @@
         </div>
       </div>
 
-      @if (activeDeals().length > 1) {
+      @if (displayDeals().length > 1) {
         <section id="product-group-deals" class="mt-rally-xl border-t border-outline-variant/20 pt-rally-xl">
           <div class="flex items-center justify-between mb-rally-lg">
             <h2
@@ -264,18 +266,20 @@
               Active Group Deals
             </h2>
             <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">
-              {{ activeDeals().length }} active
+              {{ displayDeals().length }} active
             </span>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-rally-md">
-            @for (deal of activeDeals(); track deal.id) {
+            @for (deal of displayDeals(); track deal.id) {
               <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-4 flex flex-col gap-3">
                 <div class="flex items-start justify-between gap-2">
                   <p class="font-body-md font-semibold text-on-surface leading-snug">
                     {{ deal.productName }}
                   </p>
                   <span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">
-                    <app-countdown [endAt]="deal.endTime.toISOString()" />
+                    @if (deal.endTime) {
+                      <app-countdown [endAt]="deal.endTime" />
+                    }
                   </span>
                 </div>
                 <div class="flex items-end justify-between">
