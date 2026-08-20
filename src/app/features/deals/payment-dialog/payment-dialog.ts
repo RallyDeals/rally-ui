@@ -18,25 +18,7 @@ import { StripeService } from '../../../shared/services/stripe.service';
   selector: 'app-payment-dialog',
   imports: [FormsModule],
   templateUrl: './payment-dialog.html',
-  styles: `
-    .backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1000; display: flex; align-items: center; justify-content: center; }
-    .dialog { background: white; border-radius: 16px; padding: 24px; width: 90%; max-width: 480px; max-height: 85vh; overflow-y: auto; }
-    .card-item { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 12px; cursor: pointer; transition: all 0.15s; }
-    .card-item:hover { border-color: var(--color-primary-container); }
-    .card-item.selected { border-color: var(--color-primary-container); background: var(--color-primary-fixed); }
-    .card-icon { width: 40px; height: 28px; border-radius: 4px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; color: white; }
-    .card-brand-visa { background: linear-gradient(135deg, #1a1f71, #2557d6); }
-    .card-brand-mastercard { background: linear-gradient(135deg, #eb001b, #f79e1b); }
-    .card-brand-amex { background: linear-gradient(135deg, #006fcf, #00aeef); }
-    .card-brand-default { background: linear-gradient(135deg, #64748b, #94a3b8); }
-    .card-element-box { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; min-height: 44px; }
-    .btn-primary { background: var(--color-primary-container); color: white; border: none; border-radius: 8px; padding: 12px 24px; font-weight: 600; cursor: pointer; width: 100%; font-size: 15px; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-secondary { background: transparent; color: var(--color-primary-container); border: 1px solid var(--color-primary-container); border-radius: 8px; padding: 10px 24px; font-weight: 600; cursor: pointer; width: 100%; font-size: 14px; }
-    .btn-close { position: absolute; top: 12px; right: 12px; background: none; border: none; font-size: 20px; cursor: pointer; color: #94a3b8; }
-    .error-text { color: #dc2626; font-size: 13px; margin-top: 4px; }
-  `,
+  styleUrl: './payment-dialog.css',
 })
 export class PaymentDialog implements AfterViewInit, OnDestroy {
   @Output() confirmed = new EventEmitter<{ paymentMethodId: string; address: string }>();

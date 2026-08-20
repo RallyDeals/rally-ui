@@ -285,7 +285,10 @@ export class DealDetails implements OnInit {
   }
 
   private toInitials(userId: string): string {
-    return userId.replace(/-/g, '').slice(0, 2).toUpperCase();
+    const hex = userId.replace(/-/g, '');
+    const first = parseInt(hex.slice(0, 8), 16) % 26;
+    const second = parseInt(hex.slice(8, 16), 16) % 26;
+    return String.fromCharCode(65 + first) + String.fromCharCode(65 + second);
   }
 
   private checkJoinedFromActivity(events: ActivityEvent[]) {
