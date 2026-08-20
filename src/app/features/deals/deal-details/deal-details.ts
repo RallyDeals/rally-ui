@@ -319,12 +319,13 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    if (!isAuthenticated()) {
-      this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
-      });
-      return;
-    }
+    // TODO: uncomment when auth service is wired
+    // if (!isAuthenticated()) {
+    //   this.router.navigate(['/auth/login'], {
+    //     queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
+    //   });
+    //   return;
+    // }
     this.showPaymentDialog.set(true);
   };
 
