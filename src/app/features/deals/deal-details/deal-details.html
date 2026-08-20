@@ -118,22 +118,29 @@
               </div>
 
               <div class="flex flex-col gap-rally-sm">
-                <app-primary-btn
-                  [content]="
-                    isClosed() && !isFull()
-                      ? statusText()
-                      : isFull()
-                        ? 'Rally is full'
-                        : joined()
-                          ? 'You joined this rally!'
+                @if (!joined()) {
+                  <app-primary-btn
+                    [content]="
+                      isClosed() && !isFull()
+                        ? statusText()
+                        : isFull()
+                          ? 'Rally is full'
                           : 'Join This Rally.'
-                  "
-                  [icon]="isFull() || joined() || isClosed() ? '' : 'arrow_forward'"
-                  [disabled]="isFull() || isClosed()"
-                  bgClass="bg-primary-container"
-                  extraClasses="py-4"
-                  (clicked)="joinDeal()"
-                />
+                    "
+                    [icon]="isFull() || isClosed() ? '' : 'arrow_forward'"
+                    [disabled]="isFull() || isClosed()"
+                    bgClass="bg-primary-container"
+                    extraClasses="py-4"
+                    (clicked)="joinDeal()"
+                  />
+                } @else {
+                  <div
+                    class="w-full bg-surface-container text-on-surface-variant font-body-md text-body-md py-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                    You joined this rally!
+                  </div>
+                }
                 <button
                   class="w-full bg-transparent border border-outline-variant hover:border-primary-container hover:text-primary-container text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                   (click)="inviteFriends()"
