@@ -345,7 +345,8 @@ export class DealDetails implements OnInit {
     this.joined.set(true);
     this.dealsService.joinDeal(deal.id, data.paymentMethodId, data.address).subscribe({
       next: () => {
-        this.loadDeal(deal.id);
+        this.loadActivity(deal.id);
+        this.loadParticipants(deal.id);
       },
       error: () => {
         this.joined.set(false);
@@ -365,7 +366,8 @@ export class DealDetails implements OnInit {
     this.dealsService.leaveDeal(deal.id).subscribe({
       next: () => {
         this.joined.set(false);
-        this.loadDeal(deal.id);
+        this.loadActivity(deal.id);
+        this.loadParticipants(deal.id);
       },
     });
   };
