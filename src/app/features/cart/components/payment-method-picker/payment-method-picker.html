@@ -5,85 +5,43 @@
     <span class="icon-lg">credit_card</span>
     <h2 class="label-caps-plain">Payment Method</h2>
   </div>
-
-  @if (loading()) {
-    <div class="text-center py-4 text-on-surface-variant text-sm">Loading saved cards...</div>
-  } @else if (methods().length === 0 && !addingNewCard()) {
-    <div class="text-center py-4 text-on-surface-variant text-sm">No saved cards. Add one below.</div>
-  }
-
-  @if (methods().length > 0 && !addingNewCard()) {
-    <div class="flex flex-col gap-rally-xs">
-      @for (method of methods(); track method.id) {
-        <button
-          type="button"
-          class="flex items-center gap-rally-sm p-rally-sm rounded-lg border transition-colors text-left hover:cursor-pointer"
-          [class]="
-            selectedId() === method.id
-              ? 'border-primary bg-primary-container/10'
-              : 'border-outline-variant hover:border-primary/50'
-          "
-          (click)="select(method.id)"
-        >
-          <span
-            class="material-symbols-outlined text-[20px]"
-            [class]="selectedId() === method.id ? 'text-primary' : 'text-on-surface-variant'"
-          >
-            {{ selectedId() === method.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
-          </span>
-          <div
-            class="px-2 py-1 rounded text-xs font-bold tracking-wider text-white"
-            [class]="getCardBrandClass(method.brand)"
-          >
-            {{ getCardBrandLabel(method.brand) }}
-          </div>
-          <div>
-            <div class="font-body-md text-sm font-bold text-on-surface">
-              •••• {{ method.lastFourDigits }}
-            </div>
-            <div class="font-body-md text-xs text-on-surface-variant">Expires {{ method.expiry }}</div>
-          </div>
-          @if (method.isDefault) {
-            <span class="ml-auto text-[11px] text-primary font-semibold bg-primary-container/10 px-2 py-0.5 rounded">Default</span>
-          }
-        </button>
-      }
+  <div class="flex flex-col gap-rally-xs">
+    @for (method of methods; track method.id) {
       <button
         type="button"
-        class="flex items-center gap-rally-xs p-rally-sm rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors hover:cursor-pointer"
-        (click)="showAddCard()"
+        class="flex items-center gap-rally-sm p-rally-sm rounded-lg border transition-colors text-left hover:cursor-pointer"
+        [class]="
+          selectedId() === method.id
+            ? 'border-primary bg-primary-container/10'
+            : 'border-outline-variant hover:border-primary/50'
+        "
+        (click)="select(method.id)"
       >
-        <span class="icon-lg">add</span>
-        <span class="font-label-sm text-label-sm">Add New Card</span>
-      </button>
-    </div>
-  }
-
-  @if (addingNewCard()) {
-    <div class="flex flex-col gap-rally-xs">
-      @if (methods().length > 0) {
-        <button
-          type="button"
-          class="text-left text-primary text-sm font-semibold hover:underline mb-1 cursor-pointer bg-transparent border-none p-0"
-          (click)="cancelAddCard()"
+        <span
+          class="material-symbols-outlined text-[20px]"
+          [class]="selectedId() === method.id ? 'text-primary' : 'text-on-surface-variant'"
         >
-          &larr; Use saved card
-        </button>
-      }
-      <div class="border border-outline-variant rounded-lg p-3">
-        <div #cardElementContainer></div>
-      </div>
-      @if (error(); as err) {
-        <p class="text-error text-xs mt-1">{{ err }}</p>
-      }
-      <button
-        type="button"
-        class="btn-primary bg-primary text-white rounded-lg py-2 px-4 text-sm font-semibold hover:opacity-90 transition-opacity disabled:opacity-50"
-        [disabled]="savingCard()"
-        (click)="saveNewCard()"
-      >
-        {{ savingCard() ? 'Saving...' : 'Save Card' }}
+          {{ selectedId() === method.id ? 'radio_button_checked' : 'radio_button_unchecked' }}
+        </span>
+        <div
+          class="bg-inverse-surface text-inverse-on-surface px-2 py-1 rounded text-xs font-bold tracking-wider"
+        >
+          {{ method.brand.toUpperCase() }}
+        </div>
+        <div>
+          <div class="font-body-md text-sm font-bold text-on-surface">
+            •••• {{ method.lastFourDigits }}
+          </div>
+          <div class="font-body-md text-xs text-on-surface-variant">Expires {{ method.expiry }}</div>
+        </div>
       </button>
-    </div>
-  }
+    }
+    <button
+      type="button"
+      class="flex items-center gap-rally-xs p-rally-sm rounded-lg border border-dashed border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary transition-colors hover:cursor-pointer"
+    >
+      <span class="icon-lg">add</span>
+      <span class="font-label-sm text-label-sm">Add New Card</span>
+    </button>
+  </div>
 </section>
