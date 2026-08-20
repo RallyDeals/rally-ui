@@ -24,7 +24,7 @@ export class StripeService {
       appearance: {
         theme: 'stripe',
         variables: {
-          colorPrimary: '#5B5FC7',
+          colorPrimary: '#f97316',
           borderRadius: '8px',
         },
       },

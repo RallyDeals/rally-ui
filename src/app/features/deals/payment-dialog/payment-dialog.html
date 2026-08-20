@@ -28,10 +28,10 @@
                   <div style="font-size: 12px; color: #94a3b8;">Expires {{ card.expiry }}</div>
                 </div>
                 @if (card.isDefault) {
-                  <span style="font-size: 11px; color: #5B5FC7; font-weight: 600; background: #f0f0ff; padding: 2px 8px; border-radius: 4px;">Default</span>
+                  <span style="font-size: 11px; color: var(--color-primary-container); font-weight: 600; background: var(--color-primary-fixed); padding: 2px 8px; border-radius: 4px;">Default</span>
                 }
                 @if (selectedCardId() === card.id) {
-                  <span style="color: #5B5FC7; font-size: 18px;">&#10003;</span>
+                  <span style="color: var(--color-primary-container); font-size: 18px;">&#10003;</span>
                 }
               </div>
             }
@@ -48,7 +48,7 @@
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <label style="font-size: 13px; font-weight: 600; color: #475569;">New Card</label>
             @if (savedCards().length > 0) {
-              <button (click)="cancelAddCard()" style="background: none; border: none; color: #5B5FC7; font-size: 13px; cursor: pointer; font-weight: 600;">Use saved card</button>
+              <button (click)="cancelAddCard()" style="background: none; border: none; color: var(--color-primary-container); font-size: 13px; cursor: pointer; font-weight: 600;">Use saved card</button>
             }
           </div>
           <div class="card-element-box">
