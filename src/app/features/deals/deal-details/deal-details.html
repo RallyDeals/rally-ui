@@ -379,3 +379,10 @@
     }
   </div>
 </section>
+
+@if (showPaymentDialog()) {
+  <app-payment-dialog
+    (confirmed)="onPaymentConfirmed($event)"
+    (cancelled)="onPaymentCancelled()"
+  />
+}
