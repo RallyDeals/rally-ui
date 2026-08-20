@@ -144,7 +144,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   loadActiveDeals(productId: string) {
-    this.dealsService.getDealsOverview({ productId, status: DealStatus.ACTIVE, limit: 10 }).subscribe({
+    this.dealsService.getDealsOverview({ productId, status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`, limit: 10 }).subscribe({
       next: (response) => this.activeDeals.set(response.items),
       error: () => this.activeDeals.set([]),
     });

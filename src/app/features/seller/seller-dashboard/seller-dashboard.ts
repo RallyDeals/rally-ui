@@ -102,9 +102,14 @@ export class SellerDashboard implements OnInit {
   readonly statusClasses = STATUS_CLASSES;
   readonly barClasses = BAR_CLASSES;
 
+  readonly loading = signal(true);
+
   private readonly allDeals = toSignal(
     this.dealsService.getSellerDeals(this.getSellerId(), { limit: 100 }).pipe(
-      map((page) => page.items)
+      map((page) => {
+        this.loading.set(false);
+        return page.items;
+      })
     ),
     { initialValue: [] as DealOverview[] }
   );

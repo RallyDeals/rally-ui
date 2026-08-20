@@ -21,7 +21,7 @@ export interface DealsQueryParams {
 
   // dashboards + buyer profile
   sellerId?: string;
-  status?: DealStatus;
+  status?: DealStatus | string;
 
   // buyer profile ("my deals" — all statuses, scoped to deals this buyer joined)
   userId?: string;

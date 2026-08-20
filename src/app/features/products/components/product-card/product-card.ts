@@ -36,7 +36,7 @@ export class ProductCard implements OnDestroy {
       const productId = this.product().id;
       this.dealSub?.unsubscribe();
       this.dealSub = this.dealsService
-        .getDealsOverview({ productId, status: DealStatus.ACTIVE, limit: 1 })
+        .getDealsOverview({ productId, status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`, limit: 1 })
         .subscribe((response) => this.deal.set(response.items[0] ?? null));
     });
   }

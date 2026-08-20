@@ -12,6 +12,7 @@ import { MetricCard } from '../components/metric-card/metric-card';
 import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { DealsService } from '../../deals/deals.service';
 import { DealStatus } from '../../../shared/models/deal';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { PageResponse } from '../../products/page-response';
 import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { TokenService } from '../../../shared/services/token.service';
@@ -59,6 +60,7 @@ export class SellerDeals implements OnInit, OnDestroy {
   readonly statusOptions = DEAL_STATUS_OPTIONS;
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
   readonly DealStatus = DealStatus;
+  readonly resolveImageUrl = resolveImageUrl;
 
   statusFilter = signal<StatusFilter>('ALL');
   searchQuery = signal('');

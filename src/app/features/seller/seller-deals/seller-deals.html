@@ -69,7 +69,23 @@
   <!-- Deals Table -->
   <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
     <div class="overflow-x-auto no-scrollbar">
-      @if (deals().length === 0) {
+      @if (loading() && deals().length === 0) {
+        <div class="p-rally-md space-y-4">
+          @for (s of [1, 2, 3, 4, 5]; track s) {
+            <div class="flex items-center gap-4 animate-pulse">
+              <div class="w-12 h-12 rounded-lg bg-surface-container"></div>
+              <div class="flex-1 space-y-2">
+                <div class="h-4 bg-surface-container rounded w-1/3"></div>
+                <div class="h-3 bg-surface-container rounded w-1/4"></div>
+              </div>
+              <div class="h-6 w-16 bg-surface-container rounded"></div>
+              <div class="h-4 w-20 bg-surface-container rounded"></div>
+              <div class="h-4 w-24 bg-surface-container rounded"></div>
+              <div class="h-8 w-16 bg-surface-container rounded"></div>
+            </div>
+          }
+        </div>
+      } @else if (deals().length === 0) {
         <div class="text-center py-16">
           <span class="material-symbols-outlined text-5xl text-primary mb-4 block">group_off</span>
           <h3 class="section-title mb-1">No deals found</h3>
@@ -102,7 +118,7 @@
                         alt="Deal Product"
                         class="w-full h-full object-cover"
                         [class.grayscale]="deal.status === DealStatus.FAILED || deal.status === DealStatus.CANCELLED"
-                        [src]="deal.image"
+                        [src]="resolveImageUrl(deal.image)"
                       />
                     </div>
                     <div>
