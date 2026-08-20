@@ -234,7 +234,6 @@ export class DealDetails implements OnInit {
   loadDeal(id: string) {
     this.loading.set(true);
     this.error.set(null);
-    this.joined.set(false);
     this.copied.set(false);
     this.selectedImage.set(null);
     this.selectedTab.set('description');
