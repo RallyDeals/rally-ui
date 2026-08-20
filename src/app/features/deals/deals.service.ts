@@ -19,6 +19,19 @@ export interface InviteLinkResponse {
   expiresAt: string;
 }
 
+export interface ParticipantSummary {
+  userId: string;
+  referredBy: string | null;
+  joinedAt: string;
+}
+
+interface ParticipantsPageResponse {
+  participants: ParticipantSummary[];
+  activeCount: number;
+  page: number;
+  size: number;
+}
+
 interface DealResponse {
   id: string;
   productId: string;
@@ -135,6 +148,12 @@ export class DealsService {
 
   createInviteLink(dealId: string): Observable<InviteLinkResponse> {
     return this.http.post<InviteLinkResponse>(`${environment.apiUrl}/deals/${dealId}/invite-link`, {});
+  }
+
+  getDealParticipants(dealId: string): Observable<ParticipantSummary[]> {
+    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`).pipe(
+      map((res) => res.participants ?? [])
+    );
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {

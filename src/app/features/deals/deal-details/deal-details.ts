@@ -7,7 +7,7 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService } from '../deals.service';
+import { DealsService, ParticipantSummary } from '../deals.service';
 import { TokenService } from '../../../shared/services/token.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
@@ -101,21 +101,8 @@ export class DealDetails implements OnInit {
 
   activeImage = computed(() => this.selectedImage() ?? this.deal()?.productImageUrl ?? '');
 
-  participants = computed(() => {
-    const deal = this.deal();
-    if (!deal) {
-      return [];
-    }
-    return AVATAR_INITIALS.slice(0, Math.min(3, deal.currentParticipants)).map((initials, index) => ({
-      initials,
-      color: AVATAR_COLORS[index % AVATAR_COLORS.length],
-    }));
-  });
-
-  extraParticipants = computed(() => {
-    const deal = this.deal();
-    return deal ? Math.max(0, deal.currentParticipants - 3) : 0;
-  });
+  participants = signal<{ initials: string; color: string }[]>([]);
+  extraParticipants = signal(0);
 
   specs = computed(() => {
     const deal = this.deal();
@@ -258,6 +245,7 @@ export class DealDetails implements OnInit {
           this.deal.set(deal);
           this.startDealPoll(id);
           this.loadActivity(id);
+          this.loadParticipants(id);
         } else {
           this.error.set(NOT_FOUND_ERROR);
           this.stopDealPoll();
@@ -279,6 +267,25 @@ export class DealDetails implements OnInit {
         this.checkJoinedFromActivity(events);
       },
     });
+  }
+
+  private loadParticipants(dealId: string) {
+    this.dealsService.getDealParticipants(dealId).subscribe({
+      next: (list) => {
+        const shown = list.slice(0, 3);
+        this.participants.set(
+          shown.map((p, i) => ({
+            initials: this.toInitials(p.userId),
+            color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+          }))
+        );
+        this.extraParticipants.set(Math.max(0, list.length - 3));
+      },
+    });
+  }
+
+  private toInitials(userId: string): string {
+    return userId.replace(/-/g, '').slice(0, 2).toUpperCase();
   }
 
   private checkJoinedFromActivity(events: ActivityEvent[]) {

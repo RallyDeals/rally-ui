@@ -191,7 +191,13 @@
                     </span>
                   }
                 </div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant">just joined</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">
+                  @if (participants().length > 0) {
+                    {{ participants()[0].initials }} joined
+                  } @else {
+                    No participants yet
+                  }
+                </span>
               </div>
             </div>
           </div>
