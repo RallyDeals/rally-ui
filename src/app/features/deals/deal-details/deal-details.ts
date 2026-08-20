@@ -1,5 +1,5 @@
 import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
@@ -14,6 +14,7 @@ import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { ActivityEvent } from '../interfaces/ActivityEvent';
 import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../payment-dialog/payment-dialog';
+import { isAuthenticated } from '../../../core/auth/auth-token';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',
@@ -65,6 +66,7 @@ const DEAL_POLL_INTERVAL_MS = 15_000;
 })
 export class DealDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly dealsService = inject(DealsService);
   private readonly tokenService = inject(TokenService);
   private readonly destroyRef = inject(DestroyRef);
@@ -317,8 +319,10 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    const userId = this.tokenService.getUserId();
-    if (!userId) {
+    if (!isAuthenticated()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
+      });
       return;
     }
     this.showPaymentDialog.set(true);
