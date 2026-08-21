@@ -7,7 +7,7 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { UserToolbar } from './user-toolbar/user-toolbar';
 import { UserRow } from './user-row/user-row';
-import { UserService } from '../../auth/user.service';
+import { UserService } from '../../auth/admin-user.service';
 import { BuyerStatus, User, UserType } from '../../../shared/models/user';
 
 const PAGE_SIZE = 3;
