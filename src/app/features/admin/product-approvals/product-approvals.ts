@@ -9,7 +9,7 @@ import { ProductsService } from '../../products/products.service';
 import { Product } from '../../../shared/models/product';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { UserService } from '../../auth/user.service';
+import { UserService } from '../../auth/admin-user.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
 import { Seller } from '../interfaces/seller';

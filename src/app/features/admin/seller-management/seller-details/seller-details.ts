@@ -1,6 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { UserService } from '../../../auth/user.service';
+import { UserService } from '../../../auth/admin-user.service';
 import { Seller } from '../../interfaces/seller';
 import { PageResponse } from '../../../products/page-response';
 import { ProductsService } from '../../../products/products.service';
