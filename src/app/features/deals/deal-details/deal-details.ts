@@ -8,13 +8,12 @@ import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/prima
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { DealsService, ParticipantSummary } from '../deals.service';
-import { TokenService } from '../../../shared/services/token.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { ActivityEvent } from '../interfaces/ActivityEvent';
 import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../payment-dialog/payment-dialog';
-import { isAuthenticated } from '../../../core/auth/auth-token';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',
@@ -68,7 +67,7 @@ export class DealDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly dealsService = inject(DealsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
@@ -291,7 +290,7 @@ export class DealDetails implements OnInit {
   }
 
   private checkJoinedFromActivity(events: ActivityEvent[]) {
-    const userId = this.tokenService.getUserId();
+    const userId = this.authService.currentUser()?.id;
     if (!userId) return;
     const sorted = [...events].sort((a, b) =>
       new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
@@ -328,13 +327,12 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    // TODO: uncomment when auth service is wired
-    // if (!isAuthenticated()) {
-    //   this.router.navigate(['/auth/login'], {
-    //     queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
-    //   });
-    //   return;
-    // }
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
+      });
+      return;
+    }
     this.showPaymentDialog.set(true);
   };
 

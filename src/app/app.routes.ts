@@ -61,6 +61,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate:[authGuard],
         children: USER_PROFILE_ROUTES,
       },
       {

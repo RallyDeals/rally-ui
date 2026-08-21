@@ -11,12 +11,13 @@ import { BriefSellerOrdersPageResponse } from './interfaces/brief-seller-orders-
 import { SellerOrdersParams } from './interfaces/seller-orders-params';
 import { DetailedSellerOrderResponse } from './interfaces/detailed-seller-order-response';
 import { SellerOrdersStatistics } from './interfaces/seller-orders-statistics';
+import { AuthService } from '../../core/auth/auth.service';
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
   private baseUrl: string = `${environment.apiUrl}/api/orders`;
   private http = inject(HttpClient);
-  private tokenService = inject(TokenService);
+  private authService = inject(AuthService);
 
   getMyOrders(page: number, limit: number): Observable<BriefOrderPageResponse> {
     return this.http.get<BriefOrderPageResponse>(`${this.baseUrl}/my`, {
@@ -66,6 +67,6 @@ export class OrderService {
   }
 
   private get sellerId(): string {
-    return this.tokenService.getSellerId() ?? '';
+    return this.authService.currentUser()?.id ?? '';
   }
 }
