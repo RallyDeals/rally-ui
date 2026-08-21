@@ -3,7 +3,7 @@ import { Category } from './category';
 export type ProductStatus = 'PENDING_APPROVAL' | 'APPROVED' | 'REJECTED';
 
 export interface ActiveDeal {
-  dealId: string;
+  id: string;
   dealPrice: number;
   dealStock: number;
   currentParticipants: number;
@@ -33,5 +33,5 @@ export interface Product {
   deleted: boolean;
   deletedAt: string | null;
   availableStock?: number;
-  activeDeals?: ActiveDeal[];
+  deals?: ActiveDeal[];
 }

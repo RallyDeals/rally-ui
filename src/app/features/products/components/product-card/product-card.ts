@@ -21,7 +21,8 @@ export class ProductCard implements OnDestroy {
   private addTimer: ReturnType<typeof setTimeout> | undefined;
 
   get hasActiveDeal(): boolean {
-    return (this.product().activeDeals?.length ?? 0) > 0;
+    console.log('Checking for active deals:', this.product().deals);
+    return (this.product().deals?.length ?? 0) > 0;
   }
 
   get imageSrc(): string {
