@@ -1,0 +1,74 @@
+<div
+  class="bg-pattern min-h-screen flex items-center justify-center p-gutter font-sans antialiased text-on-surface"
+>
+  <main class="w-full max-w-110 relative z-10">
+    <div class="text-center mb-rally-lg">
+      <app-logo />
+    </div>
+
+    <div
+      class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(19,27,46,0.05)] border border-outline-variant/30 overflow-hidden relative"
+    >
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary-fixed-dim to-primary-container"
+      ></div>
+      <div class="p-rally-lg">
+        @if (error(); as err) {
+          <div
+            class="flex items-center gap-2 px-3 py-2 mb-rally-sm rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
+            role="alert"
+          >
+            <span class="material-symbols-outlined" style="font-size: 18px">error</span>
+            <span>{{ err.message }}</span>
+          </div>
+        }
+        @if (done()) {
+          <div class="text-center py-rally-sm">
+            <span
+              class="material-symbols-outlined text-[48px] block mb-rally-xs"
+              style="color: #006c49">check_circle</span>
+            <h2 class="font-headline-md text-headline-md mb-rally-xs">Email verified</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant">
+              Your email has been verified and you're signed in.
+            </p>
+            <p-button
+              label="Continue"
+              (onClick)="continueAfterVerify()"
+              [fluid]="true"
+              styleClass="mt-rally-md rounded-lg font-label-md font-semibold"
+            />
+          </div>
+        } @else {
+          @switch (step()) {
+            @case ('email') {
+              <app-enter-email
+                topic="email-verification"
+                [initialEmail]="email()"
+                [submitting]="submitting()"
+                (submitted)="onEmailSubmitted($event)"
+              />
+            }
+            @case ('otp') {
+              <h2 class="font-headline-md text-headline-md mb-rally-xs">Enter the code</h2>
+              <p class="font-body-md text-body-md text-on-surface-variant mb-rally-md">
+                We sent a 6-digit code to <span class="font-semibold">{{ email() }}</span
+                >.
+              </p>
+              <app-otp-input [disabled]="submitting()" (completed)="onOtpCompleted($event)" />
+              <app-resend-otp [submitting]="submitting()" (resent)="onResend()" />
+            }
+          }
+        }
+      </div>
+      <div class="bg-surface-container-low p-rally-md border-t border-outline-variant/30 text-center">
+        @if (!done()) {
+          <app-auth-switch-link
+            prompt="Already verified?"
+            linkText="Sign in"
+            linkPath="/auth/login"
+          />
+        }
+      </div>
+    </div>
+  </main>
+</div>
