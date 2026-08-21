@@ -24,6 +24,7 @@ import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { ProductRow, StockStatus, toProductRow } from './product-row';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { Inventory } from '../../../shared/models/inventory';
+import { AuthService } from '../../../core/auth/auth.service';
 
 type StatusFilter = 'ALL' | Product['status'] | 'DELETED';
 
@@ -52,7 +53,7 @@ const INVENTORY_POLL_INTERVAL_MS = 30_000;
 export class SellerProducts implements OnInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
   private readonly inventoryService = inject(InventoryService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
@@ -138,7 +139,7 @@ export class SellerProducts implements OnInit, OnDestroy {
   }
 
   loadProducts() {
-    const sellerId = this.tokenService.getSellerId();
+    const sellerId = this.authService.currentUser()?.id
     if (!sellerId) {
       this.loadError.set({
         message: 'Seller account not found.',

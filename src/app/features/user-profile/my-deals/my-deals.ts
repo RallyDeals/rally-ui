@@ -10,6 +10,7 @@ import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const MAX_DEALS = 50;
 
@@ -20,7 +21,7 @@ const MAX_DEALS = 50;
 })
 export class MyDeals {
   private readonly dealsService = inject(DealsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
 
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
@@ -57,7 +58,7 @@ export class MyDeals {
   }
 
   loadDeals() {
-    const buyerId = this.tokenService.getUserId();
+    const buyerId = this.authService.currentUser()?.id
     if (!buyerId) {
       this.loading.set(false);
       return;
