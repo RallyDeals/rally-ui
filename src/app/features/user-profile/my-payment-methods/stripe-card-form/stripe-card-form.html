@@ -1,0 +1,11 @@
+<form (ngSubmit)="onSubmit()">
+  <div #cardElementRef
+    class="border border-outline rounded-lg p-rally-sm"></div>
+  @if (errorMessage(); as error) {
+  <p class="text-error text-sm mt-rally-xs">{{ error }}</p>
+  }
+  <button type="submit" [disabled]="isSubmitting()"
+    class="btn-primary bg-primary text-on-primary px-rally-lg py-rally-sm rounded-lg mt-rally-md w-full disabled:opacity-50">
+    {{ isSubmitting() ? 'Saving...' : 'Save Card' }}
+  </button>
+</form>
