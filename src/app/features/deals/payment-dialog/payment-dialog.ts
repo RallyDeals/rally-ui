@@ -11,8 +11,9 @@ import {
   viewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { PaymentMethodService, SavedPaymentMethod } from '../../../shared/services/payment-method.service';
+import { PaymentMethodService } from '../../../shared/services/payment-method.service';
 import { StripeService } from '../../../shared/services/stripe.service';
+import { PaymentMethod } from '../../../shared/models/payment-method';
 
 @Component({
   selector: 'app-payment-dialog',
@@ -30,7 +31,7 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
 
   cardContainer = viewChild<ElementRef<HTMLDivElement>>('cardElementContainer');
 
-  savedCards = signal<SavedPaymentMethod[]>([]);
+  savedCards = signal<PaymentMethod[]>([]);
   selectedCardId = signal<string | null>(null);
   addingNewCard = signal(false);
   loading = signal(true);
@@ -49,33 +50,29 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
 
   private loadSavedCards(): void {
     this.loading.set(true);
-    this.paymentMethodService.listSavedCards().subscribe({
+    this.paymentMethodService.getMyPaymentMethods().subscribe({
       next: (cards) => {
-        if (cards.length > 0) {
-          this.savedCards.set(cards);
-          const defaultCard = cards.find((c) => c.isDefault);
+        if (cards.items.length > 0) {
+          this.savedCards.set(cards.items);
+          const defaultCard = cards.items.find((c) => c.isDefault);
           if (defaultCard) {
             this.selectedCardId.set(defaultCard.id);
           } else {
-            this.selectedCardId.set(cards[0].id);
+            this.selectedCardId.set(cards.items[0].id);
           }
         } else {
           // Fallback mock data when no real cards exist
-          this.savedCards.set([
-            { id: 'pm-mock-1', brand: 'VISA', lastFourDigits: '4242', expiry: '12/26', isDefault: true },
-            { id: 'pm-mock-2', brand: 'MASTERCARD', lastFourDigits: '8210', expiry: '09/27', isDefault: false },
-          ]);
-          this.selectedCardId.set('pm-mock-1');
+          // this.savedCards.set([
+          //   { id: 'pm-mock-1', brand: 'VISA', lastFourDigits: '4242', expiry: '12/26', isDefault: true },
+          //   { id: 'pm-mock-2', brand: 'MASTERCARD', lastFourDigits: '8210', expiry: '09/27', isDefault: false },
+          // ]);
+          // this.selectedCardId.set('pm-mock-1');
         }
         this.loading.set(false);
       },
       error: () => {
         // Fallback mock data when backend is unavailable
-        this.savedCards.set([
-          { id: 'pm-mock-1', brand: 'VISA', lastFourDigits: '4242', expiry: '12/26', isDefault: true },
-          { id: 'pm-mock-2', brand: 'MASTERCARD', lastFourDigits: '8210', expiry: '09/27', isDefault: false },
-        ]);
-        this.selectedCardId.set('pm-mock-1');
+
         this.loading.set(false);
       },
     });
@@ -125,7 +122,7 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
         if (!setupIntent) throw new Error('Failed to start card setup');
 
         const result = await this.stripeService.confirmSetup(setupIntent.clientSecret);
-        const saved = await this.paymentMethodService.confirmAndSave(result.paymentMethodId).toPromise();
+        const saved = await this.paymentMethodService.createPaymentMethod({paymentMethodId:result.paymentMethodId,isDefault:true}).toPromise();
         if (!saved) throw new Error('Failed to save card');
 
         this.confirmed.emit({ paymentMethodId: saved.id, address: this.address.trim() });
