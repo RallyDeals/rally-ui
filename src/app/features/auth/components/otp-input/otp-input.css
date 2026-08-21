@@ -1,0 +1,4 @@
+/* PrimeNG sizes the OTP boxes via the theme; keep spacing consistent here. */
+:host {
+  display: block;
+}

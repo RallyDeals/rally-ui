@@ -1,0 +1,9 @@
+<div class="flex justify-center">
+  <p-inputotp
+    [length]="length()"
+    [disabled]="disabled()"
+    [ngModel]="value()"
+    (ngModelChange)="onValueChange($event)"
+    styleClass="gap-2"
+  />
+</div>
