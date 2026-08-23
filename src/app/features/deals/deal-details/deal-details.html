@@ -45,7 +45,7 @@
                   class="aspect-square rounded-lg overflow-hidden cursor-pointer border-2 transition-colors"
                   [class.border-primary-container]="image === activeImage()"
                   [class.border-outline-variant]="image !== activeImage()"
-                  (click)="selectImage(image)"
+                  (click)="selectedImage.set(image)"
                 >
                   <img
                     class="w-full h-full object-cover"
@@ -100,10 +100,10 @@
                   </div>
                   <div class="flex items-baseline gap-rally-sm">
                     <span class="font-display-lg text-[32px] text-primary-container font-black leading-none">
-                      ${{ deal.dealPrice }}
+                      {{ deal.dealPrice | currency }}
                     </span>
                     <span class="font-body-lg text-body-lg text-on-surface-variant line-through opacity-60">
-                      ${{ deal.originalPrice }}
+                      {{ deal.originalPrice | currency }}
                     </span>
                   </div>
                 </div>
@@ -112,13 +112,20 @@
                     Ends In
                   </div>
                   <div class="font-headline-md text-headline-md text-on-surface tabular-nums">
-                    <app-countdown [endAt]="deal.endTime.toISOString()" />
+                    <app-countdown [endAt]="deal.endTime.toISOString()" [pending]="isPending()" />
                   </div>
                 </div>
               </div>
 
               <div class="flex flex-col gap-rally-sm">
-                @if (!joined()) {
+                @if (joinPending() || joined() === 'pending') {
+                  <div
+                    class="w-full bg-surface-container text-on-surface-variant font-body-md text-body-md py-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span class="material-symbols-outlined text-[20px] animate-spin">progress_activity</span>
+                    Processing your join...
+                  </div>
+                } @else if (!joined() || joined() === 'left') {
                   <app-primary-btn
                     [content]="
                       isClosed() && !isFull()
@@ -133,7 +140,10 @@
                     extraClasses="py-4"
                     (clicked)="joinDeal()"
                   />
-                } @else {
+                  @if (joinError(); as joinErr) {
+                    <p class="font-label-sm text-label-sm text-error">{{ joinErr }}</p>
+                  }
+                } @else if (joined() === 'active') {
                   <div
                     class="w-full bg-surface-container text-on-surface-variant font-body-md text-body-md py-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2"
                   >
@@ -242,9 +252,9 @@
               [class.text-on-surface-variant]="selectedTab() !== tab"
               [class.border-transparent]="selectedTab() !== tab"
               [class.hover:text-on-surface]="selectedTab() !== tab"
-              (click)="selectTab(tab)"
+              (click)="selectedTab.set(tab)"
             >
-              {{ tab === 'activity' ? 'Live Activity' : tab.charAt(0).toUpperCase() + tab.slice(1) }}
+              {{ tab === 'activity' ? 'Live Activity' : (tab | titlecase) }}
               @if (tab === 'activity') {
                 <span
                   class="bg-primary-container text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse"
@@ -322,11 +332,13 @@
                       <p class="font-semibold text-on-surface text-body-md">
                         @if (entry.type === 'JOINED') {
                           A participant joined the rally
-                        } @else {
+                        } @else if (entry.type === 'LEFT') {
                           A participant left the rally
+                        } @else if(entry.type === 'PENDING'){
+                          A participant is pending
                         }
                       </p>
-                      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ formatTimestampAgo(entry.timestamp) }}</p>
+                      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ entry.timestamp | timeAgo }}</p>
                     </div>
                   </div>
                 }
@@ -396,6 +408,6 @@
 @if (showPaymentDialog()) {
   <app-payment-dialog
     (confirmed)="onPaymentConfirmed($event)"
-    (cancelled)="onPaymentCancelled()"
+    (cancelled)="showPaymentDialog.set(false)"
   />
 }

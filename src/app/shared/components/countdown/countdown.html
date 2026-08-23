@@ -2,7 +2,9 @@
   @if (showIcon()) {
     <span class="material-symbols-outlined text-[16px]">timer</span>
   }
-  @if (expired()) {
+  @if (pending()) {
+    <span class="font-label-sm text-label-sm font-semibold tabular-nums">Pending</span>
+  } @else if (expired()) {
     <span class="font-label-sm text-label-sm font-semibold tabular-nums">Ended</span>
   } @else {
     <span class="font-label-sm text-label-sm font-semibold tabular-nums">{{ label() }}</span>

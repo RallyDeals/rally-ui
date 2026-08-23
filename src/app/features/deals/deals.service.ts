@@ -10,6 +10,7 @@ import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
 import { DealsQueryParams, DealSortKey } from './interfaces/DealsQueryParams';
 import { CreateDealRequest } from './interfaces/CreateDealRequest';
 import { ActivityEvent } from './interfaces/ActivityEvent';
+import { Participation } from './interfaces/Participation';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 
 export interface InviteLinkResponse {
@@ -69,10 +70,8 @@ export class DealsService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getDealsAnalytics(sellerId?: string): Observable<DealsAnalyticsResponse> {
-    return this.http.get<DealsAnalyticsResponse>(`${this.baseUrl}/analytics`, {
-      ...(sellerId && { headers: { 'X-User-Id': sellerId } }),
-    });
+  getDealsAnalytics(): Observable<DealsAnalyticsResponse> {
+    return this.http.get<DealsAnalyticsResponse>(`${this.baseUrl}/analytics`);
   }
 
   getDealsOverview(params: DealsQueryParams = {}): Observable<PageResponse<DealOverview>> {
@@ -134,12 +133,16 @@ export class DealsService {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<unknown> {
-    return this.http.post(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
+  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<Participation> {
+    return this.http.post<Participation>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
   }
 
   leaveDeal(id: string): Observable<unknown> {
     return this.http.delete(`${this.baseUrl}/${id}/leave`);
+  }
+
+  isActiveParticipation(dealId: string, participationId: string): Observable<boolean> {
+    return this.http.get<boolean>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`);
   }
 
   getDealActivity(id: string): Observable<ActivityEvent[]> {

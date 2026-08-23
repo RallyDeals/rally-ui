@@ -210,6 +210,10 @@ export class ProductDetails implements OnInit, OnDestroy {
     return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
   }
 
+  isDealPending(deal: DisplayDeal): boolean {
+    return deal.status?.toLowerCase() === 'pending';
+  }
+
   private toDisplayDeal(d: ActiveDeal, product: Product): DisplayDeal {
     const needed = Math.max(0, d.minParticipants - d.currentParticipants);
     const progress = d.dealStock > 0

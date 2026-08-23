@@ -4,6 +4,7 @@ import { Countdown } from '../../../../shared/components/countdown/countdown';
 import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { DealOverview } from '../../interfaces/DealOverview';
 import { dealBadge } from '../../deal-badge';
+import { DealStatus } from '../../../../shared/models/deal';
 
 @Component({
   selector: 'app-active-deal-card',
@@ -27,4 +28,6 @@ export class ActiveDealCard {
   spotsLeft = computed(() => Math.max(0, this.deal().dealStock - this.deal().currentParticipants));
 
   progress = computed(() => this.deal().progressPercent);
+
+  isPending = computed(() => this.deal().status === DealStatus.PENDING);
 }
