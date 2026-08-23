@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'app-profile-summary',
@@ -9,4 +9,5 @@ export class ProfileSummary {
   avatarUrl = input.required<string>();
   avatarAlt = input.required<string>();
   name = input.required<string>();
+  logout = output<void>();
 }
