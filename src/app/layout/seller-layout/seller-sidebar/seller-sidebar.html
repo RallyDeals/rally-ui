@@ -35,6 +35,10 @@
   </nav>
 
   <div class="mt-auto pt-rally-md border-t border-outline-variant">
+    <a [class]="navClass(storeItem)" [routerLink]="storeItem.path">
+      <span class="material-symbols-outlined">{{ storeItem.symbol }}</span>
+      {{ storeItem.label }}
+    </a>
     <button type="button" [class]="navClass(settingsItem)" disabled>
       <span class="material-symbols-outlined">{{ settingsItem.symbol }}</span>
       {{ settingsItem.label }}

@@ -1,4 +1,9 @@
-@import 'tailwindcss';
+@layer tailwind-base, primeng, tailwind-utilities;
+
+@import 'tailwindcss/theme.css' layer(tailwind-base);
+@import 'tailwindcss/preflight.css' layer(tailwind-base);
+@import 'tailwindcss/utilities.css' layer(tailwind-utilities);
+
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/container-queries';
 

@@ -118,22 +118,29 @@
               </div>
 
               <div class="flex flex-col gap-rally-sm">
-                <app-primary-btn
-                  [content]="
-                    isClosed() && !isFull()
-                      ? statusText()
-                      : isFull()
-                        ? 'Rally is full'
-                        : joined()
-                          ? 'You joined this rally!'
+                @if (!joined()) {
+                  <app-primary-btn
+                    [content]="
+                      isClosed() && !isFull()
+                        ? statusText()
+                        : isFull()
+                          ? 'Rally is full'
                           : 'Join This Rally.'
-                  "
-                  [icon]="isFull() || joined() || isClosed() ? '' : 'arrow_forward'"
-                  [disabled]="isFull() || isClosed()"
-                  bgClass="bg-primary-container"
-                  extraClasses="py-4"
-                  (clicked)="joinDeal()"
-                />
+                    "
+                    [icon]="isFull() || isClosed() ? '' : 'arrow_forward'"
+                    [disabled]="isFull() || isClosed()"
+                    bgClass="bg-primary-container"
+                    extraClasses="py-4"
+                    (clicked)="joinDeal()"
+                  />
+                } @else {
+                  <div
+                    class="w-full bg-surface-container text-on-surface-variant font-body-md text-body-md py-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">check_circle</span>
+                    You joined this rally!
+                  </div>
+                }
                 <button
                   class="w-full bg-transparent border border-outline-variant hover:border-primary-container hover:text-primary-container text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                   (click)="inviteFriends()"
@@ -143,6 +150,15 @@
                   </span>
                   {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
                 </button>
+                @if (joined() && !isClosed()) {
+                  <button
+                    class="w-full bg-transparent border border-error/40 hover:border-error hover:text-error text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
+                    (click)="leaveDeal()"
+                  >
+                    <span class="material-symbols-outlined text-[20px]">logout</span>
+                    Leave Rally
+                  </button>
+                }
               </div>
 
               <div class="flex flex-col gap-rally-xs">
@@ -182,7 +198,13 @@
                     </span>
                   }
                 </div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant">just joined</span>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">
+                  @if (participants().length > 0) {
+                    {{ participants()[0].initials }} joined
+                  } @else {
+                    No participants yet
+                  }
+                </span>
               </div>
             </div>
           </div>
@@ -286,16 +308,25 @@
             }
             @case ('activity') {
               <div class="md:col-span-2 flex flex-col gap-rally-sm">
-                @for (entry of activity(); track entry.text) {
+                @if (activity().length === 0) {
+                  <p class="font-body-md text-body-md text-on-surface-variant text-center py-rally-lg">No activity yet.</p>
+                }
+                @for (entry of activity(); track entry.timestamp + entry.userId) {
                   <div
                     class="flex items-center gap-3 bg-surface-container-low p-rally-md rounded-xl border border-outline-variant/10"
                   >
                     <span class="material-symbols-outlined text-primary-container text-[24px]">{{
-                      entry.icon
+                      entry.type === 'JOINED' ? 'group_add' : 'person_remove'
                     }}</span>
                     <div class="flex-1">
-                      <p class="font-semibold text-on-surface text-body-md">{{ entry.text }}</p>
-                      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ entry.time }}</p>
+                      <p class="font-semibold text-on-surface text-body-md">
+                        @if (entry.type === 'JOINED') {
+                          A participant joined the rally
+                        } @else {
+                          A participant left the rally
+                        }
+                      </p>
+                      <p class="font-label-sm text-label-sm text-on-surface-variant">{{ formatTimestampAgo(entry.timestamp) }}</p>
                     </div>
                   </div>
                 }
@@ -361,3 +392,10 @@
     }
   </div>
 </section>
+
+@if (showPaymentDialog()) {
+  <app-payment-dialog
+    (confirmed)="onPaymentConfirmed($event)"
+    (cancelled)="onPaymentCancelled()"
+  />
+}

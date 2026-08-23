@@ -12,6 +12,7 @@ import { Product } from '../../../shared/models/product';
 import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const PROGRESS_TONES: Record<DealStatus, ProgressTone> = {
   [DealStatus.PENDING]: 'neutral',
@@ -38,7 +39,7 @@ export class SellerDealForm implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly productsService = inject(ProductsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly dealsService = inject(DealsService);
 
   readonly DealStatus = DealStatus;
@@ -338,7 +339,7 @@ export class SellerDealForm implements OnInit {
   };
 
   loadPickerProducts() {
-    const sellerId = this.tokenService.getSellerId();
+    const sellerId = this.authService.currentUser()?.id
     if (!sellerId) {
       this.pickerError.set('Seller account not found.');
       this.pickerLoading.set(false);

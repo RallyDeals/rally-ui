@@ -1,0 +1,103 @@
+<div class="backdrop" (click)="cancel()">
+  <div class="dialog" (click)="$event.stopPropagation()">
+    <button class="btn-close" (click)="cancel()">&times;</button>
+    <h2
+      style="margin: 0 0 4px; font-size: 20px; font-weight: 700; color: #1a1a2e;">Complete
+      Your Join</h2>
+    <p class="text-muted" style="margin: 0 0 20px;">Select a payment method and
+      enter your shipping address.</p>
+
+    @if (loading()) {
+    <div class="text-center-muted">Loading saved cards...</div>
+    } @else {
+    <!-- Saved Cards Section -->
+    @if (savedCards().length > 0 && !addingNewCard()) {
+    <div>
+      <span class="label">Saved Cards</span>
+      <div class="card-list">
+        @for (card of savedCards(); track card.id) {
+        <div
+          class="card-item"
+          [class.selected]="selectedCardId() === card.id"
+          (click)="selectCard(card.id)">
+          <div class="card-icon" [class]="getCardBrandClass(card.cardBrand)">
+            {{ getCardBrandLabel(card.cardBrand) }}
+          </div>
+          <div class="card-info">
+            <div class="card-number">{{ card.cardBrand }}
+              &bull;&bull;&bull;&bull;{{
+              card.cardLast4 }}</div>
+            <div class="card-expiry">Expires {{ card.cardExpMonth
+              }}/{{card.cardExpYear}}</div>
+          </div>
+          @if (card.isDefault) {
+          <span class="card-badge default">Default</span>
+          }
+          @if (selectedCardId() === card.id) {
+          <span class="card-check">&#10003;</span>
+          }
+        </div>
+        }
+      </div>
+      <button class="btn-secondary" (click)="showAddCard()">+ Add New
+        Card</button>
+    </div>
+    }
+
+    <!-- Add New Card Section -->
+    @if (addingNewCard()) {
+    <div style="margin-bottom: 16px;">
+      <div
+        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+        <span class="label" style="margin-bottom: 0;">New Card</span>
+        @if (savedCards().length > 0) {
+        <button class="btn-link" (click)="cancelAddCard()">Use saved
+          card</button>
+        }
+      </div>
+      <div class="card-element-box">
+        <div #cardElementContainer></div>
+      </div>
+    </div>
+    }
+
+    <!-- No saved cards and not adding new -->
+    @if (savedCards().length === 0 && !addingNewCard()) {
+    <div style="margin-bottom: 16px;">
+      <p class="text-muted" style="margin-bottom: 12px;">No saved payment
+        methods. Add a card to continue.</p>
+      <div class="card-element-box">
+        <div #cardElementContainer></div>
+      </div>
+    </div>
+    }
+
+    <!-- Address Input -->
+    <div style="margin-bottom: 20px;">
+      <span class="label">Shipping Address</span>
+      <textarea
+        [(ngModel)]="address"
+        rows="3"
+        maxlength="500"
+        placeholder="Enter your full shipping address..."
+        class="address-input"></textarea>
+    </div>
+
+    @if (error(); as err) {
+    <div class="error-text">{{ err }}</div>
+    }
+
+    <!-- Actions -->
+    <button
+      class="btn-primary"
+      [disabled]="processing() || (!selectedCardId() && !addingNewCard())"
+      (click)="confirm()">
+      @if (processing()) {
+      Processing...
+      } @else {
+      Confirm &amp; Join Rally
+      }
+    </button>
+    }
+  </div>
+</div>

@@ -1,5 +1,5 @@
 import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
+import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
@@ -7,11 +7,13 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService } from '../deals.service';
-import { TokenService } from '../../../shared/services/token.service';
+import { DealsService, ParticipantSummary } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
+import { ActivityEvent } from '../interfaces/ActivityEvent';
 import { dealBadge } from '../deal-badge';
+import { PaymentDialog } from '../payment-dialog/payment-dialog';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',
@@ -58,13 +60,14 @@ const DEAL_POLL_INTERVAL_MS = 15_000;
 
 @Component({
   selector: 'app-deal-details',
-  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn],
+  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog],
   templateUrl: './deal-details.html',
 })
 export class DealDetails implements OnInit {
   private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly dealsService = inject(DealsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
@@ -76,6 +79,7 @@ export class DealDetails implements OnInit {
   error = signal<ApiError | null>(null);
   joined = signal(false);
   copied = signal(false);
+  showPaymentDialog = signal(false);
   selectedTab = signal<DealTab>('description');
   selectedImage = signal<string | null>(null);
   private copyTimer: ReturnType<typeof setTimeout> | undefined;
@@ -96,21 +100,8 @@ export class DealDetails implements OnInit {
 
   activeImage = computed(() => this.selectedImage() ?? this.deal()?.productImageUrl ?? '');
 
-  participants = computed(() => {
-    const deal = this.deal();
-    if (!deal) {
-      return [];
-    }
-    return AVATAR_INITIALS.slice(0, Math.min(3, deal.currentParticipants)).map((initials, index) => ({
-      initials,
-      color: AVATAR_COLORS[index % AVATAR_COLORS.length],
-    }));
-  });
-
-  extraParticipants = computed(() => {
-    const deal = this.deal();
-    return deal ? Math.max(0, deal.currentParticipants - 3) : 0;
-  });
+  participants = signal<{ initials: string; color: string }[]>([]);
+  extraParticipants = signal(0);
 
   specs = computed(() => {
     const deal = this.deal();
@@ -126,52 +117,9 @@ export class DealDetails implements OnInit {
     ];
   });
 
-  activity = computed(() => {
-    const deal = this.deal();
-    if (!deal) {
-      return [];
-    }
-    const created = dealStartTime(deal);
-    const ended = deal.endTime.getTime();
-    const unlocked = created + (ended - created) * 0.35;
-    const isLive = deal.currentParticipants >= deal.minParticipants;
-    return [
-      { icon: 'rocket_launch', text: 'Rally created', time: this.formatTimeAgo(created) },
-      {
-        icon: 'flag',
-        text: `Goal set: ${deal.minParticipants} minimum participants`,
-        time: this.formatTimeAgo(created),
-      },
-      isLive
-        ? {
-            icon: 'check_circle',
-            text: `Minimum reached — rally is live at $${deal.dealPrice.toFixed(2)}`,
-            time: this.formatTimeAgo(unlocked),
-          }
-        : {
-            icon: 'hourglass_top',
-            text: `Waiting for ${deal.neededCount} more to unlock`,
-            time: 'just now',
-          },
-      {
-        icon: 'link',
-        text: `${Math.min(Math.max(deal.currentParticipants - deal.minParticipants, 3), 12)} friends joined via invite links`,
-        time: this.formatTimeAgo(ended - 60 * 60 * 1000),
-      },
-      {
-        icon: 'person_remove',
-        text: '1 participant left this rally',
-        time: this.formatTimeAgo(ended - 90 * 60 * 1000),
-      },
-      {
-        icon: 'group_add',
-        text: `${deal.currentParticipants} people joined this rally so far`,
-        time: 'just now',
-      },
-    ];
-  });
+  activity = signal<ActivityEvent[]>([]);
 
-  private formatTimeAgo(timestamp: number): string {
+  formatTimeAgo(timestamp: number): string {
     const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000));
     if (minutes < 1) {
       return 'just now';
@@ -184,6 +132,10 @@ export class DealDetails implements OnInit {
       return `${hours}h ago`;
     }
     return `${Math.round(hours / 24)}d ago`;
+  }
+
+  formatTimestampAgo(timestamp: string): string {
+    return this.formatTimeAgo(new Date(timestamp).getTime());
   }
 
   milestones = computed(() => {
@@ -247,7 +199,7 @@ export class DealDetails implements OnInit {
 
   isClosed = computed(() => {
     const deal = this.deal();
-    return !!deal && deal.status !== DealStatus.ACTIVE;
+    return !!deal && deal.status !== DealStatus.ACTIVE && deal.status !== DealStatus.PENDING;
   });
 
   badge = computed(() => {
@@ -281,15 +233,17 @@ export class DealDetails implements OnInit {
   loadDeal(id: string) {
     this.loading.set(true);
     this.error.set(null);
-    this.joined.set(false);
     this.copied.set(false);
     this.selectedImage.set(null);
     this.selectedTab.set('description');
+    this.activity.set([]);
     this.dealsService.getDeal(id).subscribe({
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
           this.startDealPoll(id);
+          this.loadActivity(id);
+          this.loadParticipants(id);
         } else {
           this.error.set(NOT_FOUND_ERROR);
           this.stopDealPoll();
@@ -302,6 +256,53 @@ export class DealDetails implements OnInit {
         this.stopDealPoll();
       },
     });
+  }
+
+  private loadActivity(dealId: string) {
+    this.dealsService.getDealActivity(dealId).subscribe({
+      next: (events) => {
+        this.activity.set(events);
+        this.checkJoinedFromActivity(events);
+      },
+    });
+  }
+
+  private loadParticipants(dealId: string) {
+    this.dealsService.getDealParticipants(dealId).subscribe({
+      next: (list) => {
+        const shown = list.slice(0, 3);
+        this.participants.set(
+          shown.map((p, i) => ({
+            initials: this.toInitials(p.userId),
+            color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+          }))
+        );
+        this.extraParticipants.set(Math.max(0, list.length - 3));
+      },
+    });
+  }
+
+  private toInitials(userId: string): string {
+    const hex = userId.replace(/-/g, '');
+    const first = parseInt(hex.slice(0, 8), 16) % 26;
+    const second = parseInt(hex.slice(8, 16), 16) % 26;
+    return String.fromCharCode(65 + first) + String.fromCharCode(65 + second);
+  }
+
+  private checkJoinedFromActivity(events: ActivityEvent[]) {
+    const userId = this.authService.currentUser()?.id;
+    if (!userId) return;
+    const sorted = [...events].sort((a, b) =>
+      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
+    );
+    let joined = false;
+    for (const event of sorted) {
+      if (event.userId === userId) {
+        if (event.type === 'JOINED') joined = true;
+        if (event.type === 'LEFT') joined = false;
+      }
+    }
+    this.joined.set(joined);
   }
 
   private startDealPoll(dealId: string) {
@@ -326,17 +327,45 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    this.joined.set(true);
-    const deal = this.deal();
-    const buyerId = this.tokenService.getUserId();
-    if (!deal || !buyerId) {
+    if (this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
+      });
       return;
     }
-    this.dealsService.joinDeal(deal.id, buyerId).subscribe({
-      next: (updated) => {
-        if (updated) {
-          this.deal.set(updated);
-        }
+    this.showPaymentDialog.set(true);
+  };
+
+  onPaymentConfirmed = (data: { paymentMethodId: string; address: string }) => {
+    const deal = this.deal();
+    if (!deal) return;
+    this.showPaymentDialog.set(false);
+    this.joined.set(true);
+    this.dealsService.joinDeal(deal.id, data.paymentMethodId, data.address).subscribe({
+      next: () => {
+        this.loadActivity(deal.id);
+        this.loadParticipants(deal.id);
+      },
+      error: () => {
+        this.joined.set(false);
+      },
+    });
+  };
+
+  onPaymentCancelled = () => {
+    this.showPaymentDialog.set(false);
+  };
+
+  leaveDeal = () => {
+    const deal = this.deal();
+    if (!deal) {
+      return;
+    }
+    this.dealsService.leaveDeal(deal.id).subscribe({
+      next: () => {
+        this.joined.set(false);
+        this.loadActivity(deal.id);
+        this.loadParticipants(deal.id);
       },
     });
   };
@@ -350,13 +379,26 @@ export class DealDetails implements OnInit {
   };
 
   inviteFriends = () => {
-    const url = window.location.href;
+    const deal = this.deal();
+    if (!deal) return;
+    this.dealsService.createInviteLink(deal.id).subscribe({
+      next: (link) => {
+        const inviteUrl = `${window.location.origin}/deals/${deal.id}?invite=${link.code}`;
+        this.copyToClipboard(inviteUrl);
+      },
+      error: () => {
+        this.copyToClipboard(window.location.href);
+      },
+    });
+  };
+
+  private copyToClipboard(url: string): void {
     if (navigator.clipboard?.writeText) {
       navigator.clipboard.writeText(url).then(() => this.showCopied(), () => this.fallbackCopy(url));
     } else {
       this.fallbackCopy(url);
     }
-  };
+  }
 
   private showCopied() {
     this.copied.set(true);

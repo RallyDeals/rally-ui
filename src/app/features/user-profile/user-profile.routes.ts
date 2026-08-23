@@ -3,6 +3,7 @@ import { UserProfile } from './user-profile';
 import { PersonalInfo } from './personal-info/personal-info';
 import { MyOrders } from './my-orders/my-orders';
 import { MyDeals } from './my-deals/my-deals';
+import { PaymentMethods } from './my-payment-methods/my-payment-methods';
 
 export const USER_PROFILE_ROUTES: Routes = [
   {
@@ -13,6 +14,7 @@ export const USER_PROFILE_ROUTES: Routes = [
       { path: 'personal-info', component: PersonalInfo },
       { path: 'my-orders', component: MyOrders },
       { path: 'my-deals', component: MyDeals },
+       {path: 'my-payment-methods' , component:PaymentMethods}
     ],
   },
 ];

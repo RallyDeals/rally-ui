@@ -1,0 +1,30 @@
+<div
+  class="bg-surface-container-lowest rounded-lg p-rally-md soft-shadow border border-outline-variant">
+  @if (method().isDefault) {
+  <span
+    class="bg-primary text-on-primary text-xs font-semibold px-rally-sm py-0.5 rounded-full">Default</span>
+  }
+
+  <div class="flex items-center gap-rally-sm">
+    <span class="material-symbols-outlined text-primary">credit_card</span>
+    <div>
+      <p class="font-body-md font-semibold text-on-surface">{{
+        method().cardBrand }}</p>
+      <p class="font-body-md text-on-surface-variant">{{ maskedNumber() }}</p>
+    </div>
+  </div>
+  <p class="font-body-md text-xs text-on-surface-variant mt-rally-sm">Expires {{
+    expiryLabel() }}</p>
+  <div class="flex items-center gap-rally-sm mt-rally-md">
+    @if (!method().isDefault) {
+      <button (click)="setDefault.emit(method().id)"
+        class="border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-md py-rally-xs rounded-lg text-sm">
+        Set Default
+      </button>
+    }
+    <button (click)="deleteRequested.emit(method().id)"
+      class="border border-outline text-error hover:border-error px-rally-md py-rally-xs rounded-lg text-sm">
+      Delete
+    </button>
+  </div>
+</div>

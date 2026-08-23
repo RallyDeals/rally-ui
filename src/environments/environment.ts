@@ -1,10 +1,6 @@
 export const environment = {
   production: true,
   apiUrl: 'http://localhost:8090',
-  devToken: '',
-  devTokens: {
-    seller: '',
-    buyer: '',
-    admin: '',
-  },
+  paymentApiUrl: 'http://localhost:8089',
+  stripePublishableKey: 'pk_test_REPLACE_ME',
 };

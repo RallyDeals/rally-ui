@@ -5,7 +5,7 @@ import { Accordion } from './accordion/accordion';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { ProductCard } from '../components/product-card/product-card';
 import { CartService } from '../../cart/cart.service';
-import { Product } from '../../../shared/models/product';
+import { Product, ActiveDeal } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
 import { Inventory } from '../../../shared/models/inventory';
@@ -13,10 +13,21 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
-import { DealsService } from '../../deals/deals.service';
-import { DealStatus } from '../../../shared/models/deal';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { Countdown } from '../../../shared/components/countdown/countdown';
+
+export interface DisplayDeal {
+  id: string;
+  dealPrice: number;
+  originalPrice: number;
+  dealStock: number;
+  currentParticipants: number;
+  neededCount: number;
+  progressPercent: number;
+  status: string;
+  endTime: string | null;
+  durationMinutes: number;
+  productName: string;
+}
 
 @Component({
   selector: 'app-product-details',
@@ -27,7 +38,6 @@ import { Countdown } from '../../../shared/components/countdown/countdown';
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  activeDeals = signal<DealOverview[]>([]);
   inventory = signal<Inventory | null>(null);
   selectedImage = signal('');
   loading = signal(true);
@@ -38,7 +48,13 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   readonly resolveImageUrl = resolveImageUrl;
 
-  readonly primaryDeal = computed(() => this.activeDeals()[0] ?? null);
+  readonly displayDeals = computed<DisplayDeal[]>(() => {
+    const product = this.product();
+    if (!product?.activeDeals?.length) return [];
+    return product.activeDeals.map((d) => this.toDisplayDeal(d, product));
+  });
+
+  readonly primaryDeal = computed(() => this.displayDeals()[0] ?? null);
   readonly availableStock = computed(() => {
     const stock = this.inventory()?.availableStock ?? 0;
     const product = this.product();
@@ -48,21 +64,18 @@ export class ProductDetails implements OnInit, OnDestroy {
   });
   readonly outOfStock = computed(() => this.availableStock() <= 0);
 
-  dealDiscount = (deal: DealOverview): number => {
-    if (!deal.originalPrice || deal.originalPrice <= 0) {
-      return 0;
-    }
-    return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
-  };
-
   readonly minDealPrice = computed(() => {
-    const deals = this.activeDeals();
-    return deals.length ? Math.min(...deals.map((deal) => deal.dealPrice)) : 0;
+    const deals = this.displayDeals();
+    return deals.length ? Math.min(...deals.map((d) => d.dealPrice)) : 0;
   });
 
   readonly maxDealDiscount = computed(() => {
-    const deals = this.activeDeals();
-    return deals.length ? Math.max(...deals.map((deal) => this.dealDiscount(deal))) : 0;
+    const deals = this.displayDeals();
+    if (!deals.length) return 0;
+    return Math.max(...deals.map((d) => {
+      if (!d.originalPrice || d.originalPrice <= 0) return 0;
+      return Math.round((1 - d.dealPrice / d.originalPrice) * 100);
+    }));
   });
 
   scrollToDeals = () => {
@@ -103,7 +116,6 @@ export class ProductDetails implements OnInit, OnDestroy {
     private readonly productsService: ProductsService,
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
-    private readonly dealsService: DealsService,
   ) {}
 
   get imageSrc(): string {
@@ -134,19 +146,11 @@ export class ProductDetails implements OnInit, OnDestroy {
         this.loading.set(false);
         this.loadRelatedProducts(product);
         this.loadInventory(product.id);
-        this.loadActiveDeals(product.id);
       },
       error: (err) => {
         this.error.set(toApiError(err));
         this.loading.set(false);
       },
-    });
-  }
-
-  loadActiveDeals(productId: string) {
-    this.dealsService.getDealsOverview({ productId, status: DealStatus.ACTIVE, limit: 10 }).subscribe({
-      next: (response) => this.activeDeals.set(response.items),
-      error: () => this.activeDeals.set([]),
     });
   }
 
@@ -201,5 +205,30 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   ngOnDestroy() {
     clearTimeout(this.addTimer);
+  }
+
+  dealDiscount(deal: DisplayDeal): number {
+    if (!deal.originalPrice || deal.originalPrice <= 0) return 0;
+    return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
+  }
+
+  private toDisplayDeal(d: ActiveDeal, product: Product): DisplayDeal {
+    const needed = Math.max(0, d.minParticipants - d.currentParticipants);
+    const progress = d.dealStock > 0
+      ? Math.min(100, Math.round((d.currentParticipants / d.dealStock) * 100))
+      : 0;
+    return {
+      id: d.dealId,
+      dealPrice: d.dealPrice,
+      originalPrice: product.basePrice,
+      dealStock: d.dealStock,
+      currentParticipants: d.currentParticipants,
+      neededCount: needed,
+      progressPercent: progress,
+      status: d.status,
+      endTime: d.endTime,
+      durationMinutes: d.durationMinutes,
+      productName: product.name,
+    };
   }
 }

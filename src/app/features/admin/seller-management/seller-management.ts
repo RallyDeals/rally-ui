@@ -8,7 +8,7 @@ import { SellerStats } from './seller-stats/seller-stats';
 import { SellerToolbar } from './seller-toolbar/seller-toolbar';
 import { SellerRow } from './seller-row/seller-row';
 import { Seller } from '../interfaces/seller';
-import { UserService } from '../../auth/user.service';
+import { UserService } from '../../auth/admin-user.service';
 import { ProductsService } from '../../products/products.service';
 import { DealsService } from '../../deals/deals.service';
 

@@ -97,7 +97,7 @@ export class BrowseDeals implements OnInit {
     this.loadError.set(null);
     this.dealsService
       .getDealsOverview({
-        status: DealStatus.ACTIVE,
+        status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`,
         search: this.searchQuery().trim() || undefined,
         categories: this.selectedCategoryNames(),
         minPrice: this.minPrice() ?? undefined,

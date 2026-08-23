@@ -16,6 +16,7 @@ import {
   daysAgoISO,
 } from '../../../shared/utils/date-range.util';
 import { formatMoney } from '../../../shared/utils/money.util';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const RANGE_START = daysAgoISO(30);
 const RANGE_END = todayISO();
@@ -95,16 +96,21 @@ function toDealRow(deal: DealOverview): DealRow {
 export class SellerDashboard implements OnInit {
   private readonly router = inject(Router);
   private readonly dealsService = inject(DealsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
 
   readonly productImage = PLACEHOLDER_IMAGE;
   readonly resolveImageUrl = resolveImageUrl;
   readonly statusClasses = STATUS_CLASSES;
   readonly barClasses = BAR_CLASSES;
 
+  readonly loading = signal(true);
+
   private readonly allDeals = toSignal(
     this.dealsService.getSellerDeals(this.getSellerId(), { limit: 100 }).pipe(
-      map((page) => page.items)
+      map((page) => {
+        this.loading.set(false);
+        return page.items;
+      })
     ),
     { initialValue: [] as DealOverview[] }
   );
@@ -192,6 +198,6 @@ export class SellerDashboard implements OnInit {
   ngOnInit() {}
 
   private getSellerId(): string {
-    return this.tokenService.getSellerId() ?? '';
+    return this.authService.currentUser()?.id ?? '';
   }
 }

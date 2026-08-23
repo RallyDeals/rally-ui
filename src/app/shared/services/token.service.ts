@@ -1,45 +1,44 @@
-import { Injectable, signal } from '@angular/core';
-import { environment } from '../../../environments/environment';
+import { Injectable } from '@angular/core';
+import { UserSummary } from '../../core/auth/models';
 
-export type DevRole = 'seller' | 'buyer' | 'admin';
-
-const DEV_ROLE_STORAGE_KEY = 'devRole';
-const DEV_ROLES: DevRole[] = ['seller', 'buyer', 'admin'];
-
-function readStoredRole(): DevRole | null {
-  const stored = localStorage.getItem(DEV_ROLE_STORAGE_KEY);
-  return (DEV_ROLES as string[]).includes(stored ?? '') ? (stored as DevRole) : null;
-}
+const ACCESS_TOKEN_KEY = 'accessToken';
+const REFRESH_TOKEN_KEY = 'refreshToken';
+const USER_KEY = 'authUser';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
-  readonly activeRole = signal<DevRole>(readStoredRole() ?? 'seller');
-
-  getToken(): string {
-    return environment.devTokens[this.activeRole()] ?? environment.devToken ?? '';
+  getAccessToken(): string | null {
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   }
 
-  // The token's `sub` claim is the current user's id, whichever role is active — seller, buyer, or admin.
-  getUserId(): string | null {
-    const token = this.getToken();
-    if (!token) {
+  getRefreshToken(): string | null {
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
+  }
+
+  storeTokens(accessToken: string, refreshToken: string): void {
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
+  }
+
+  storeUser(user: UserSummary): void {
+    localStorage.setItem(USER_KEY, JSON.stringify(user));
+  }
+
+  readStoredUser(): UserSummary | null {
+    const raw = localStorage.getItem(USER_KEY);
+    if (!raw) {
       return null;
     }
     try {
-      const payload = token.split('.')[1];
-      const decoded = JSON.parse(atob(payload.replace(/-/g, '+').replace(/_/g, '/')));
-      return (decoded['sub'] as string | undefined) ?? null;
+      return JSON.parse(raw) as UserSummary;
     } catch {
       return null;
     }
   }
 
-  getSellerId(): string | null {
-    return this.getUserId();
-  }
-
-  setRole(role: DevRole) {
-    this.activeRole.set(role);
-    localStorage.setItem(DEV_ROLE_STORAGE_KEY, role);
+  clear(): void {
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(USER_KEY);
   }
 }

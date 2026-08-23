@@ -1,6 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Countdown } from '../../../../shared/components/countdown/countdown';
+import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { DealOverview } from '../../interfaces/DealOverview';
 import { dealBadge } from '../../deal-badge';
 
@@ -11,6 +12,7 @@ import { dealBadge } from '../../deal-badge';
 })
 export class ActiveDealCard {
   deal = input.required<DealOverview>();
+  readonly resolveImageUrl = resolveImageUrl;
 
   badge = computed(() => dealBadge(this.deal()));
 

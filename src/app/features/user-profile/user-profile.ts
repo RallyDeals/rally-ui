@@ -18,5 +18,6 @@ export class UserProfile {
     { id: 'personal-info', label: 'Personal Info' },
     { id: 'my-orders', label: 'My Orders' },
     { id: 'my-deals', label: 'My Deals' },
+     { id: 'my-payment-methods', label: 'My Payment Methods' },
   ];
 }

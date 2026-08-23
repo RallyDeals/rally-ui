@@ -1,0 +1,46 @@
+<section>
+  <div class="flex justify-between items-center mb-rally-md">
+    <h3
+      class="font-headline-md text-headline-md font-bold text-on-surface">Payment
+      Methods</h3>
+    <button (click)="openAddForm()"
+      class="bg-primary text-on-primary px-rally-lg py-rally-sm rounded-lg font-semibold text-sm hover:bg-primary/90 flex items-center gap-1">
+      <span class="material-symbols-outlined text-sm">add</span>
+      Add Payment Method
+    </button>
+  </div>
+  @if (isLoading()) {
+  <p class="text-on-surface-variant">Loading payment methods...</p>
+  } @else if (loadError(); as error) {
+  <app-error-state [error]="error" />
+  } @else {
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-rally-md">
+    @for (method of pms(); track method.id) {
+    <app-payment-method-card [method]="method"
+      (setDefault)="onSetDefault(method.id)"
+      (deleteRequested)="onDelete(method.id)" />
+    } @empty {
+    <p class="text-on-surface-variant">No payment methods yet.</p>
+    }
+  </div>
+  }
+
+</section>
+
+@if (isAddFormOpen()) {
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+  <div
+    class="bg-surface-container-lowest rounded-2xl p-rally-lg w-full max-w-md soft-shadow">
+    <div class="flex justify-between items-center mb-rally-md">
+      <h3
+        class="font-headline-md text-headline-md font-bold text-on-surface">Add
+        Payment Method</h3>
+      <button (click)="closeAddForm()"
+        class="text-on-surface-variant hover:text-on-surface">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <app-stripe-card-form (createdPaymentMethod)="onCreated($event)" />
+  </div>
+</div>
+}

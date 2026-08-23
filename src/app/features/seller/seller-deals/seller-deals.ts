@@ -12,11 +12,13 @@ import { MetricCard } from '../components/metric-card/metric-card';
 import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { DealsService } from '../../deals/deals.service';
 import { DealStatus } from '../../../shared/models/deal';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { PageResponse } from '../../products/page-response';
 import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { TokenService } from '../../../shared/services/token.service';
 import { DealRowActions } from './deal-row-actions/deal-row-actions';
 import { DEAL_STATUS_OPTIONS, DealRow, PROGRESS_TONES, StatusFilter, formatCountdown, toDealRow } from './seller-deals.model';
+import { AuthService } from '../../../core/auth/auth.service';
 
 const COUNTDOWN_TICK_MS = 1_000;
 
@@ -44,7 +46,7 @@ const PAGE_SIZE = 5;
 export class SellerDeals implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
   private readonly dealsService = inject(DealsService);
-  private readonly tokenService = inject(TokenService);
+  private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
@@ -59,6 +61,7 @@ export class SellerDeals implements OnInit, OnDestroy {
   readonly statusOptions = DEAL_STATUS_OPTIONS;
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
   readonly DealStatus = DealStatus;
+  readonly resolveImageUrl = resolveImageUrl;
 
   statusFilter = signal<StatusFilter>('ALL');
   searchQuery = signal('');
@@ -126,7 +129,7 @@ export class SellerDeals implements OnInit, OnDestroy {
 
   loadDeals() {
     this.loading.set(true);
-    const sellerId = this.tokenService.getSellerId() ?? 'a1b2c3d4-1111-4a1b-8c2d-000000000001';
+    const sellerId = this.authService.currentUser()?.id ?? 'a1b2c3d4-1111-4a1b-8c2d-000000000001';
 
     this.dealsService.getSellerDeals(sellerId, this.currentParams()).subscribe({
       next: (response) => {

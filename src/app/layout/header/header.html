@@ -15,6 +15,12 @@
     <!-- Right: Actions -->
     @if (loggedIn) {
       <div class="flex items-center gap-1 sm:gap-rally-sm justify-self-end">
+        @if (isSeller()) {
+          <a routerLink="/seller" class="px-3 py-1.5 bg-primary-container text-on-primary rounded-lg font-label-sm font-semibold hover:opacity-90 transition-all text-xs flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">dashboard</span>
+            Seller Dashboard
+          </a>
+        }
         <button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hover:cursor-pointer" routerLink="/cart"
                 (click)="setSelectedLink('cart')">
           <span class="material-symbols-outlined">shopping_cart</span>

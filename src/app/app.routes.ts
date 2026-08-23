@@ -16,6 +16,7 @@ import { AdminLayout } from './layout/admin-layout/admin-layout';
 import { ADMIN_ROUTES } from './features/admin/admin.routes';
 import { OrderDetails } from './features/orders/order-details/order-details';
 import { authGuard } from './core/guards/auth.guard';
+import { sellerGuard } from './core/guards/seller.guard';
 import { adminGuard } from './core/guards/admin.guard';
 
 
@@ -60,6 +61,7 @@ export const routes: Routes = [
       },
       {
         path: 'profile',
+        canActivate:[authGuard],
         children: USER_PROFILE_ROUTES,
       },
       {
@@ -75,6 +77,7 @@ export const routes: Routes = [
   {
     path: 'seller',
     component: SellerLayout,
+    // canActivate: [authGuard, sellerGuard], // TODO: uncomment when auth service is wired
     children: SELLER_ROUTES
   },
   {
