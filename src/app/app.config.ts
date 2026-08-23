@@ -7,6 +7,7 @@ import Aura from '@primeuix/themes/aura';
 
 import { routes } from './app.routes';
 import { httpRequestInterceptor } from './core/interceptors/http-request.interceptor';
+import { authRefreshInterceptor } from './core/interceptors/auth-refresh.interceptor';
 
 const RallyPreset = definePreset(Aura, {
   semantic: {
@@ -45,6 +46,6 @@ export const appConfig: ApplicationConfig = {
       ripple: true,
     }),
     provideRouter(routes, withComponentInputBinding()),
-    provideHttpClient(withInterceptors([httpRequestInterceptor])),
+    provideHttpClient(withInterceptors([httpRequestInterceptor, authRefreshInterceptor])),
   ],
 };
