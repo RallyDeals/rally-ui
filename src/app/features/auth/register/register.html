@@ -53,40 +53,45 @@
 
       <!-- Registration Form -->
       <form class="space-y-rally-xs" [formGroup]="form" (ngSubmit)="onSubmit()">
-        <div>
-          <label
-            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
-            for="firstName">First Name</label>
-          <input
-            pInputText
-            id="firstName"
-            formControlName="firstName"
-            type="text"
-            placeholder="John"
-            autocomplete="given-name"
-            class="w-full rounded-lg font-body-md text-body-md" />
-          @if (form.controls.firstName.touched &&
-          form.controls.firstName.invalid) {
-          <small class="text-error">First name is required.</small>
-          }
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-xs">
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="firstName">First Name</label>
+            <input
+              pInputText
+              id="firstName"
+              formControlName="firstName"
+              type="text"
+              placeholder="John"
+              autocomplete="given-name"
+              style="border-radius: 0.5rem"
+              class="w-full rounded-lg font-body-md text-body-md"
+            />
+            @if (form.controls.firstName.touched &&
+            form.controls.firstName.invalid) {
+            <small class="text-error">First name is required.</small>
+            }
+          </div>
 
-        <div>
-          <label
-            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
-            for="lastName">Last Name</label>
-          <input
-            pInputText
-            id="lastName"
-            formControlName="lastName"
-            type="text"
-            placeholder="Doe"
-            autocomplete="family-name"
-            class="w-full rounded-lg font-body-md text-body-md" />
-          @if (form.controls.lastName.touched && form.controls.lastName.invalid)
-          {
-          <small class="text-error">Last name is required.</small>
-          }
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="lastName">Last Name</label>
+            <input
+              pInputText
+              id="lastName"
+              formControlName="lastName"
+              type="text"
+              placeholder="Doe"
+              autocomplete="family-name"
+              style="border-radius: 0.5rem"
+              class="w-full rounded-lg font-body-md text-body-md" />
+            @if (form.controls.lastName.touched && form.controls.lastName.invalid)
+            {
+            <small class="text-error">Last name is required.</small>
+            }
+          </div>
         </div>
 
         <div>
@@ -100,49 +105,52 @@
             type="email"
             placeholder="jane@example.com"
             autocomplete="email"
+            style="border-radius: 0.5rem"
             class="w-full rounded-lg font-body-md text-body-md" />
           @if (form.controls.email.touched && form.controls.email.invalid) {
           <small class="text-error">Enter a valid email address.</small>
           }
         </div>
 
-        <div>
-          <label
-            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
-            for="password">Password</label>
-          <p-password
-            inputId="password"
-            formControlName="password"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            [toggleMask]="true"
-            [feedback]="false"
-            [fluid]="true"
-            inputClass="rounded-lg font-body-md text-body-md" />
-          @if (form.controls.password.touched && form.controls.password.invalid)
-          {
-          <small class="text-error">
-            8–64 characters with upper, lower, digit and special character.
-          </small>
-          }
-        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-xs">
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="password">Password</label>
+            <input
+              pInputPassword
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [fluid]="true"
+              style="border-radius: 0.5rem"
+              class="font-body-md text-body-md" />
+            @if (form.controls.password.touched && form.controls.password.invalid)
+            {
+            <small class="text-error">
+              8–64 characters with upper, lower, digit and special character.
+            </small>
+            }
+          </div>
 
-        <div>
-          <label
-            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
-            for="confirmPassword">Confirm Password</label>
-          <p-password
-            inputId="confirmPassword"
-            formControlName="confirmPassword"
-            placeholder="••••••••"
-            autocomplete="new-password"
-            [toggleMask]="true"
-            [feedback]="false"
-            [fluid]="true"
-            inputClass="rounded-lg font-body-md text-body-md" />
-          @if (passwordMismatch) {
-          <small class="text-error">Passwords do not match.</small>
-          }
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="confirmPassword">Confirm Password</label>
+            <input
+              pInputPassword
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [fluid]="true"
+              style="border-radius: 0.5rem"
+              class="font-body-md text-body-md" />
+            @if (passwordMismatch) {
+            <small class="text-error">Passwords do not match.</small>
+            }
+          </div>
         </div>
 
         <div>

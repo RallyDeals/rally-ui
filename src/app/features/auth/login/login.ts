@@ -9,6 +9,7 @@ import { AuthSwitchLink } from '../components/auth-switch-link/auth-switch-link'
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
+import { InputPassword } from 'primeng/inputpassword';
 
 @Component({
   selector: 'app-login',
@@ -20,17 +21,16 @@ import { toApiError } from '../../../shared/utils/api-error.util';
     RouterLink,
     Logo,
     AuthSwitchLink,
+    InputPassword,
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',
 })
 export class Login {
-
-
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-   readonly rememberMe = signal<true | false > (false);
+  readonly rememberMe = signal<true | false>(false);
 
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
@@ -41,9 +41,8 @@ export class Login {
   });
 
   onChecked($event: Event) {
-    this.rememberMe.set(!this.rememberMe())
+    this.rememberMe.set(!this.rememberMe());
   }
-
 
   onSubmit(): void {
     if (this.form.invalid || this.submitting()) {
@@ -53,15 +52,12 @@ export class Login {
     this.submitting.set(true);
     this.error.set(null);
 
-    this.authService.login(this.form.getRawValue(),this.rememberMe()).subscribe({
+    this.authService.login(this.form.getRawValue(), this.rememberMe()).subscribe({
       next: (response) => {
-        console.log(response)
-        if(response.user.role === "ADMIN")
-          this.router.navigateByUrl('admin');
-        else if(response.user.role === "SELLER")
-          this.router.navigateByUrl('seller');
-        else
-          this.router.navigateByUrl(`/`)
+        console.log(response);
+        if (response.user.role === 'ADMIN') this.router.navigateByUrl('admin');
+        else if (response.user.role === 'SELLER') this.router.navigateByUrl('seller');
+        else this.router.navigateByUrl(`/`);
       },
       error: (err) => {
         console.log(err);
@@ -70,7 +66,7 @@ export class Login {
 
         // Unverified email -> continue the verification flow instead of an error banner.
         if (apiError.status === 403 && /verif/i.test(apiError.message)) {
-        this.authService.resendVerificationOtp(this.form.getRawValue().email)
+          this.authService.resendVerificationOtp(this.form.getRawValue().email);
           this.router.navigate(['/auth/verify-email'], {
             queryParams: { email: this.form.getRawValue().email },
           });

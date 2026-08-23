@@ -9,6 +9,7 @@ import { AuthSwitchLink } from '../components/auth-switch-link/auth-switch-link'
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
+import { InputPassword } from 'primeng/inputpassword';
 
 type RegisterRole = 'BUYER' | 'SELLER';
 
@@ -21,6 +22,7 @@ type RegisterRole = 'BUYER' | 'SELLER';
     ButtonModule,
     Logo,
     AuthSwitchLink,
+    InputPassword,
   ],
   templateUrl: './register.html',
   styleUrl: './register.css',
