@@ -35,6 +35,7 @@
       <aside class="lg:col-span-4 sticky top-24 w-full flex flex-col gap-rally-sm">
         <app-checkout-address [address]="address()" (addressChange)="setAddress($event)" />
         <app-payment-method-picker
+          #paymentMethodPicker
           [selectedId]="selectedPaymentMethodId()"
           (selectedIdChange)="selectPaymentMethod($event)"
         />
@@ -49,6 +50,23 @@
         />
       </aside>
     </div>
+
+    @if (paymentMethodPicker.isAddFormOpen()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-surface-container-lowest rounded-2xl p-rally-lg w-full max-w-md soft-shadow">
+          <div class="flex justify-between items-center mb-rally-md">
+            <h3 class="font-headline-md text-headline-md font-bold text-on-surface">Add Payment Method</h3>
+            <button (click)="paymentMethodPicker.closeAddForm()" class="text-on-surface-variant hover:text-on-surface">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <app-stripe-card-form
+            (createdPaymentMethod)="paymentMethodPicker.onCreated($event)"
+            (formIsClosed)="paymentMethodPicker.closeAddForm()"
+          />
+        </div>
+      </div>
+    }
   }
 </main>
 <app-error-modal [error]="checkoutError()" (closed)="checkoutError.set(null)" />
