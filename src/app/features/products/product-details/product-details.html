@@ -165,7 +165,7 @@
                 </p>
                 <span class="font-label-sm text-label-sm text-on-surface-variant">
                   @if (deal.endTime) {
-                    <app-countdown [endAt]="deal.endTime" />
+                    <app-countdown [endAt]="deal.endTime" [pending]="isDealPending(deal)" />
                   }
                 </span>
               </div>
@@ -278,7 +278,7 @@
                   </p>
                   <span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">
                     @if (deal.endTime) {
-                      <app-countdown [endAt]="deal.endTime" />
+                      <app-countdown [endAt]="deal.endTime" [pending]="isDealPending(deal)" />
                     }
                   </span>
                 </div>

@@ -8,28 +8,28 @@ import { CreatePaymentMethodRequest, PaymentMethod, PaymentMethodListResponse, S
 @Injectable({ providedIn: 'root' })
 export class PaymentMethodService {
   private http = inject(HttpClient);
-  private readonly apiUrl = environment.paymentApiUrl;
+  private readonly baseUrl: string = `${environment.apiUrl}/api/payment-methods`;
 
   getMyPaymentMethods(): Observable<PaymentMethodListResponse> {
-    return this.http.get<PaymentMethodListResponse>(`${this.apiUrl}/api/payment-methods`);
+    return this.http.get<PaymentMethodListResponse>(`${this.baseUrl}`);
   }
 
   createSetupIntent(): Observable<SetupIntentResponse> {
     return this.http.post<SetupIntentResponse>(
-      `${this.apiUrl}/api/payment-methods/setup-intent`,
+      `${this.baseUrl}/setup-intent`,
       {},
     );
   }
 
   createPaymentMethod(request: CreatePaymentMethodRequest): Observable<PaymentMethod> {
-    return this.http.post<PaymentMethod>(`${this.apiUrl}/api/payment-methods`, request);
+    return this.http.post<PaymentMethod>(`${this.baseUrl}`, request);
   }
 
   setDefault(id: string): Observable<PaymentMethod> {
-    return this.http.put<PaymentMethod>(`${this.apiUrl}/api/payment-methods/${id}/default`, {});
+    return this.http.put<PaymentMethod>(`${this.baseUrl}/${id}/default`, {});
   }
 
   deletePaymentMethod(id: string): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/api/payment-methods/${id}`);
+    return this.http.delete<void>(`${this.baseUrl}/${id}`);
   }
 }

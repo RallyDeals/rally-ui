@@ -17,23 +17,23 @@
       <div class="p-rally-lg">
         <h2 class="section-title-plain mb-rally-sm">Sign In</h2>
         <p
-          class="font-body-md text-body-md text-on-surface-variant mb-rally-lg">
+          class="font-body-md text-body-md text-on-surface-variant mb-rally-sm">
           Welcome back! Please enter your details.
         </p>
         @if (error(); as err) {
-        <div
-          class="flex items-center gap-2 px-3 py-2 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
-          role="alert">
+          <div
+            class="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
+            role="alert">
           <span class="material-symbols-outlined"
-            style="font-size: 18px">error</span>
-          <span>{{ err.message }}</span>
-        </div>
+                style="font-size: 18px">error</span>
+            <span>{{ err.message }}</span>
+          </div>
         }
 
         <!-- Primary CTA -->
         <form class="space-y-md" [formGroup]="form" (ngSubmit)="onSubmit()">
           <!-- Email Input -->
-          <div>
+          <div class="mb-3">
             <label
               class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
               for="email">Email Address</label>
@@ -52,12 +52,12 @@
                 [class.ng-dirty]="form.controls.email.invalid && form.controls.email.touched" />
             </div>
             @if (form.controls.email.touched && form.controls.email.invalid) {
-            <small class="text-error">Enter a valid email address.</small>
+              <small class="text-error">Enter a valid email address.</small>
             }
           </div>
 
           <!-- Password Input -->
-          <div>
+          <div  class="mb-3">
             <label
               class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
               for="password">Password</label>
@@ -72,7 +72,7 @@
               inputClass="rounded-lg font-body-md text-body-md" />
             @if (form.controls.password.touched &&
             form.controls.password.invalid) {
-            <small class="text-error">Password is required.</small>
+              <small class="text-error">Password is required.</small>
             }
           </div>
 

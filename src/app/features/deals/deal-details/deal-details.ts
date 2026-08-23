@@ -1,6 +1,7 @@
 import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, TitleCasePipe } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subscription, interval, switchMap, startWith } from 'rxjs';
+import { Subscription, interval, switchMap, startWith, catchError, of } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -11,8 +12,10 @@ import { DealsService, ParticipantSummary } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { ActivityEvent } from '../interfaces/ActivityEvent';
+import { Participation, ParticipationStatus } from '../interfaces/Participation';
 import { dealBadge } from '../deal-badge';
-import { PaymentDialog } from '../payment-dialog/payment-dialog';
+import { PaymentDialog } from '../../../shared/components/payment-dialog/payment-dialog';
+import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 import { AuthService } from '../../../core/auth/auth.service';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
@@ -57,10 +60,12 @@ const FAQS = [
 ];
 
 const DEAL_POLL_INTERVAL_MS = 15_000;
+const JOIN_POLL_INTERVAL_MS = 3_000;
+const JOIN_POLL_TIMEOUT_MS = 10_000;
 
 @Component({
   selector: 'app-deal-details',
-  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog],
+  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog, CurrencyPipe, TitleCasePipe, TimeAgoPipe],
   templateUrl: './deal-details.html',
 })
 export class DealDetails implements OnInit {
@@ -72,12 +77,14 @@ export class DealDetails implements OnInit {
   private readonly ngZone = inject(NgZone);
 
   private dealPollSub: Subscription | null = null;
-  private currentDealId: string | null = null;
+  private joinPollSub: Subscription | null = null;
 
   deal = signal<DealDetailsModel | null>(null);
   loading = signal(true);
   error = signal<ApiError | null>(null);
-  joined = signal(false);
+  joined = signal<ParticipationStatus | null>(null);
+  joinPending = signal(false);
+  joinError = signal<string | null>(null);
   copied = signal(false);
   showPaymentDialog = signal(false);
   selectedTab = signal<DealTab>('description');
@@ -118,25 +125,6 @@ export class DealDetails implements OnInit {
   });
 
   activity = signal<ActivityEvent[]>([]);
-
-  formatTimeAgo(timestamp: number): string {
-    const minutes = Math.max(0, Math.round((Date.now() - timestamp) / 60000));
-    if (minutes < 1) {
-      return 'just now';
-    }
-    if (minutes < 60) {
-      return `${minutes}m ago`;
-    }
-    const hours = Math.round(minutes / 60);
-    if (hours < 24) {
-      return `${hours}h ago`;
-    }
-    return `${Math.round(hours / 24)}d ago`;
-  }
-
-  formatTimestampAgo(timestamp: string): string {
-    return this.formatTimeAgo(new Date(timestamp).getTime());
-  }
 
   milestones = computed(() => {
     const deal = this.deal();
@@ -202,6 +190,8 @@ export class DealDetails implements OnInit {
     return !!deal && deal.status !== DealStatus.ACTIVE && deal.status !== DealStatus.PENDING;
   });
 
+  isPending = computed(() => this.deal()?.status === DealStatus.PENDING);
+
   badge = computed(() => {
     const deal = this.deal();
     return deal ? dealBadge(deal) : null;
@@ -215,6 +205,7 @@ export class DealDetails implements OnInit {
   constructor() {
     this.destroyRef.onDestroy(() => {
       this.stopDealPoll();
+      this.stopJoinStatusPoll();
       clearTimeout(this.copyTimer);
     });
   }
@@ -224,7 +215,6 @@ export class DealDetails implements OnInit {
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
-        this.currentDealId = id;
         this.loadDeal(id);
       }
     });
@@ -237,6 +227,9 @@ export class DealDetails implements OnInit {
     this.selectedImage.set(null);
     this.selectedTab.set('description');
     this.activity.set([]);
+    this.joinPending.set(false);
+    this.joinError.set(null);
+    this.stopJoinStatusPoll();
     this.dealsService.getDeal(id).subscribe({
       next: (deal) => {
         if (deal) {
@@ -292,15 +285,16 @@ export class DealDetails implements OnInit {
   private checkJoinedFromActivity(events: ActivityEvent[]) {
     const userId = this.authService.currentUser()?.id;
     if (!userId) return;
-    const sorted = [...events].sort((a, b) =>
-      new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
-    );
-    let joined = false;
-    for (const event of sorted) {
-      if (event.userId === userId) {
-        if (event.type === 'JOINED') joined = true;
-        if (event.type === 'LEFT') joined = false;
-      }
+
+    const userEvent = events
+      .filter((e) => e.userId === userId)
+      .reduce((latest: ActivityEvent | null, e) =>
+        !latest || e.timestamp > latest.timestamp ? e : latest, null);
+
+    let joined: ParticipationStatus = 'left';
+    if (userEvent) {
+      if (userEvent.type === 'JOINED') joined = 'active';
+      else if (userEvent.type === 'PENDING') joined = 'pending';
     }
     this.joined.set(joined);
   }
@@ -326,6 +320,49 @@ export class DealDetails implements OnInit {
     this.dealPollSub = null;
   }
 
+  private startJoinStatusPoll(dealId: string, participationId: string) {
+    this.stopJoinStatusPoll();
+    const deadline = Date.now() + JOIN_POLL_TIMEOUT_MS;
+    this.ngZone.runOutsideAngular(() => {
+      this.joinPollSub = interval(JOIN_POLL_INTERVAL_MS)
+        .pipe(
+          startWith(0),
+          switchMap(() =>
+            this.dealsService.isActiveParticipation(dealId, participationId).pipe(catchError(() => of(null))),
+          ),
+        )
+        .subscribe((active: boolean | null) => {
+          if (!active) {
+            if (Date.now() > deadline) {
+              this.ngZone.run(() => {
+                this.joinPending.set(false);
+                this.joinError.set('Still processing — check back in a moment.');
+              });
+              this.stopJoinStatusPoll();
+            }
+            return;
+          }
+          this.ngZone.run(() => {
+            this.joinPending.set(false);
+            if (active) {
+              this.joined.set('active');
+              this.loadActivity(dealId);
+              this.loadParticipants(dealId);
+            } else {
+              this.joined.set('left');
+              this.joinError.set('Payment could not be authorized. Please try again.');
+            }
+          });
+          this.stopJoinStatusPoll();
+        });
+    });
+  }
+
+  private stopJoinStatusPoll() {
+    this.joinPollSub?.unsubscribe();
+    this.joinPollSub = null;
+  }
+
   joinDeal = () => {
     if (this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login'], {
@@ -340,20 +377,15 @@ export class DealDetails implements OnInit {
     const deal = this.deal();
     if (!deal) return;
     this.showPaymentDialog.set(false);
-    this.joined.set(true);
+    this.joinError.set(null);
+    this.joinPending.set(true);
     this.dealsService.joinDeal(deal.id, data.paymentMethodId, data.address).subscribe({
-      next: () => {
-        this.loadActivity(deal.id);
-        this.loadParticipants(deal.id);
-      },
+      next: (participation) => this.startJoinStatusPoll(deal.id, participation.id),
       error: () => {
-        this.joined.set(false);
+        this.joinPending.set(false);
+        this.joinError.set('Failed to join the rally. Please try again.');
       },
     });
-  };
-
-  onPaymentCancelled = () => {
-    this.showPaymentDialog.set(false);
   };
 
   leaveDeal = () => {
@@ -363,19 +395,11 @@ export class DealDetails implements OnInit {
     }
     this.dealsService.leaveDeal(deal.id).subscribe({
       next: () => {
-        this.joined.set(false);
+        this.joined.set('left');
         this.loadActivity(deal.id);
         this.loadParticipants(deal.id);
       },
     });
-  };
-
-  selectImage = (image: string) => {
-    this.selectedImage.set(image);
-  };
-
-  selectTab = (tab: DealTab) => {
-    this.selectedTab.set(tab);
   };
 
   inviteFriends = () => {

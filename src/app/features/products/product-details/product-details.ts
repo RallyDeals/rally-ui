@@ -50,8 +50,8 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   readonly displayDeals = computed<DisplayDeal[]>(() => {
     const product = this.product();
-    if (!product?.activeDeals?.length) return [];
-    return product.activeDeals.map((d) => this.toDisplayDeal(d, product));
+    if (!product?.deals?.length) return [];
+    return product.deals.map((d) => this.toDisplayDeal(d, product));
   });
 
   readonly primaryDeal = computed(() => this.displayDeals()[0] ?? null);
@@ -169,8 +169,6 @@ export class ProductDetails implements OnInit, OnDestroy {
     });
   }
 
-  readonly atMaxStock = computed(() => this.quantity() >= this.availableStock());
-
   incrementQuantity = () => {
     if (this.quantity() < this.availableStock()) {
       const next = this.quantity() + 1;
@@ -212,13 +210,17 @@ export class ProductDetails implements OnInit, OnDestroy {
     return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
   }
 
+  isDealPending(deal: DisplayDeal): boolean {
+    return deal.status?.toLowerCase() === 'pending';
+  }
+
   private toDisplayDeal(d: ActiveDeal, product: Product): DisplayDeal {
     const needed = Math.max(0, d.minParticipants - d.currentParticipants);
     const progress = d.dealStock > 0
       ? Math.min(100, Math.round((d.currentParticipants / d.dealStock) * 100))
       : 0;
     return {
-      id: d.dealId,
+      id: d.id,
       dealPrice: d.dealPrice,
       originalPrice: product.basePrice,
       dealStock: d.dealStock,

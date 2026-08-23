@@ -40,6 +40,8 @@ export const appConfig: ApplicationConfig = {
           },
         },
       },
+      license:
+        'eyJpZCI6IjFkYWYxODE1LTJlMDgtNGQ4YS1hNjk0LWRhZTc5NzUzOTI1OCIsInByb2R1Y3QiOiJwcmltZXVpIiwidGllciI6ImNvbW11bml0eSIsInR5cGUiOiJkZXYiLCJpYXQiOjE3ODc0ODY0ODEsImV4cCI6MTgxOTAyMjQ4MX0.ghF1TfHmIngFt1OO9vkcltmM6jKS_z7hEh-g2DxUQrk9R1GlriRehPwxjCVv4jorxkPkfUhQd6ggKH1jCJ5TCQ',
       ripple: true,
     }),
     provideRouter(routes, withComponentInputBinding()),

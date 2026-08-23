@@ -55,7 +55,7 @@
         <span class="font-body-md text-[14px] text-on-surface-variant">
           <strong class="text-on-surface">{{ spotsLeft() }}</strong> spots left
         </span>
-        <app-countdown [endAt]="deal().endTime.toISOString()" />
+        <app-countdown [endAt]="deal().endTime.toISOString()" [pending]="isPending()" />
       </div>
     </div>
   </div>
