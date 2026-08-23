@@ -12,10 +12,10 @@ export interface Deal {
   originalPrice: number;
   dealPrice: number;
   currentParticipants: number;
+  authorizedCount: number;
   neededCount: number;
   progressPercent: number;
   status: DealStatus;
   durationMinutes: number;
   endTime: Date;
-  timeRemainingInSeconds: number;
 }

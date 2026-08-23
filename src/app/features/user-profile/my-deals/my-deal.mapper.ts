@@ -2,6 +2,7 @@ import { DealStatus } from '../../../shared/models/deal';
 import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { dealBadge } from '../../deals/deal-badge';
 import { MyDeal } from '../interfaces/my-deal';
+import { timeRemainingInSeconds } from '../../../shared/utils/deal-time.util';
 
 const URGENT_THRESHOLD_SECONDS = 6 * 60 * 60;
 
@@ -13,7 +14,7 @@ function timeInfo(deal: DealOverview): { label: string; icon: string; textClass:
       textClass: 'text-on-surface-variant',
     };
   }
-  const seconds = Math.max(0, deal.timeRemainingInSeconds);
+  const seconds = timeRemainingInSeconds(deal.endTime);
   const days = Math.floor(seconds / 86400);
   const hours = Math.floor(seconds / 3600);
   const label = days > 0 ? `${days}d left` : hours > 0 ? `${hours}h left` : `${Math.ceil(seconds / 60)}m left`;

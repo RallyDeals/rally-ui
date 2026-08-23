@@ -10,7 +10,7 @@ import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
 import { DealsQueryParams, DealSortKey } from './interfaces/DealsQueryParams';
 import { CreateDealRequest } from './interfaces/CreateDealRequest';
 import { ActivityEvent } from './interfaces/ActivityEvent';
-import { Participation } from './interfaces/Participation';
+import { Participation, ParticipationStatus } from './interfaces/Participation';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 
 export interface InviteLinkResponse {
@@ -24,6 +24,10 @@ export interface ParticipantSummary {
   userId: string;
   referredBy: string | null;
   joinedAt: string;
+}
+
+interface ParticipantStatusResponse {
+  status: string;
 }
 
 interface ParticipantsPageResponse {
@@ -141,8 +145,10 @@ export class DealsService {
     return this.http.delete(`${this.baseUrl}/${id}/leave`);
   }
 
-  isActiveParticipation(dealId: string, participationId: string): Observable<boolean> {
-    return this.http.get<boolean>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`);
+  getParticipationStatus(dealId: string, participationId: string): Observable<ParticipationStatus> {
+    return this.http
+      .get<ParticipantStatusResponse>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`)
+      .pipe(map((res) => res.status.toLowerCase() as ParticipationStatus));
   }
 
   getDealActivity(id: string): Observable<ActivityEvent[]> {
@@ -196,13 +202,13 @@ export class DealsService {
       dealPrice: res.dealPrice,
       dealStock: res.dealStock,
       currentParticipants: res.currentParticipants,
+      authorizedCount: res.authorizedCount,
       neededCount,
       progressPercent,
       minParticipants: res.minParticipants,
       status: res.status.toLowerCase() as DealStatus,
       durationMinutes: res.durationMinutes,
       endTime: res.endTime ? new Date(res.endTime) : new Date(),
-      timeRemainingInSeconds: res.timeRemainingSeconds ?? 0,
     };
   }
 }

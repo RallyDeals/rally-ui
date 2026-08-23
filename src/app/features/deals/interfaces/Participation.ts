@@ -1,4 +1,4 @@
-export type ParticipationStatus = 'pending' | 'active' | 'removed' | 'left';
+export type ParticipationStatus = 'pending' | 'active' | 'declined' | 'left';
 
 export interface Participation {
   id: string;

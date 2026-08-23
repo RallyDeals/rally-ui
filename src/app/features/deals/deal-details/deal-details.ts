@@ -8,11 +8,11 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService, ParticipantSummary } from '../deals.service';
+import { DealsService } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
 import { ActivityEvent } from '../interfaces/ActivityEvent';
-import { Participation, ParticipationStatus } from '../interfaces/Participation';
+import { ParticipationStatus } from '../interfaces/Participation';
 import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../../../shared/components/payment-dialog/payment-dialog';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
@@ -61,7 +61,7 @@ const FAQS = [
 
 const DEAL_POLL_INTERVAL_MS = 15_000;
 const JOIN_POLL_INTERVAL_MS = 3_000;
-const JOIN_POLL_TIMEOUT_MS = 10_000;
+const JOIN_POLL_TIMEOUT_MS = 30_000;
 
 @Component({
   selector: 'app-deal-details',
@@ -169,7 +169,7 @@ export class DealDetails implements OnInit {
 
   spotsLeft = computed(() => {
     const deal = this.deal();
-    return deal ? Math.max(0, deal.dealStock - deal.currentParticipants) : 0;
+    return deal ? Math.max(0, deal.dealStock - deal.authorizedCount) : 0;
   });
 
   progress = computed(() => {
@@ -177,7 +177,7 @@ export class DealDetails implements OnInit {
     if (!deal || deal.dealStock <= 0) {
       return 0;
     }
-    return Math.min(100, Math.max(0, Math.round((deal.currentParticipants / deal.dealStock) * 100)));
+    return Math.min(100, Math.max(0, Math.round((deal.authorizedCount / deal.dealStock) * 100)));
   });
 
   isFull = computed(() => {
@@ -291,12 +291,27 @@ export class DealDetails implements OnInit {
       .reduce((latest: ActivityEvent | null, e) =>
         !latest || e.timestamp > latest.timestamp ? e : latest, null);
 
-    let joined: ParticipationStatus = 'left';
-    if (userEvent) {
-      if (userEvent.type === 'JOINED') joined = 'active';
-      else if (userEvent.type === 'PENDING') joined = 'pending';
+    if (!userEvent) {
+      this.joined.set(null);
+      return;
     }
-    this.joined.set(joined);
+
+    switch (userEvent.type) {
+      case 'JOINED':
+        this.joined.set('active');
+        break;
+      case 'PENDING':
+        this.joined.set('pending');
+        break;
+      case 'DECLINED':
+        this.joined.set(null);
+        this.joinError.set('Your last payment attempt was declined. Please try again.');
+        break;
+      case 'LEFT':
+      default:
+        this.joined.set('left');
+        break;
+    }
   }
 
   private startDealPoll(dealId: string) {
@@ -328,32 +343,50 @@ export class DealDetails implements OnInit {
         .pipe(
           startWith(0),
           switchMap(() =>
-            this.dealsService.isActiveParticipation(dealId, participationId).pipe(catchError(() => of(null))),
+            this.dealsService.getParticipationStatus(dealId, participationId).pipe(catchError(() => of(null))),
           ),
         )
-        .subscribe((active: boolean | null) => {
-          if (!active) {
-            if (Date.now() > deadline) {
-              this.ngZone.run(() => {
-                this.joinPending.set(false);
-                this.joinError.set('Still processing — check back in a moment.');
-              });
-              this.stopJoinStatusPoll();
-            }
-            return;
-          }
-          this.ngZone.run(() => {
-            this.joinPending.set(false);
-            if (active) {
+        .subscribe((status: ParticipationStatus | null) => {
+          if (status === 'active') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joinError.set(null);
               this.joined.set('active');
               this.loadActivity(dealId);
               this.loadParticipants(dealId);
-            } else {
-              this.joined.set('left');
-              this.joinError.set('Payment could not be authorized. Please try again.');
-            }
-          });
-          this.stopJoinStatusPoll();
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          if (status === 'declined') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joined.set(null);
+              this.joinError.set('Your payment was declined. Please try again with a different payment method.');
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          if (status === 'left') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joined.set(null);
+              this.joinError.set('Your join request could not be completed. Please try again.');
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          // status is 'pending', or the check failed transiently (null): keep polling until the deadline.
+          if (Date.now() > deadline) {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joinError.set("We're still processing your payment — check back in a moment.");
+            });
+            this.stopJoinStatusPoll();
+          }
         });
     });
   }
@@ -364,7 +397,7 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    if (this.authService.isLoggedIn()) {
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
       });
@@ -443,6 +476,19 @@ export class DealDetails implements OnInit {
       document.body.removeChild(textarea);
     }
     this.showCopied();
+  }
+
+  activityIcon(type: ActivityEvent['type']): string {
+    switch (type) {
+      case 'JOINED':
+        return 'group_add';
+      case 'PENDING':
+        return 'hourglass_top';
+      case 'DECLINED':
+        return 'cancel';
+      default:
+        return 'person_remove';
+    }
   }
 
   retry = () => {

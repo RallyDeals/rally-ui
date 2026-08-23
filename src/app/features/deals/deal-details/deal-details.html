@@ -160,7 +160,7 @@
                   </span>
                   {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
                 </button>
-                @if (joined() && !isClosed()) {
+                @if ((joined() === 'active' || joined() === 'pending') && !isClosed()) {
                   <button
                     class="w-full bg-transparent border border-error/40 hover:border-error hover:text-error text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                     (click)="leaveDeal()"
@@ -173,7 +173,7 @@
 
               <div class="flex flex-col gap-rally-xs">
                 <div class="flex justify-between font-label-sm text-label-sm text-on-surface font-semibold">
-                  <span>{{ deal.currentParticipants }} Joined</span>
+                  <span>{{ deal.authorizedCount }} Joined</span>
                   <span>Target: {{ deal.dealStock }}</span>
                 </div>
                 <div class="progress-track">
@@ -326,7 +326,7 @@
                     class="flex items-center gap-3 bg-surface-container-low p-rally-md rounded-xl border border-outline-variant/10"
                   >
                     <span class="material-symbols-outlined text-primary-container text-[24px]">{{
-                      entry.type === 'JOINED' ? 'group_add' : 'person_remove'
+                      activityIcon(entry.type)
                     }}</span>
                     <div class="flex-1">
                       <p class="font-semibold text-on-surface text-body-md">
@@ -334,8 +334,10 @@
                           A participant joined the rally
                         } @else if (entry.type === 'LEFT') {
                           A participant left the rally
-                        } @else if(entry.type === 'PENDING'){
+                        } @else if (entry.type === 'PENDING') {
                           A participant is pending
+                        } @else if (entry.type === 'DECLINED') {
+                          A participant's payment was declined
                         }
                       </p>
                       <p class="font-label-sm text-label-sm text-on-surface-variant">{{ entry.timestamp | timeAgo }}</p>
