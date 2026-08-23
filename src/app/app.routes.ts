@@ -58,6 +58,7 @@ export const routes: Routes = [
       {
         path: 'orders/:orderId',
         component: OrderDetails,
+        canActivate: [authGuard],
       },
       {
         path: 'profile',
@@ -77,12 +78,13 @@ export const routes: Routes = [
   {
     path: 'seller',
     component: SellerLayout,
-    // canActivate: [authGuard, sellerGuard], // TODO: uncomment when auth service is wired
+    canActivate: [authGuard, sellerGuard],
     children: SELLER_ROUTES
   },
   {
     path: 'admin',
     component: AdminLayout,
+    canActivate: [authGuard, adminGuard],
     children: ADMIN_ROUTES
   },
 ];

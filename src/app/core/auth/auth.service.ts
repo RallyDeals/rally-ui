@@ -33,10 +33,9 @@ export class AuthService {
   readonly role = computed(() => this.currentUser()?.role ?? null);
 
   /** POST /auth/login */
-  login(request: LoginRequest, rememberMe?:boolean): Observable<LoginResponse> {
+  login(request: LoginRequest, rememberMe = false): Observable<LoginResponse> {
     return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
-      tap((res) => rememberMe ? this.establishSession(res)
-        : this.establishSessionWithoutSaving(res)),
+      tap((res) => this.establishSession(res, rememberMe)),
     );
   }
 
@@ -49,7 +48,7 @@ export class AuthService {
   verifyEmail(request: VerifyEmailRequest): Observable<LoginResponse> {
     return this.http
       .post<LoginResponse>(`${this.apiUrl}/verify-email`, request)
-      .pipe(tap((res) => this.establishSession(res)));
+      .pipe(tap((res) => this.establishSession(res, true)));
   }
 
   /** POST /auth/resend-verification-otp -> always 202 (no enumeration) */
@@ -90,9 +89,12 @@ export class AuthService {
   /** POST /auth/refresh -> rotates both tokens; store BOTH */
   refresh(): Observable<TokenPairResponse> {
     const refreshToken = this.tokenService.getRefreshToken();
+    const persist = this.tokenService.isPersisted();
     return this.http
       .post<TokenPairResponse>(`${this.apiUrl}/refresh`, { refreshToken })
-      .pipe(tap((res) => this.tokenService.storeTokens(res.accessToken, res.refreshToken)));
+      .pipe(
+        tap((res) => this.tokenService.storeTokens(res.accessToken, res.refreshToken, persist)),
+      );
   }
 
   /** POST /auth/logout -> 204, revokes the session server-side */
@@ -142,12 +144,9 @@ export class AuthService {
     this.currentUser.set(null);
   }
 
-  private establishSession(res: LoginResponse): void {
-    this.tokenService.storeTokens(res.accessToken, res.refreshToken);
-    this.tokenService.storeUser(res.user);
-    this.currentUser.set(res.user);
-  }
-    private establishSessionWithoutSaving(res: LoginResponse): void {
+  private establishSession(res: LoginResponse, persist: boolean): void {
+    this.tokenService.storeTokens(res.accessToken, res.refreshToken, persist);
+    this.tokenService.storeUser(res.user, persist);
     this.currentUser.set(res.user);
   }
 }
