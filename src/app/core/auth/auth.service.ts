@@ -11,8 +11,6 @@ import {
   RegisterRequest,
   RegisterResponse,
   TokenPairResponse,
-  UpdateProfileRequest,
-  UserProfile,
   UserSummary,
   VerifyEmailRequest,
 } from './models';
@@ -114,29 +112,6 @@ export class AuthService {
   /** POST /auth/change-password -> 204, revokes all other sessions */
   changePassword(request: ChangePasswordRequest): Observable<void> {
     return this.http.post<void>(`${this.apiUrl}/change-password`, request);
-  }
-
-  /** GET /auth/me */
-  getProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.apiUrl}/me`);
-  }
-
-  /**
-   * PATCH /auth/me. Keys left undefined are omitted from the JSON body so the
-   * backend's Optional fields keep their current values.
-   */
-  updateProfile(request: UpdateProfileRequest): Observable<UserProfile> {
-    const body: UpdateProfileRequest = {};
-    if (request.firstName !== undefined) {
-      body.firstName = request.firstName;
-    }
-    if (request.lastName !== undefined) {
-      body.lastName = request.lastName;
-    }
-    if (request.phoneNumber !== undefined) {
-      body.phoneNumber = request.phoneNumber;
-    }
-    return this.http.patch<UserProfile>(`${this.apiUrl}/me`, body);
   }
 
   clearSession(): void {

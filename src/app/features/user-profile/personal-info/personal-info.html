@@ -1,57 +1,254 @@
-<div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl relative">
-  <!-- Left Column: Visual/Avatar side -->
-  <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
-    <div
-      class="w-full max-w-70 aspect-square rounded-2xl bg-surface-container-high relative overflow-hidden shadow-xl transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-1">
-      <img
-        [src]="profile.avatarUrl"
-        [alt]="profile.avatarAlt"
-        class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-700 group-hover:scale-105"
-      />
-    </div>
-    <div class="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-70">
-      <p class="body-subtle text-sm">{{ profile.joinedLabel }}</p>
-      <div class="w-full h-px bg-linear-to-r from-outline-variant/50 via-outline-variant to-transparent my-rally-sm"></div>
-      <div class="flex justify-between w-full label-caps">
-        <span>Total Deals Joined</span>
-        <span class="text-on-surface font-bold">{{ profile.totalDealsJoined }}</span>
-      </div>
-      <div class="flex justify-between w-full label-caps mt-rally-xs">
-        <span>Total Orders Made</span>
-        <span class="text-primary font-bold">{{ profile.totalOrdersMade }}</span>
+@if (loadError(); as loadError) {
+  <app-error-state [error]="loadError" />
+}
+@else if (loading()) {
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl">
+    <!-- Left Column skeleton -->
+    <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start">
+      <div class="w-full max-w-[280px] aspect-square rounded-2xl bg-surface-container-high animate-pulse"></div>
+      <div class="flex flex-col gap-rally-xs w-full max-w-70">
+        <div class="h-3 w-32 bg-surface-container-high rounded animate-pulse"></div>
+        <div class="w-full h-px bg-outline-variant/50 my-rally-sm"></div>
+        <div class="flex justify-between w-full">
+          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
+          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+        <div class="flex justify-between w-full mt-rally-xs">
+          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
+          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
       </div>
     </div>
-    <!-- Decorative element -->
-    <div class="absolute -left-rally-lg -bottom-rally-lg w-32 h-32 opacity-10 pointer-events-none mix-blend-overlay">
-      <svg class="w-full h-full fill-current text-primary animate-spin-slow" style="animation: spin 60s linear infinite;"
-           viewbox="0 0 100 100">
-        <defs>
-          <path d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" id="circlePath"></path>
-        </defs>
-        <text font-family="monospace" font-size="12" letter-spacing="3">
-          <textpath href="#circlePath">MEMBER PROFILE • RALLY ACCOUNT •</textpath>
-        </text>
-      </svg>
+
+    <!-- Right Column skeleton -->
+    <div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl border border-outline-variant p-rally-lg">
+      <div class="flex flex-col gap-rally-lg">
+        <div class="flex items-center gap-rally-sm">
+          <div class="w-8 h-8 rounded-full bg-surface-container-high animate-pulse"></div>
+          <div class="h-5 w-40 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+          @for (field of [1, 2, 3, 4]; track field) {
+            <div class="flex flex-col gap-rally-xs">
+              <div class="h-3 w-20 bg-surface-container-high rounded animate-pulse"></div>
+              <div class="h-10 w-full bg-surface-container-high rounded-lg animate-pulse"></div>
+            </div>
+          }
+        </div>
+        <div class="flex items-center justify-end">
+          <div class="h-9 w-32 bg-surface-container-high rounded-lg animate-pulse"></div>
+        </div>
+      </div>
     </div>
   </div>
-  <!-- Right Column: Form -->
+}
+@else if(profile() !== null){
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl relative mb-8">
+    <!-- Left Column: Visual/Avatar side -->
+    <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
+      <div class="w-full max-w-[280px] aspect-square rounded-2xl bg-surface-container-high relative overflow-hidden shadow-xl transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-1">
+        <img alt="Profile Picture" class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-700 group-hover:scale-105"
+             ngSrc="{{profile()!.info.profilePicture??PROFILE_PLACEHOLDER}}"
+             fill="">
+        <div class="absolute inset-0 bg-gradient-to-t from-inverse-surface/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-md">
+          <button class="w-full py-rally-xs px-rally-sm  backdrop-blur-md rounded-lg flex items-center justify-center gap-xs hover:bg-primary hover:text-on-primary transition-all duration-300 text-on-surface font-label-sm uppercase tracking-widest group/btn shadow-md">
+            <span class="material-symbols-outlined text-[16px] group-hover/btn:scale-110 transition-transform me-2">photo_camera</span>
+            Update Photo
+          </button>
+        </div>
+      </div>
+      <div class="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-70">
+        <p class="body-subtle text-sm">{{ profile()!.info.createdAt | date:"MMM d, y" }}</p>
+        <div
+          class="w-full h-px bg-linear-to-r from-outline-variant/50 via-outline-variant to-transparent my-rally-sm"></div>
+        <div class="flex justify-between w-full label-caps">
+          <span>Total Deals Joined</span>
+          <span class="text-on-surface font-bold">{{ profile()!.dealsJoinedCount }}</span>
+        </div>
+        <div class="flex justify-between w-full label-caps mt-rally-xs">
+          <span>Total Orders Made</span>
+          <span class="text-primary font-bold">{{ profile()!.ordersCount }}</span>
+        </div>
+      </div>
+      <!-- Decorative element -->
+      <div class="absolute -left-rally-lg -bottom-rally-lg w-32 h-32 opacity-10 pointer-events-none mix-blend-overlay">
+        <svg class="w-full h-full fill-current text-primary animate-spin-slow"
+             style="animation: spin 60s linear infinite;"
+             viewbox="0 0 100 100">
+          <defs>
+            <path d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" id="circlePath"></path>
+          </defs>
+          <text font-family="monospace" font-size="12" letter-spacing="3">
+            <textpath href="#circlePath">MEMBER PROFILE • RALLY ACCOUNT •</textpath>
+          </text>
+        </svg>
+      </div>
+    </div>
+
+    <!-- Right Column: Form -->
+    <div
+      class="lg:col-span-8 bg-surface-container-lowest rounded-2xl soft-shadow hover-lift border border-outline-variant p-rally-lg lg:p-rally-lg relative overflow-hidden">
+      <div class="absolute top-0 right-0 w-full h-full opacity-[0.02] pointer-events-none mix-blend-multiply"></div>
+      <form [formGroup]="form" (ngSubmit)="save()" class="flex flex-col gap-rally-xl relative z-10">
+        <div class="flex flex-col gap-rally-lg">
+          <div class="flex items-center gap-rally-sm">
+            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+              <span class="icon-lg">person</span>
+            </div>
+            <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+            <div class="flex flex-col gap-rally-xs">
+              <label class="label-caps flex items-center gap-1" for="email">
+                <span class="icon-sm">mail</span> Email
+              </label>
+              <input
+                id="email"
+                type="email"
+                [value]="profile()!.info.email"
+                disabled
+                style="border-radius: 0.5rem;"
+                class="w-full rounded-lg border border-outline-variant bg-surface-container-high px-rally-sm py-rally-xs text-on-surface/60 cursor-not-allowed"
+              />
+            </div>
+            @for (field of fields; track field.key) {
+              <div class="flex flex-col gap-rally-xs">
+                <label class="label-caps flex items-center gap-1" [for]="field.key">
+                  @if (field.icon) {
+                    <span class="icon-sm">{{ field.icon }}</span>
+                  }
+                  {{ field.label }}
+                </label>
+                <input
+                  [id]="field.key"
+                  [type]="field.type"
+                  [formControlName]="field.key"
+                  style="border-radius: 0.5rem;"
+                  class="w-full rounded-lg border border-outline-variant bg-surface-container px-rally-sm py-rally-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+                />
+                @if (field.key === 'email' && form.get('email')?.invalid && form.get('email')?.dirty) {
+                  <p class="text-error text-xs">Enter a valid email address.</p>
+                }
+              </div>
+            }
+          </div>
+
+          @if (saveError(); as saveErr) {
+            <p class="text-error text-sm">{{ saveErr.message }}</p>
+          }
+
+          <div class="flex items-center gap-rally-sm justify-end">
+            @if (form.dirty) {
+              <button
+                type="button"
+                (click)="discard()"
+                [disabled]="saving()"
+                class="px-rally-md py-rally-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors"
+              >
+                Discard
+              </button>
+            }
+            <button
+              type="submit"
+              [disabled]="form.invalid || form.pristine || saving()"
+              class="px-rally-md py-rally-xs rounded-lg bg-primary text-on-primary font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+            >
+              {{ saving() ? 'Saving...' : 'Save Changes' }}
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+  <!-- Change Password -->
   <div
-    class="lg:col-span-8 bg-surface-container-lowest rounded-2xl soft-shadow hover-lift border border-outline-variant p-rally-lg lg:p-rally-xl relative overflow-hidden">
+    class="lg:col-span-12 bg-surface-container-lowest rounded-2xl soft-shadow hover-lift border border-outline-variant p-rally-lg lg:p-rally-lg relative overflow-hidden">
     <div class="absolute top-0 right-0 w-full h-full opacity-[0.02] pointer-events-none mix-blend-multiply"></div>
-    <div class="flex flex-col gap-rally-xl relative z-10">
+    <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="flex flex-col gap-rally-xl relative z-10">
       <div class="flex flex-col gap-rally-lg">
         <div class="flex items-center gap-rally-sm">
           <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-            <span class="icon-lg">person</span>
+            <span class="icon-lg">lock</span>
           </div>
-          <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
+          <h2 class="font-headline-md text-on-surface text-xl">Change Password</h2>
         </div>
+
         <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
-          @for (field of profile.fields; track field.label) {
-            <app-info-field [field]="field" />
+          <div class="flex flex-col gap-rally-xs md:col-span-2">
+            <label class="label-caps flex items-center gap-1" for="currentPassword">
+              <span class="icon-sm">key</span> Current Password
+            </label>
+            <input
+              id="currentPassword"
+              type="password"
+              formControlName="currentPassword"
+              style="border-radius: 0.5rem;"
+              class="w-full rounded-lg border border-outline-variant bg-surface-container px-rally-sm py-rally-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            @if (passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.dirty) {
+              <p class="text-error text-xs">Current password is required.</p>
+            }
+          </div>
+
+          <div class="flex flex-col gap-rally-xs">
+            <label class="label-caps flex items-center gap-1" for="newPassword">
+              <span class="icon-sm">lock_reset</span> New Password
+            </label>
+            <input
+              id="newPassword"
+              type="password"
+              formControlName="newPassword"
+              style="border-radius: 0.5rem;"
+              class="w-full rounded-lg border border-outline-variant bg-surface-container px-rally-sm py-rally-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            @if (passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.dirty) {
+              <p class="text-error text-xs">Password must be at least 8 characters.</p>
+            }
+          </div>
+
+          <div class="flex flex-col gap-rally-xs">
+            <label class="label-caps flex items-center gap-1" for="confirmPassword">
+              <span class="icon-sm">check_circle</span> Confirm New Password
+            </label>
+            <input
+              id="confirmPassword"
+              type="password"
+              formControlName="confirmPassword"
+              style="border-radius: 0.5rem;"
+              class="w-full rounded-lg border border-outline-variant bg-surface-container px-rally-sm py-rally-xs text-on-surface focus:outline-none focus:ring-2 focus:ring-primary"
+            />
+            @if (passwordForm.get('confirmPassword')?.invalid && passwordForm.get('confirmPassword')?.dirty) {
+              <p class="text-error text-xs">Passwords must match.</p>
+            }
+          </div>
+        </div>
+
+        @if (passwordSaveError(); as pwErr) {
+          <p class="text-error text-sm">{{ pwErr.message }}</p>
+        }
+
+        <div class="flex items-center gap-rally-sm justify-end">
+          @if (passwordForm.dirty) {
+            <button
+              type="button"
+              (click)="discardPassword()"
+              [disabled]="changingPassword()"
+              class="px-rally-md py-rally-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors"
+            >
+              Discard
+            </button>
           }
+          <button
+            type="submit"
+            [disabled]="passwordForm.invalid || passwordForm.pristine || changingPassword()"
+            class="px-rally-md py-rally-xs rounded-lg bg-primary text-on-primary font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+          >
+            {{ changingPassword() ? 'Updating...' : 'Update Password' }}
+          </button>
         </div>
       </div>
-    </div>
+    </form>
   </div>
-</div>
+}
+

@@ -5,6 +5,7 @@ export interface UserSummary {
   firstName: string;
   lastName: string;
   email: string;
+  avatarUrl: string;
   role: Role;
 }
 
