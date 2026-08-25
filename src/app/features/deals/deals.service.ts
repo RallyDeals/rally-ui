@@ -3,7 +3,6 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { PageResponse } from '../products/page-response';
-import { DealStatus } from '../../shared/models/deal';
 import { DealOverview } from './interfaces/DealOverview';
 import { DealDetails } from './interfaces/DealDetails';
 import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
@@ -12,6 +11,7 @@ import { CreateDealRequest } from './interfaces/CreateDealRequest';
 import { ActivityEvent } from './interfaces/ActivityEvent';
 import { Participation, ParticipationStatus } from './interfaces/Participation';
 import { resolveImageUrl } from '../../shared/utils/image-url';
+import { DealResponse, toDealOverview } from './deal-overview.mapper';
 
 export interface InviteLinkResponse {
   code: string;
@@ -37,29 +37,6 @@ interface ParticipantsPageResponse {
   size: number;
 }
 
-interface DealResponse {
-  id: string;
-  productId: string;
-  sellerId: string;
-  originalPrice: number;
-  dealPrice: number;
-  dealStock: number;
-  currentParticipants: number;
-  authorizedCount: number;
-  minParticipants: number;
-  status: string;
-  startTime: string | null;
-  durationMinutes: number;
-  endTime: string | null;
-  timeRemainingSeconds: number | null;
-  createdAt: string;
-  productName: string | null;
-  productImageUrl: string | null;
-  category: string | null;
-  sku: string | null;
-  sellerName: string | null;
-}
-
 interface SpringPage<T> {
   content: T[];
   totalElements: number;
@@ -83,7 +60,6 @@ export class DealsService {
     const status = params.status;
     const categories = params.categories?.length ? params.categories : undefined;
     const sellerId = params.sellerId;
-    const participantId = params.userId;
     const productId = params.productId;
     const minPrice = params.minPrice;
     const maxPrice = params.maxPrice;
@@ -97,9 +73,6 @@ export class DealsService {
         size: limit,
         ...(search && { search }),
         ...(status && { status }),
-        ...(categories && { categories }),
-        ...(sellerId && { sellerId }),
-        ...(participantId && { participantId }),
         ...(productId && { productId }),
         ...(minPrice !== undefined && { minPrice }),
         ...(maxPrice !== undefined && { maxPrice }),
@@ -107,7 +80,7 @@ export class DealsService {
       },
     }).pipe(
       map((spring) => ({
-        items: spring.content.map(this.toDealOverview),
+        items: spring.content.map(toDealOverview),
         page: spring.number + 1,
         limit: spring.size,
         total: spring.totalElements,
@@ -119,14 +92,10 @@ export class DealsService {
     return this.getDealsOverview({ ...params, sellerId });
   }
 
-  getMyDeals(buyerId: string, params: Omit<DealsQueryParams, 'userId'> = {}): Observable<PageResponse<DealOverview>> {
-    return this.getDealsOverview({ ...params, userId: buyerId });
-  }
-
   getDealsDetails(id: string): Observable<DealDetails | null> {
     return this.http.get<DealResponse>(`${this.baseUrl}/${id}`).pipe(
       map((res) => ({
-        ...this.toDealOverview(res),
+        ...toDealOverview(res),
         productDescription: `Group deal for the ${res.productName ?? 'this product'}.`,
         productImages: res.productImageUrl ? [resolveImageUrl(res.productImageUrl)] : [],
       })),
@@ -167,50 +136,23 @@ export class DealsService {
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {
     return this.http.post<DealResponse>(this.baseUrl, request).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
 
   updateDeal(id: string, request: CreateDealRequest): Observable<DealOverview> {
     const { productId, ...patchBody } = request;
     return this.http.patch<DealResponse>(`${this.baseUrl}/${id}`, patchBody).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
 
   cancelDeal(id: string): Observable<DealOverview | null> {
     return this.http.post<DealResponse>(`${this.baseUrl}/${id}/cancel`, {}).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
 
-  private toDealOverview(res: DealResponse): DealOverview {
-    const neededCount = Math.max(0, res.minParticipants - res.currentParticipants);
-    const progressPercent = res.dealStock > 0
-      ? Math.min(100, Math.round((res.currentParticipants / res.dealStock) * 100))
-      : 0;
-    return {
-      id: res.id,
-      productId: res.productId,
-      productName: res.productName ?? 'Unknown Product',
-      productImageUrl: resolveImageUrl(res.productImageUrl),
-      category: res.category ?? 'Uncategorized',
-      sku: res.sku ?? '',
-      sellerId: res.sellerId,
-      sellerName: res.sellerName ?? '',
-      originalPrice: res.originalPrice,
-      dealPrice: res.dealPrice,
-      dealStock: res.dealStock,
-      currentParticipants: res.currentParticipants,
-      authorizedCount: res.authorizedCount,
-      neededCount,
-      progressPercent,
-      minParticipants: res.minParticipants,
-      status: res.status.toLowerCase() as DealStatus,
-      durationMinutes: res.durationMinutes,
-      endTime: res.endTime ? new Date(res.endTime) : new Date(),
-    };
-  }
 }
 
 function discountOf(deal: DealOverview): number {

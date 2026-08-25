@@ -54,13 +54,11 @@ export class Login {
 
     this.authService.login(this.form.getRawValue(), this.rememberMe()).subscribe({
       next: (response) => {
-        console.log(response);
         if (response.user.role === 'ADMIN') this.router.navigateByUrl('admin');
         else if (response.user.role === 'SELLER') this.router.navigateByUrl('seller');
         else this.router.navigateByUrl(`/`);
       },
       error: (err) => {
-        console.log(err);
         this.submitting.set(false);
         const apiError = toApiError(err);
 
