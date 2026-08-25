@@ -1,22 +1,27 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { MyOrderCard } from './my-order-card/my-order-card';
 import { BriefOrderResponse } from '../../orders/interfaces/brief-order-response';
 import { OrderService } from '../../orders/order.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
+import { ShippingStatusBadge } from '../../../shared/components/shipping-status-badge/shipping-status-badge';
+import { OrderStatusBadge } from '../../../shared/components/order-status-badge/order-status-badge';
+import { ORDER_TYPE_LABELS } from '../../../shared/models/order-type';
 
 const PAGE_SIZE = 2;
 
 @Component({
   selector: 'app-my-orders',
-  imports: [MyOrderCard, ErrorState, ErrorModal, RouterLink],
+  imports: [ErrorState, ErrorModal, RouterLink, DatePipe, CurrencyPipe, ShippingStatusBadge, OrderStatusBadge],
   templateUrl: './my-orders.html',
 })
 export class MyOrders {
   private orderService = inject(OrderService);
+
+  orderTypeLabels = ORDER_TYPE_LABELS;
 
   orders = signal<BriefOrderResponse[]>([]);
   isLoading = signal(false);
