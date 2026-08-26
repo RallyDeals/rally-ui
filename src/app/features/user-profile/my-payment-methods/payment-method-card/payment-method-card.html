@@ -1,4 +1,4 @@
-<div
+<!-- <div
   class="bg-surface-container-lowest rounded-lg p-rally-md soft-shadow border border-outline-variant">
   @if (method().isDefault) {
   <span
@@ -26,5 +26,28 @@
       class="border border-outline text-error hover:border-error px-rally-md py-rally-xs rounded-lg text-sm">
       Delete
     </button>
+  </div>
+</div> -->
+
+<div
+  class="card-item">
+  <div class="card-icon" [class]="getCardBrandClass(cardBrand())">
+    {{ getCardBrandLabel(cardBrand()) }}
+  </div>
+  <div class="card-info">
+    <div class="card-number">{{ cardBrand() }}
+      &bull;&bull;&bull;&bull;{{
+      cardLast4() }}</div>
+    <div class="card-expiry">Expires {{ cardExpMonth()
+      }}/{{cardExpYear()}}</div>
+  </div>
+  @if (isDefault()) {
+  <span class="card-badge default">Default</span>
+  }
+  <div class="card-actions">
+    @if (!method().isDefault) {
+      <button class="btn-set-default" (click)="setDefault.emit(method().id)">Set Default</button>
+    }
+    <button class="btn-delete" (click)="deleteRequested.emit(method().id)">Delete</button>
   </div>
 </div>
