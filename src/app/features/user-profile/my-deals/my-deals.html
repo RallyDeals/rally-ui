@@ -24,7 +24,7 @@
           @for (option of dealStatusOptions; track option.value) {
             <button
               type="button"
-              class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors flex-shrink-0"
+              class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors shrink-0"
               [class]="isDealStatusSelected(option.value)
                 ? 'bg-primary/10 text-primary border border-primary/20'
                 : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high border border-transparent'"
@@ -56,14 +56,14 @@
           </div>
         } @else if (deals().length === 0) {
           <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
-            <span class="material-symbols-outlined text-on-surface-variant text-[40px]">local_offer</span>
-            <h2 class="section-title-plain">No deals joined yet</h2>
+            <span class="material-symbols-outlined text-on-surface-variant text-[40px]">{{ emptyState().icon }}</span>
+            <h2 class="section-title-plain">{{ emptyState().title }}</h2>
             <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
-              When you join a group deal, it will show up here.
+              {{ emptyState().message }}
             </p>
           </div>
         } @else {
-          <table class="w-full min-w-[720px] text-left border-collapse">
+          <table class="w-full min-w-180 text-left border-collapse">
             <thead>
               <tr class="bg-surface-container-low border-b border-outline-variant">
                 <th class="table-head-cell">Deal</th>
@@ -79,7 +79,7 @@
                 <tr [class.opacity-75]="deal.isCompleted">
                   <td class="table-cell">
                     <div class="flex items-center gap-rally-sm">
-                      <div class="w-12 h-12 rounded-lg overflow-hidden border border-outline-variant/20 flex-shrink-0">
+                      <div class="w-12 h-12 rounded-lg overflow-hidden border border-outline-variant/20 shrink-0">
                         <img
                           [src]="deal.image"
                           [alt]="deal.imageAlt"
@@ -131,4 +131,14 @@
       </div>
     </div>
   </section>
+  @if (hasMore()) {
+    <div class="w-full flex justify-center mt-rally-md">
+      <button
+        (click)="loadMore()"
+        [disabled]="loading()"
+        class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-rally-lg py-2 rounded-lg font-semibold transition-colors text-sm disabled:opacity-50 disabled:pointer-events-none">
+        {{ loading() ? 'Loading...' : 'Load More Orders' }}
+      </button>
+    </div>
+  }
 }

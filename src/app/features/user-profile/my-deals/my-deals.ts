@@ -40,6 +40,11 @@ export class MyDeals {
 
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
+  loadMoreError = signal<ApiError | null>(null);
+  private total = signal(0);
+  private allDealsTotal = signal(0);
+  private page = signal(1);
+  hasMore = computed(() => this.page() * MAX_DEALS < this.total());
   private myDeals = signal<DealOverview[]>([]);
   private summary = signal({ activeDealsCount: 0, savedAmount: 0 });
 
@@ -50,6 +55,24 @@ export class MyDeals {
   dealStatusFilter = signal<ReadonlySet<DealStatus>>(new Set());
 
   deals = computed(() => this.myDeals().map(toMyDeal));
+  hasActiveFilters = computed(
+    () => this.participationStatus() !== '' || this.dealStatusFilter().size > 0,
+  );
+  emptyState = computed(() => {
+    if (this.hasActiveFilters() && this.allDealsTotal() > 0) {
+      return {
+        title: 'No deals found',
+        message: 'Try adjusting your filters to see matching deals.',
+        icon: 'search_off',
+      };
+    }
+
+    return {
+      title: 'No deals joined yet',
+      message: 'When you join a group deal, it will show up here.',
+      icon: 'local_offer',
+    };
+  });
 
   stats = computed<DealStat[]>(() => {
     const { activeDealsCount, savedAmount } = this.summary();
@@ -72,13 +95,14 @@ export class MyDeals {
   });
 
   constructor() {
-    this.loadDeals();
+    this.loadPage();
     this.loadSummary();
   }
 
   onParticipationStatusChange(value: string) {
     this.participationStatus.set(value as ParticipationStatus | '');
-    this.loadDeals();
+    this.page.set(1);
+    this.loadPage();
   }
 
   isDealStatusSelected(status: DealStatus): boolean {
@@ -93,14 +117,18 @@ export class MyDeals {
       next.add(status);
     }
     this.dealStatusFilter.set(next);
-    this.loadDeals();
+    this.page.set(1);
+    this.loadPage();
   }
 
-  loadDeals() {
+  loadPage() {
+    const isFirstPage = this.page() === 1;
+    const hasActiveFiltersAtRequestTime = this.hasActiveFilters();
     this.loading.set(true);
     this.loadError.set(null);
     this.userService
       .getMyDeals({
+        page: this.page(),
         size: MAX_DEALS,
         participationStatus: this.participationStatus() || undefined,
         dealStatus: [...this.dealStatusFilter()],
@@ -108,17 +136,32 @@ export class MyDeals {
       .subscribe({
         next: (response) => {
           this.myDeals.set(response.items);
+          this.total.set(response.total);
+          if (!hasActiveFiltersAtRequestTime) {
+            this.allDealsTotal.set(response.total);
+          }
           this.loading.set(false);
         },
         error: (err) => {
           this.loading.set(false);
-          this.loadError.set(toApiError(err));
+          const apiError = toApiError(err);
+          if (isFirstPage) {
+            this.loadError.set(apiError);
+          } else {
+            this.page.update((page) => page - 1);
+            this.loadMoreError.set(apiError);
+          }
         },
       });
   }
 
-  viewDealDetails(dealId: string){
+  viewDealDetails(dealId: string) {
     this.router.navigate(['/deals', dealId]);
+  }
+
+  loadMore(): void {
+    this.page.update((page) => page + 1);
+    this.loadPage();
   }
 
   private loadSummary() {
