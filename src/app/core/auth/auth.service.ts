@@ -4,6 +4,7 @@ import { Observable, tap } from 'rxjs';
 import { environment } from '../../../environments/environment';
 import { TokenService } from '../../shared/services/token.service';
 import {
+  AvatarUploadResponse,
   ChangePasswordRequest,
   LoginRequest,
   LoginResponse,
@@ -139,9 +140,27 @@ export class AuthService {
     return this.http.patch<UserProfile>(`${this.apiUrl}/me`, body);
   }
 
+  /** POST /auth/me/avatar -> returns the stored image path (/uploads/avatars/...) */
+  uploadAvatar(file: File): Observable<AvatarUploadResponse> {
+    const formData = new FormData();
+    formData.append('file', file);
+    return this.http.post<AvatarUploadResponse>(`${this.apiUrl}/me/avatar`, formData);
+  }
+
   clearSession(): void {
     this.tokenService.clear();
     this.currentUser.set(null);
+  }
+
+  /** Keeps the header/sidebar in sync after a profile PATCH (name change). */
+  updateStoredUser(firstName: string, lastName: string): void {
+    const current = this.currentUser();
+    if (!current) {
+      return;
+    }
+    const updated = { ...current, firstName, lastName };
+    this.currentUser.set(updated);
+    this.tokenService.storeUser(updated, this.tokenService.isPersisted());
   }
 
   private establishSession(res: LoginResponse, persist: boolean): void {
