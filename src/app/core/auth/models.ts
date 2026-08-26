@@ -78,8 +78,14 @@ export interface UserProfile {
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;
+  /** Present only once the gateway aggregates these from other services. */
+  totalDealsJoined?: number;
+  totalOrdersMade?: number;
 }
 
+export interface AvatarUploadResponse{
+  path: string;
+}
 /**
  * PATCH /auth/me body.
  * Backend uses Optional<T> fields: omit a key to leave it unchanged,
