@@ -1,4 +1,4 @@
-export interface DealStat {
+export interface StatCardInfo {
   label: string;
   value: string;
   icon: string;

@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { StatCard } from './stat-card/stat-card';
 import { toMyDeal } from './my-deal.mapper';
-import { DealStat } from '../interfaces/deal-stat';
+import { StatCardInfo } from '../interfaces/stat-card-info';
 import { UserService } from '../user.service';
 import { DealOverview } from '../../deals/interfaces/DealOverview';
 import { DealStatus } from '../../../shared/models/deal';
@@ -74,7 +74,7 @@ export class MyDeals {
     };
   });
 
-  stats = computed<DealStat[]>(() => {
+  stats = computed<StatCardInfo[]>(() => {
     const { activeDealsCount, savedAmount } = this.summary();
     return [
       {

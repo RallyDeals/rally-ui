@@ -12,6 +12,21 @@ import { SellerOrdersParams } from './interfaces/seller-orders-params';
 import { DetailedSellerOrderResponse } from './interfaces/detailed-seller-order-response';
 import { SellerOrdersStatistics } from './interfaces/seller-orders-statistics';
 import { AuthService } from '../../core/auth/auth.service';
+import { OrderStatusFiltration } from '../../shared/models/order-status-filtration';
+import { OrderType } from '../../shared/models/order-type';
+
+export interface MyOrderQueryParams {
+  page: number;
+  limit: number;
+  status: string[];
+  type: OrderType|null;
+}
+export interface MyOrdersStatistics {
+  deliveredOrders: number;
+  cancelledOrders: number;
+  pendingDelivery: number;
+  pendingPayment: number;
+}
 
 @Injectable({ providedIn: 'root' })
 export class OrderService {
@@ -19,10 +34,19 @@ export class OrderService {
   private http = inject(HttpClient);
   private authService = inject(AuthService);
 
-  getMyOrders(page: number, limit: number): Observable<BriefOrderPageResponse> {
+  getMyOrders(req: MyOrderQueryParams): Observable<BriefOrderPageResponse> {
     return this.http.get<BriefOrderPageResponse>(`${this.baseUrl}/my`, {
-      params: { page, limit },
+      params: {
+        page: req.page,
+        limit: req.limit,
+        ...(req.status && { status: Array.from(req.status) }),
+        ...(req.type && { type: req.type }),
+      },
     });
+  }
+
+  getMyOrdersStatistics(): Observable<MyOrdersStatistics> {
+    return this.http.get<MyOrdersStatistics>(`${this.baseUrl}/my/statistics`);
   }
 
   getOrderById(id: string): Observable<DetailedOrderResponse> {

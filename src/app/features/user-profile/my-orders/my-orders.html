@@ -1,42 +1,77 @@
 @if (loadError(); as loadError) {
   <app-error-state [error]="loadError" />
 } @else {
-  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
-    <div class="overflow-x-auto no-scrollbar">
-      @if (isLoading() && orders().length === 0) {
-        <div class="p-rally-md space-y-4">
-          @for (skeleton of [1, 2, 3]; track skeleton) {
-            <div class="flex items-center gap-4 animate-pulse">
-              <div class="flex-1 grid grid-cols-5 gap-rally-md">
-                @for (field of [1, 2, 3, 4, 5]; track field) {
-                  <div class="space-y-2">
-                    <div class="h-3 w-16 bg-surface-container rounded"></div>
-                    <div class="h-4 w-20 bg-surface-container rounded"></div>
-                  </div>
-                }
-              </div>
-              <div class="h-6 w-20 bg-surface-container rounded-full"></div>
-              <div class="h-9 w-28 bg-surface-container rounded-lg"></div>
-            </div>
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4  gap-rally-md mb-rally-xl">
+    @for (stat of stats(); track stat.label) {
+      <app-stat-card [stat]="stat" />
+    }
+  </div>
+  <section>
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-rally-sm mb-rally-md">
+      <h3 class="section-title">My Orders</h3>
+      <div class="flex flex-col sm:flex-row sm:items-center gap-rally-sm">
+        <div class="w-full sm:w-48">
+          <app-searchable-select
+            [options]="orderTypeOptions"
+            [selected]="orderType()"
+            placeholder="All Order Types"
+            (selectedChange)="onOrderTypeChange($event)"
+          />
+        </div>
+        <div class="flex items-center gap-2 overflow-x-auto no-scrollbar">
+          @for (option of orderStatusOptions; track option.value) {
+            <button
+              type="button"
+              class="px-4 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-colors shrink-0"
+              [class]="isOrderStatusSelected(option.value)
+                ? 'bg-primary/10 text-primary border border-primary/20'
+                : 'bg-surface-container text-on-surface-variant hover:bg-surface-container-high border border-transparent'"
+              (click)="toggleOrderStatus(option.value)"
+            >
+              {{ option.label }}
+            </button>
           }
         </div>
-      } @else if (orders().length === 0) {
-        <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
-          <span class="material-symbols-outlined text-on-surface-variant text-[40px]">shopping_bag</span>
-          <h2 class="section-title-plain">No orders yet</h2>
-          <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
-            When you place an order, it will show up here.
-          </p>
-          <a
-            routerLink="/products"
-            class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
-          >
-            Browse Products
-          </a>
-        </div>
-      } @else {
-        <table class="w-full min-w-[720px] text-left border-collapse">
-          <thead>
+      </div>
+    </div>
+    <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+      <div class="overflow-x-auto no-scrollbar">
+        @if (isLoading() && orders().length === 0) {
+          <div class="p-rally-md space-y-4">
+            @for (skeleton of [1, 2, 3]; track skeleton) {
+              <div class="flex items-center gap-4 animate-pulse">
+                <div class="flex-1 grid grid-cols-5 gap-rally-md">
+                  @for (field of [1, 2, 3, 4, 5]; track field) {
+                    <div class="space-y-2">
+                      <div class="h-3 w-16 bg-surface-container rounded"></div>
+                      <div class="h-4 w-20 bg-surface-container rounded"></div>
+                    </div>
+                  }
+                </div>
+                <div class="h-6 w-20 bg-surface-container rounded-full"></div>
+                <div class="h-9 w-28 bg-surface-container rounded-lg"></div>
+              </div>
+            }
+          </div>
+        } @else if (orders().length === 0) {
+          <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
+            <span class="material-symbols-outlined text-on-surface-variant text-[40px]">{{ emptyState().icon }}</span>
+            <h2 class="section-title-plain">{{ emptyState().title }}</h2>
+            <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+              {{ emptyState().message }}
+            </p>
+            @if (emptyState().actionLabel) {
+              <a
+                routerLink="/products"
+                class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+              >
+                {{ emptyState().actionLabel }}
+              </a>
+            }
+          </div>
+        } @else {
+          <table class="w-full min-w-180 text-left border-collapse">
+            <thead>
             <tr class="bg-surface-container-low border-b border-outline-variant">
               <th class="table-head-cell">Order ID</th>
               <th class="table-head-cell">Date Placed</th>
@@ -46,47 +81,48 @@
               <th class="table-head-cell">Status</th>
               <th class="table-head-cell text-right">Action</th>
             </tr>
-          </thead>
-          <tbody class="divide-y divide-outline-variant/30">
-            @for (order of orders(); track order.orderId) {
-              <tr [class.opacity-75]="order.status === 'CANCELLED'">
-                <td class="table-cell font-semibold text-on-surface whitespace-nowrap">
-                  {{ order.orderId.slice(0, 8) }}
-                </td>
-                <td class="table-cell text-on-surface-variant whitespace-nowrap">
-                  {{ order.createdAt | date:'MMM dd, y' }}
-                </td>
-                <td class="table-cell font-semibold text-on-surface whitespace-nowrap">
-                  {{ order.totalPrice | currency:'USD' }}
-                </td>
-                <td class="table-cell text-on-surface-variant whitespace-nowrap">
-                  {{ order.noOfItems }} {{ order.noOfItems === 1 ? 'Item' : 'Items' }}
-                </td>
-                <td class="table-cell text-on-surface-variant whitespace-nowrap">
-                  {{ orderTypeLabels[order.orderType] }}
-                </td>
-                <td class="table-cell whitespace-nowrap">
-                  @if (order.shippingStatus; as status) {
-                    <app-shipping-status-badge [status]="status" />
-                  } @else {
-                    <app-order-status-badge [status]="order.status" />
-                  }
-                </td>
-                <td class="table-cell text-right">
-                  <button
-                    [routerLink]="['/orders', order.orderId]"
-                    class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap"
-                  >
-                    View Details
-                  </button>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      }
+            </thead>
+            <tbody class="divide-y divide-outline-variant/30">
+              @for (order of orders(); track order.orderId) {
+                <tr [class.opacity-75]="order.status === 'CANCELLED'">
+                  <td class="table-cell font-semibold text-on-surface whitespace-nowrap">
+                    {{ order.orderId.slice(0, 8) }}
+                  </td>
+                  <td class="table-cell text-on-surface-variant whitespace-nowrap">
+                    {{ order.createdAt | date:'MMM dd, y' }}
+                  </td>
+                  <td class="table-cell font-semibold text-on-surface whitespace-nowrap">
+                    {{ order.totalPrice | currency:'USD' }}
+                  </td>
+                  <td class="table-cell text-on-surface-variant whitespace-nowrap">
+                    {{ order.noOfItems }} {{ order.noOfItems === 1 ? 'Item' : 'Items' }}
+                  </td>
+                  <td class="table-cell text-on-surface-variant whitespace-nowrap">
+                    {{ order.orderType }}
+                  </td>
+                  <td class="table-cell whitespace-nowrap">
+                    @if (order.shippingStatus; as status) {
+                      <app-shipping-status-badge [status]="status" />
+                    } @else {
+                      <app-order-status-badge [status]="order.status" />
+                    }
+                  </td>
+                  <td class="table-cell text-right">
+                    <button
+                      [routerLink]="['/orders', order.orderId]"
+                      class="bg-surface-container-lowest border border-outline hover:border-primary text-on-surface hover:text-primary px-4 py-2 rounded-lg font-semibold transition-colors text-sm whitespace-nowrap"
+                    >
+                      View Details
+                    </button>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        }
+      </div>
     </div>
-  </div>
+  </section>
 
   @if (hasMore()) {
     <div class="w-full flex justify-center mt-rally-md">
