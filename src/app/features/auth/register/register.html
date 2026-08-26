@@ -105,6 +105,22 @@
           <small class="text-error">Enter a valid email address.</small>
           }
         </div>
+        <div>
+          <label
+            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+            for="phone">Phone Number</label>
+          <input
+            pInputText
+            id="phone"
+            formControlName="phone"
+            type="tel"
+            placeholder="+201011111111"
+            autocomplete="tel"
+            class="w-full rounded-lg font-body-md text-body-md" />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+          <small class="text-error">Enter a valid phone number.</small>
+          }
+        </div>
 
         <div>
           <label
@@ -186,7 +202,8 @@
             </span>
           </label>
           @if (termsNotAccepted) {
-          <small class="text-error">You must accept the terms to continue.</small>
+          <small class="text-error">You must accept the terms to
+            continue.</small>
           }
         </div>
 
