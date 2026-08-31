@@ -1,33 +1,37 @@
 <!-- Main Content -->
-<main class="flex-1 p-rally-gutter pt-10 max-w-rally-container-max mx-auto w-full">
+<main
+  class="flex-1 p-rally-gutter pt-10 max-w-rally-container-max mx-auto w-full">
   @if (store.loadError(); as err) {
-    <app-error-state [error]="err" [showRetry]="true" (retry)="store.load()" />
-  } @else if (!store.profile()) {
-    <p class="text-body-lg text-on-surface-variant">Loading profile...</p>
+  <app-error-state [error]="err" [showRetry]="true" (retry)="store.load()" />
+  } @else if (!store.profileInfo()) {
+  <p class="text-body-lg text-on-surface-variant">Loading profile...</p>
   } @else {
-    <!-- Header Section -->
-    <header
-      class="mb-rally-lg flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-      <div>
-        <h2
-          class="font-display-lg text-[22px] md:text-[38px] font-bold text-on-surface tracking-tighter">
-          My Dashboard</h2>
-        <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Manage your active group
-          deals and recent purchases.</p>
-      </div>
-      <div class="flex items-center gap-rally-sm">
-        <app-profile-summary [avatarUrl]="avatarUrl()" avatarAlt="User Profile" [name]="userName()" />
-        <button
-          class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors cursor-pointer"
-          (click)="logout()"
-          title="Logout">
-          <span class="material-symbols-outlined text-on-surface-variant">logout</span>
-        </button>
-      </div>
-    </header>
+  <!-- Header Section -->
+  <header
+    class="mb-rally-lg flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div>
+      <h2
+        class="font-display-lg text-[22px] md:text-[38px] font-bold text-on-surface tracking-tighter">
+        My Dashboard</h2>
+      <p class="font-body-lg text-body-lg text-on-surface-variant mt-2">Manage
+        your active group
+        deals and recent purchases.</p>
+    </div>
+    <div class="flex items-center gap-rally-sm">
+      <app-profile-summary [avatarUrl]="avatarUrl()" avatarAlt="User Profile"
+        [name]="userName()" />
+      <button
+        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors cursor-pointer"
+        (click)="logout()"
+        title="Logout">
+        <span
+          class="material-symbols-outlined text-on-surface-variant">logout</span>
+      </button>
+    </div>
+  </header>
 
-    <app-profile-tabs [tabs]="tabs" />
+  <app-profile-tabs [tabs]="tabs" />
 
-    <router-outlet />
+  <router-outlet />
   }
 </main>

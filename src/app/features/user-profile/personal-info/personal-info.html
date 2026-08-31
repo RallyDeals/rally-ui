@@ -1,13 +1,13 @@
 <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl relative">
   <!-- Left Column: Visual/Avatar side -->
-  <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
+  <div
+    class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
     <div
       class="w-full max-w-70 aspect-square rounded-2xl bg-surface-container-high relative overflow-hidden shadow-xl transition-all duration-500 group-hover:shadow-2xl group-hover:-translate-y-1">
       <img
         [src]="displayAvatarUrl()"
         alt="Profile picture"
-        class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-700 group-hover:scale-105"
-      />
+        class="w-full h-full object-cover mix-blend-multiply opacity-90 transition-transform duration-700 group-hover:scale-105" />
       <!-- Upload overlay: hidden file input + camera icon on hover -->
       <button
         type="button"
@@ -15,9 +15,10 @@
         (click)="fileInput.click()"
         [disabled]="avatarUploading()">
         @if (avatarUploading()) {
-          <span class="material-symbols-outlined text-white animate-spin">progress_activity</span>
+        <span
+          class="material-symbols-outlined text-white animate-spin">progress_activity</span>
         } @else {
-          <span class="material-symbols-outlined text-white">photo_camera</span>
+        <span class="material-symbols-outlined text-white">photo_camera</span>
         }
       </button>
       <input
@@ -25,37 +26,43 @@
         type="file"
         accept="image/svg+xml,image/png,image/jpeg"
         class="hidden"
-        (change)="onFileSelected($event)"
-      />
+        (change)="onFileSelected($event)" />
     </div>
-    <div class="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-70">
+    <div
+      class="flex flex-col items-center lg:items-start text-center lg:text-left w-full max-w-70">
       @if (joinedLabel()) {
-        <p class="body-subtle text-sm">{{ joinedLabel() }}</p>
+      <p class="body-subtle text-sm">{{ joinedLabel() }}</p>
       }
       <div
         class="w-full h-px bg-linear-to-r from-outline-variant/50 via-outline-variant to-transparent my-rally-sm"></div>
-      @if (profile()?.totalDealsJoined !== undefined) {
-        <div class="flex justify-between w-full label-caps">
-          <span>Total Deals Joined</span>
-          <span class="text-on-surface font-bold">{{ profile()!.totalDealsJoined }}</span>
-        </div>
+      @if (true) {
+      <div class="flex justify-between w-full label-caps">
+        <span>Total Deals Joined</span>
+        <span class="text-on-surface font-bold">{{ dealsJoinedCount()
+          }}</span>
+      </div>
       }
-      @if (profile()?.totalOrdersMade !== undefined) {
-        <div class="flex justify-between w-full label-caps mt-rally-xs">
-          <span>Total Orders Made</span>
-          <span class="text-primary font-bold">{{ profile()!.totalOrdersMade }}</span>
-        </div>
+      @if (true) {
+      <div class="flex justify-between w-full label-caps mt-rally-xs">
+        <span>Total Orders Made</span>
+        <span class="text-primary font-bold">{{ ordersCount()
+          }}</span>
+      </div>
       }
     </div>
     <!-- Decorative element -->
-    <div class="absolute -left-rally-lg -bottom-rally-lg w-32 h-32 opacity-10 pointer-events-none mix-blend-overlay">
-      <svg class="w-full h-full fill-current text-primary animate-spin-slow" style="animation: spin 60s linear infinite;"
-           viewbox="0 0 100 100">
+    <div
+      class="absolute -left-rally-lg -bottom-rally-lg w-32 h-32 opacity-10 pointer-events-none mix-blend-overlay">
+      <svg class="w-full h-full fill-current text-primary animate-spin-slow"
+        style="animation: spin 60s linear infinite;"
+        viewbox="0 0 100 100">
         <defs>
-          <path d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" id="circlePath"></path>
+          <path d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0"
+            id="circlePath"></path>
         </defs>
         <text font-family="monospace" font-size="12" letter-spacing="3">
-          <textpath href="#circlePath">MEMBER PROFILE • RALLY ACCOUNT •</textpath>
+          <textpath href="#circlePath">MEMBER PROFILE • RALLY ACCOUNT
+            •</textpath>
         </text>
       </svg>
     </div>
@@ -63,116 +70,122 @@
   <!-- Right Column: Form -->
   <div
     class="lg:col-span-8 bg-surface-container-lowest rounded-2xl soft-shadow hover-lift border border-outline-variant p-rally-lg lg:p-rally-xl relative overflow-hidden">
-    <div class="absolute top-0 right-0 w-full h-full opacity-[0.02] pointer-events-none mix-blend-multiply"></div>
+    <div
+      class="absolute top-0 right-0 w-full h-full opacity-[0.02] pointer-events-none mix-blend-multiply"></div>
     <div class="flex flex-col gap-rally-xl relative z-10">
       <div class="flex flex-col gap-rally-lg">
         <div class="flex items-center justify-between gap-rally-sm">
           <div class="flex items-center gap-rally-sm">
-            <div class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
+            <div
+              class="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
               <span class="icon-lg">person</span>
             </div>
-            <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
+            <h2 class="font-headline-md text-on-surface text-xl">Basic
+              Information</h2>
           </div>
           @if (!isEditing()) {
-            <p-button
-              label="Edit"
-              icon="pi pi-pencil"
-              size="small"
-              [text]="true"
-              (onClick)="startEdit()" />
+          <p-button
+            label="Edit"
+            icon="pi pi-pencil"
+            size="small"
+            [text]="true"
+            (onClick)="startEdit()" />
           }
         </div>
 
         @if (!isEditing()) {
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
-            @for (field of fields(); track field.label) {
-              <app-info-field [field]="field" />
-            }
-          </div>
-          @if (saved()) {
-            <p class="flex items-center gap-rally-xs text-sm font-medium text-emerald-600 dark:text-emerald-400">
-              <span class="material-symbols-outlined text-base">check_circle</span>
-              Profile updated
-            </p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+          @for (field of fields(); track field.label) {
+          <app-info-field [field]="field" />
           }
+        </div>
+        @if (saved()) {
+        <p
+          class="flex items-center gap-rally-xs text-sm font-medium text-emerald-600 dark:text-emerald-400">
+          <span class="material-symbols-outlined text-base">check_circle</span>
+          Profile updated
+        </p>
+        }
         } @else {
-          <form [formGroup]="form" (ngSubmit)="onSubmit()" class="flex flex-col gap-rally-lg">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
-              <div class="flex flex-col gap-rally-xs">
-                <label for="firstName"
-                       class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">First
-                  Name *</label>
-                <input
-                  pInputText
-                  id="firstName"
-                  formControlName="firstName"
-                  [maxlength]="100"
-                  [class.ng-invalid]="isInvalid('firstName')"
-                  [class.ng-dirty]="isInvalid('firstName')"
-                />
-                @if (isInvalid('firstName')) {
-                  <small class="text-red-500 ml-rally-xs">
-                    @if (form.controls.firstName.hasError('required') || form.controls.firstName.hasError('blank')) {
-                      First name is required.
-                    } @else {
-                      First name must be at most 100 characters.
-                    }
-                  </small>
+        <form [formGroup]="form" (ngSubmit)="onSubmit()"
+          class="flex flex-col gap-rally-lg">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+            <div class="flex flex-col gap-rally-xs">
+              <label for="firstName"
+                class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">First
+                Name *</label>
+              <input
+                pInputText
+                id="firstName"
+                formControlName="firstName"
+                [maxlength]="100"
+                [class.ng-invalid]="isInvalid('firstName')"
+                [class.ng-dirty]="isInvalid('firstName')" />
+              @if (isInvalid('firstName')) {
+              <small class="text-red-500 ml-rally-xs">
+                @if (form.controls.firstName.hasError('required') ||
+                form.controls.firstName.hasError('blank')) {
+                First name is required.
+                } @else {
+                First name must be at most 100 characters.
                 }
-              </div>
-
-              <div class="flex flex-col gap-rally-xs">
-                <label for="lastName"
-                       class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">Last
-                  Name</label>
-                <input
-                  pInputText
-                  id="lastName"
-                  formControlName="lastName"
-                  [maxlength]="100"
-                  [class.ng-invalid]="isInvalid('lastName')"
-                  [class.ng-dirty]="isInvalid('lastName')"
-                />
-                @if (isInvalid('lastName')) {
-                  <small class="text-red-500 ml-rally-xs">Last name must be at most 100 characters.</small>
-                }
-              </div>
-
-              <app-info-field [field]="{ label: 'Email Address', value: profile()?.email ?? '', icon: 'mail' }" />
-
-              <div class="flex flex-col gap-rally-xs">
-                <label for="phoneNumber"
-                       class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">Phone
-                  Number</label>
-                <input
-                  pInputText
-                  id="phoneNumber"
-                  formControlName="phoneNumber"
-                  [maxlength]="30"
-                  [class.ng-invalid]="isInvalid('phoneNumber')"
-                  [class.ng-dirty]="isInvalid('phoneNumber')"
-                />
-                @if (isInvalid('phoneNumber')) {
-                  <small class="text-red-500 ml-rally-xs">Phone number must be at most 30 characters.</small>
-                }
-              </div>
+              </small>
+              }
             </div>
 
-            <div class="flex items-center justify-end gap-rally-sm">
-              <p-button
-                label="Cancel"
-                severity="secondary"
-                size="small"
-                [text]="true"
-                (onClick)="cancelEdit()" />
-              <p-button
-                label="Save"
-                icon="pi pi-check"
-                size="small"
-                type="submit"
-                [loading]="submitting()" />
+            <div class="flex flex-col gap-rally-xs">
+              <label for="lastName"
+                class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">Last
+                Name</label>
+              <input
+                pInputText
+                id="lastName"
+                formControlName="lastName"
+                [maxlength]="100"
+                [class.ng-invalid]="isInvalid('lastName')"
+                [class.ng-dirty]="isInvalid('lastName')" />
+              @if (isInvalid('lastName')) {
+              <small class="text-red-500 ml-rally-xs">Last name must be at most
+                100 characters.</small>
+              }
             </div>
-          </form>
+
+            <app-info-field
+              [field]="{ label: 'Email Address', value: profile()?.email ?? 'Undefiend'}" />
+
+            <div class="flex flex-col gap-rally-xs">
+              <label for="phoneNumber"
+                class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">Phone
+                Number</label>
+              <input
+                pInputText
+                id="phoneNumber"
+                formControlName="phoneNumber"
+                [maxlength]="30"
+                [class.ng-invalid]="isInvalid('phoneNumber')"
+                [class.ng-dirty]="isInvalid('phoneNumber')" />
+              @if (isInvalid('phoneNumber')) {
+              <small class="text-red-500 ml-rally-xs">Phone number must be at
+                most 30 characters.</small>
+              }
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-rally-sm">
+            <p-button
+              label="Cancel"
+              severity="secondary"
+              size="small"
+              [text]="true"
+              (onClick)="cancelEdit()" />
+            <p-button
+              label="Save"
+              icon="pi pi-check"
+              size="small"
+              type="submit"
+              [loading]="submitting()" />
+          </div>
+        </form>
         }
       </div>
     </div>

@@ -21,10 +21,10 @@ export class UserProfile {
   private readonly router = inject(Router);
 
   readonly avatarUrl = computed(() =>
-    resolveImageUrl(this.store.profile()?.profilePicture, PLACEHOLDER_IMAGE),
+    resolveImageUrl(this.store.profileInfo()?.profilePicture, PLACEHOLDER_IMAGE),
   );
 
-  readonly userName = computed(() => this.store.profile()?.name ?? '');
+  readonly userName = computed(() => this.store.profileInfo()?.name ?? '');
 
   tabs: ProfileTab[] = [
     { id: 'personal-info', label: 'Personal Info' },

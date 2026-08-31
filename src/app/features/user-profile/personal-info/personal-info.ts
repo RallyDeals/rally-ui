@@ -35,7 +35,9 @@ export class PersonalInfo {
   private readonly authService = inject(AuthService);
   private readonly fb = inject(FormBuilder);
 
-  readonly profile = this.store.profile;
+  readonly profile = this.store.profileInfo;
+  readonly ordersCount = this.store.ordersCount;
+  readonly dealsJoinedCount = this.store.dealsJoinedCount;
 
   /** Mirrors the backend limits enforced by ImageStorageService. */
   static readonly ALLOWED_AVATAR_TYPES = new Set(['image/svg+xml', 'image/png', 'image/jpeg']);
