@@ -8,7 +8,7 @@ import { DealsStats } from './deals-stats/deals-stats';
 import { DealsToolbar, DealStatusFilter } from './deals-toolbar/deals-toolbar';
 import { DealRow } from './deal-row/deal-row';
 import { DealsService } from '../../deals/deals.service';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 
 const PAGE_SIZE = 5;
 

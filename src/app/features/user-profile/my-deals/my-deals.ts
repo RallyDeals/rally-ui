@@ -4,7 +4,7 @@ import { StatCard } from './stat-card/stat-card';
 import { toMyDeal } from './my-deal.mapper';
 import { StatCardInfo } from '../interfaces/stat-card-info';
 import { UserService } from '../user.service';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { DealStatus } from '../../../shared/models/deal';
 import { ParticipationStatus } from '../../deals/interfaces/Participation';
 import { ApiError } from '../../../shared/models/api-error';

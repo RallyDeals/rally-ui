@@ -6,7 +6,7 @@ import { environment } from '../../../environments/environment';
 import { UpdateProfileRequest, UserProfile } from '../../core/auth/models';
 import { AuthService } from '../../core/auth/auth.service';
 import { PageResponse } from '../products/page-response';
-import { DealOverview } from '../deals/interfaces/DealOverview';
+import { DealOverview } from '../deals/interfaces/deal-overview';
 import { DealResponse, toDealOverview } from '../deals/deal-overview.mapper';
 
 export interface MyDealsQueryParams {

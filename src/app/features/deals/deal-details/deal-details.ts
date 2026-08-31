@@ -8,11 +8,10 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService } from '../deals.service';
+import { DealsService, ParticipantSummary, ParticipationStatus } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
-import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
-import { ActivityEvent } from '../interfaces/ActivityEvent';
-import { ParticipationStatus } from '../interfaces/Participation';
+import { DealDetails as DealDetailsModel } from '../interfaces/deal-details';
+import { ActivityEvent } from '../interfaces/activity-event';
 import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../../../shared/components/payment-dialog/payment-dialog';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
@@ -40,10 +39,6 @@ function dealStartTime(deal: DealDetailsModel): number {
 }
 
 type DealTab = 'description' | 'specifications' | 'activity' | 'faq';
-
-const AVATAR_INITIALS = ['SM', 'JK', 'AL', 'RZ', 'PD', 'MT', 'NO', 'KW'];
-const AVATAR_COLORS = ['#f97316', '#006c49', '#be0037', '#9d4300', '#7c4dff', '#00796b'];
-
 const FAQS = [
   {
     q: 'How does a group deal work?',
@@ -65,7 +60,17 @@ const JOIN_POLL_TIMEOUT_MS = 30_000;
 
 @Component({
   selector: 'app-deal-details',
-  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog, CurrencyPipe, TitleCasePipe, TimeAgoPipe],
+  imports: [
+    Breadcrumbs,
+    Countdown,
+    ErrorState,
+    PrimaryBtn,
+    PaymentDialog,
+    CurrencyPipe,
+    TitleCasePipe,
+    TimeAgoPipe,
+    AvatarPipe,
+  ],
   templateUrl: './deal-details.html',
 })
 export class DealDetails implements OnInit {
@@ -107,7 +112,7 @@ export class DealDetails implements OnInit {
 
   activeImage = computed(() => this.selectedImage() ?? this.deal()?.productImageUrl ?? '');
 
-  participants = signal<{ initials: string; color: string }[]>([]);
+  participants = signal<ParticipantSummary[]>([]);
   extraParticipants = signal(0);
 
   specs = computed(() => {
@@ -262,24 +267,16 @@ export class DealDetails implements OnInit {
 
   private loadParticipants(dealId: string) {
     this.dealsService.getDealParticipants(dealId).subscribe({
-      next: (list) => {
-        const shown = list.slice(0, 3);
-        this.participants.set(
-          shown.map((p, i) => ({
-            initials: this.toInitials(p.userId),
-            color: AVATAR_COLORS[i % AVATAR_COLORS.length],
-          }))
-        );
-        this.extraParticipants.set(Math.max(0, list.length - 3));
+      next: (page) => {
+        const shown = page.participants.slice(0, 3);
+        this.participants.set(shown);
+        this.extraParticipants.set(Math.max(0, page.activeCount - shown.length));
       },
     });
   }
 
-  private toInitials(userId: string): string {
-    const hex = userId.replace(/-/g, '');
-    const first = parseInt(hex.slice(0, 8), 16) % 26;
-    const second = parseInt(hex.slice(8, 16), 16) % 26;
-    return String.fromCharCode(65 + first) + String.fromCharCode(65 + second);
+  fullName(p: ParticipantSummary): string {
+    return `${p.firstName} ${p.lastName}`.trim();
   }
 
   private checkJoinedFromActivity(events: ActivityEvent[]) {
@@ -288,8 +285,11 @@ export class DealDetails implements OnInit {
 
     const userEvent = events
       .filter((e) => e.userId === userId)
-      .reduce((latest: ActivityEvent | null, e) =>
-        !latest || e.timestamp > latest.timestamp ? e : latest, null);
+      .reduce(
+        (latest: ActivityEvent | null, e) =>
+          !latest || e.timestamp > latest.timestamp ? e : latest,
+        null,
+      );
 
     if (!userEvent) {
       this.joined.set(null);
@@ -298,10 +298,10 @@ export class DealDetails implements OnInit {
 
     switch (userEvent.type) {
       case 'JOINED':
-        this.joined.set('active');
+        this.joined.set(ParticipationStatus.ACTIVE);
         break;
       case 'PENDING':
-        this.joined.set('pending');
+        this.joined.set(ParticipationStatus.PENDING);
         break;
       case 'DECLINED':
         this.joined.set(null);
@@ -309,7 +309,7 @@ export class DealDetails implements OnInit {
         break;
       case 'LEFT':
       default:
-        this.joined.set('left');
+        this.joined.set(ParticipationStatus.LEFT);
         break;
     }
   }
@@ -343,7 +343,9 @@ export class DealDetails implements OnInit {
         .pipe(
           startWith(0),
           switchMap(() =>
-            this.dealsService.getParticipationStatus(dealId, participationId).pipe(catchError(() => of(null))),
+            this.dealsService
+              .getParticipationStatus(dealId, participationId)
+              .pipe(catchError(() => of(null))),
           ),
         )
         .subscribe((status: ParticipationStatus | null) => {
@@ -351,7 +353,7 @@ export class DealDetails implements OnInit {
             this.ngZone.run(() => {
               this.joinPending.set(false);
               this.joinError.set(null);
-              this.joined.set('active');
+              this.joined.set(ParticipationStatus.ACTIVE);
               this.loadActivity(dealId);
               this.loadParticipants(dealId);
             });
@@ -363,7 +365,9 @@ export class DealDetails implements OnInit {
             this.ngZone.run(() => {
               this.joinPending.set(false);
               this.joined.set(null);
-              this.joinError.set('Your payment was declined. Please try again with a different payment method.');
+              this.joinError.set(
+                'Your payment was declined. Please try again with a different payment method.',
+              );
             });
             this.stopJoinStatusPoll();
             return;
@@ -428,7 +432,7 @@ export class DealDetails implements OnInit {
     }
     this.dealsService.leaveDeal(deal.id).subscribe({
       next: () => {
-        this.joined.set('left');
+        this.joined.set(ParticipationStatus.LEFT);
         this.loadActivity(deal.id);
         this.loadParticipants(deal.id);
       },
@@ -451,7 +455,10 @@ export class DealDetails implements OnInit {
 
   private copyToClipboard(url: string): void {
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => this.showCopied(), () => this.fallbackCopy(url));
+      navigator.clipboard.writeText(url).then(
+        () => this.showCopied(),
+        () => this.fallbackCopy(url),
+      );
     } else {
       this.fallbackCopy(url);
     }

@@ -1,5 +1,5 @@
 import { DealStatus } from '../../../shared/models/deal';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { dealBadge } from '../../deals/deal-badge';
 import { MyDeal } from '../interfaces/my-deal';
 import { timeRemainingInSeconds } from '../../../shared/utils/deal-time.util';

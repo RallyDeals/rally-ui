@@ -1,4 +1,4 @@
-import { DealOverview } from './interfaces/DealOverview';
+import { DealOverview } from './interfaces/deal-overview';
 import { DealStatus } from '../../shared/models/deal';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 

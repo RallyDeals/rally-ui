@@ -2,7 +2,7 @@ import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { Countdown } from '../../../../shared/components/countdown/countdown';
 import { resolveImageUrl } from '../../../../shared/utils/image-url';
-import { DealOverview } from '../../interfaces/DealOverview';
+import { DealOverview } from '../../interfaces/deal-overview';
 import { dealBadge } from '../../deal-badge';
 import { DealStatus } from '../../../../shared/models/deal';
 

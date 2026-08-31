@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { CurrencyPipe } from '@angular/common';
 import { DealStatus } from '../../../../shared/models/deal';
-import { DealOverview } from '../../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../../deals/interfaces/deal-overview';
 
 interface StatusBadge {
   label: string;

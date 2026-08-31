@@ -1,6 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { DealOverview } from '../../../../features/deals/interfaces/DealOverview';
+import { DealOverview } from '../../../../features/deals/interfaces/deal-overview';
 import { dealBadge } from '../../../../features/deals/deal-badge';
 
 @Component({

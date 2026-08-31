@@ -1,7 +1,7 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { DealCard } from './deal-card/deal-card';
-import { DealOverview } from '../../../features/deals/interfaces/DealOverview';
+import { DealOverview } from '../../../features/deals/interfaces/deal-overview';
 import { DealsService } from '../../../features/deals/deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 

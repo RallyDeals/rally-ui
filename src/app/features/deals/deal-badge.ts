@@ -1,5 +1,5 @@
 import { DealStatus } from '../../shared/models/deal';
-import { DealOverview } from './interfaces/DealOverview';
+import { DealOverview } from './interfaces/deal-overview';
 import { timeRemainingInSeconds } from '../../shared/utils/deal-time.util';
 
 const ENDING_SOON_THRESHOLD_SECONDS = 6 * 60 * 60;

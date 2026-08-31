@@ -11,7 +11,7 @@ export type DealSortKey =
 
 export interface DealsQueryParams {
   // buyer browse + dashboards
-  search?: string; // product name/seller name
+  search?: string; // product name
 
   // buyer browse
   categories?: string[];
