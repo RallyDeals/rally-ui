@@ -1,8 +1,9 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserProfile } from '../../core/auth/models';
+import { UserPersonalInfo, UserProfile } from '../../core/auth/models';
 import { ApiError } from '../../shared/models/api-error';
 import { toApiError } from '../../shared/utils/api-error.util';
+import { single } from 'rxjs';
 
 /**
  * Shared state for the user-profile section. Loaded once by the shell and
@@ -13,7 +14,9 @@ import { toApiError } from '../../shared/utils/api-error.util';
 export class ProfileStore {
   private readonly authService = inject(AuthService);
 
-  readonly profile = signal<UserProfile | null>(null);
+  readonly profileInfo = signal<UserProfile | null>(null);
+  readonly dealsJoinedCount = signal <number>(0);
+  readonly ordersCount = signal <number>(0);
   readonly isLoading = signal(false);
   readonly loadError = signal<ApiError | null>(null);
 
@@ -21,9 +24,11 @@ export class ProfileStore {
   load(): void {
     this.isLoading.set(true);
     this.loadError.set(null);
-    this.authService.getProfile().subscribe({
+    this.authService.getPersonalInfo().subscribe({
       next: (profile) => {
-        this.profile.set(profile);
+        this.profileInfo.set(profile.info);
+        this.dealsJoinedCount.set(profile.dealsJoinedCount)
+        this.ordersCount.set(profile.ordersCount)
         this.isLoading.set(false);
       },
       error: (err) => {
@@ -35,12 +40,12 @@ export class ProfileStore {
 
   /** Replaces the stored profile after a successful PATCH /auth/me. */
   setProfile(profile: UserProfile): void {
-    this.profile.set(profile);
+    this.profileInfo.set(profile);
   }
 
   /** Applies a freshly uploaded avatar path (POST /auth/me/avatar response). */
   applyAvatarPath(path: string): void {
-    this.profile.update((current) =>
+    this.profileInfo.update((current) =>
       current ? { ...current, profilePicture: path } : current,
     );
   }
