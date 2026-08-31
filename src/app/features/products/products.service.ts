@@ -65,13 +65,14 @@ export class ProductsService {
   }
 
   getPendingApprovalProducts(
-    params: { categoryId?: string; sellerId?: string; page?: number; limit?: number } = {},
+    params: { categoryId?: string; sellerId?: string; page?: number; limit?: number; includeDeleted?: boolean } = {},
   ): Observable<PageResponse<Product>> {
     return this.http.get<PageResponse<Product>>(`${this.apiUrl}/products/admin`, {
       params: {
         status: ProductStatus.PENDING_APPROVAL,
         page: params.page ?? 1,
         limit: params.limit ?? 20,
+        includeDeleted: params.includeDeleted ?? true,
         ...(params.categoryId && { categoryId: params.categoryId }),
         ...(params.sellerId && { sellerId: params.sellerId }),
       },
