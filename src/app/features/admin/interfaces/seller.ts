@@ -4,7 +4,7 @@ export interface Seller {
   email: string;
   avatarUrl?: string;
   joinedAt: string;
-  productsCount: number;
-  pendingApprovals: number;
+  totalProducts: number;
+  totalPendingProducts: number;
   activeDeals: number;
 }
