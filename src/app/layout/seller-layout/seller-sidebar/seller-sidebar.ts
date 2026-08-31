@@ -2,6 +2,7 @@ import { Component, inject, input, output } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface NavItem {
   label: string;
@@ -20,6 +21,7 @@ export class SellerSidebar {
   close = output<void>();
 
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -54,5 +56,10 @@ export class SellerSidebar {
     return this.isActive(item)
       ? `${base} bg-primary-container text-on-primary font-semibold shadow-sm`
       : `${base} text-on-surface-variant hover:bg-surface-container`;
+  }
+
+  logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/');
   }
 }
