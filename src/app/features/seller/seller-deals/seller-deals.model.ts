@@ -1,7 +1,7 @@
 import { FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { ProgressTone } from '../components/deal-progress/deal-progress';
 import { DealStatus } from '../../../shared/models/deal';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { timeRemainingInSeconds } from '../../../shared/utils/deal-time.util';
 
 export interface DealRow {

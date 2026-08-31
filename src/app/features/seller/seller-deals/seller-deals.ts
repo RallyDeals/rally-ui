@@ -14,7 +14,7 @@ import { DealsService } from '../../deals/deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { PageResponse } from '../../products/page-response';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { TokenService } from '../../../shared/services/token.service';
 import { DealRowActions } from './deal-row-actions/deal-row-actions';
 import { DEAL_STATUS_OPTIONS, DealRow, PROGRESS_TONES, StatusFilter, formatCountdown, toDealRow } from './seller-deals.model';
