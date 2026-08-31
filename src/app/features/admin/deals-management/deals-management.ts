@@ -22,6 +22,7 @@ export class DealsManagement implements OnInit {
 
   deals = signal<DealOverview[]>([]);
   total = signal(0);
+  loading = signal(true);
   loadError = signal<ApiError | null>(null);
   search = signal('');
   status = signal<DealStatusFilter>('');
@@ -44,6 +45,7 @@ export class DealsManagement implements OnInit {
   }
 
   loadDeals() {
+    this.loading.set(true);
     this.loadError.set(null);
     this.dealsService
       .getDealsOverview({
@@ -56,9 +58,11 @@ export class DealsManagement implements OnInit {
         next: (response) => {
           this.deals.set(response.items);
           this.total.set(response.total);
+          this.loading.set(false);
         },
         error: (err) => {
           this.loadError.set(toApiError(err));
+          this.loading.set(false);
         },
       });
   }

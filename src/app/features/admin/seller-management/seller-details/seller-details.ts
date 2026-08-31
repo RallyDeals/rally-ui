@@ -35,6 +35,7 @@ export class SellerDetails implements OnInit {
     page: 1,
   });
   productsError = signal<ApiError | null>(null);
+  productsLoading = signal(true);
   loading = signal(true);
   page = signal(1);
 
@@ -62,13 +63,16 @@ export class SellerDetails implements OnInit {
   }
 
   loadProducts() {
+    this.productsLoading.set(true);
     this.productsError.set(null);
     this.productsService.getAdminProductsBySeller(this.sellerId, { page: this.page(), limit: PAGE_SIZE }).subscribe({
       next: (products) => {
         this.sellerProducts.set(products);
+        this.productsLoading.set(false);
       },
       error: (err) => {
         this.productsError.set(toApiError(err));
+        this.productsLoading.set(false);
       },
     });
   }

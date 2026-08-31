@@ -48,9 +48,23 @@
               </thead>
               <tbody class="text-body-md font-body-md">
                 @if (loading()) {
-                  <tr>
-                    <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="5">Loading…</td>
-                  </tr>
+                  @for (skeleton of [1, 2, 3]; track skeleton) {
+                    <tr class="animate-pulse">
+                      <td class="py-rally-sm px-rally-lg">
+                        <div class="flex items-center gap-rally-md">
+                          <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0"></div>
+                          <div class="flex flex-col gap-1.5">
+                            <div class="h-4 w-32 bg-surface-container-high rounded"></div>
+                            <div class="h-3 w-40 bg-surface-container-high rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-6 w-16 bg-surface-container-high rounded-full"></div></td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-6 w-16 bg-surface-container-high rounded-full"></div></td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-4 w-20 bg-surface-container-high rounded"></div></td>
+                      <td class="py-rally-sm px-rally-lg text-right"><div class="h-6 w-6 bg-surface-container-high rounded-full ml-auto"></div></td>
+                    </tr>
+                  }
                 } @else {
                   @for (user of users(); track user.id) {
                     <tr app-user-row [user]="user" (toggleStatus)="onToggleUserStatus($event)" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>

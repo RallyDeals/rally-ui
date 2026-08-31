@@ -28,6 +28,7 @@ export class SellerManagement implements OnInit {
   totalSellersCount = signal<number>(0);
   total = signal<number>(0);
   sellers = signal<Seller[]>([]);
+  loading = signal(true);
   loadError = signal<ApiError | null>(null);
   search = signal('');
   page = signal<number>(1);
@@ -54,16 +55,21 @@ export class SellerManagement implements OnInit {
   }
 
   loadSellers() {
+    this.loading.set(true);
     this.loadError.set(null);
-    this.userService.getSellers({ search: this.search(), page: this.page(), limit: PAGE_SIZE }).subscribe({
-      next: (sellers) => {
-        this.sellers.set(sellers.items);
-        this.total.set(sellers.total);
-      },
-      error: (err) => {
-        this.loadError.set(toApiError(err));
-      },
-    });
+    this.userService
+      .getSellers({ search: this.search(), page: this.page(), limit: PAGE_SIZE })
+      .subscribe({
+        next: (sellers) => {
+          this.sellers.set(sellers.items);
+          this.total.set(sellers.total);
+          this.loading.set(false);
+        },
+        error: (err) => {
+          this.loadError.set(toApiError(err));
+          this.loading.set(false);
+        },
+      });
   }
 
   loadStats() {
@@ -72,24 +78,27 @@ export class SellerManagement implements OnInit {
         this.totalSellersCount.set(response.total);
       },
       error: (err) => {
+        this.loadError.set(toApiError(err));
         console.error('Error loading total sellers count:', err);
-      }
+      },
     });
-    this.productsService.getPendingApprovalProducts({ limit: 1 }).subscribe({
+    this.productsService.getPendingApprovalProducts({ limit: 1, includeDeleted: false }).subscribe({
       next: (response) => {
         this.pendingApprovalProductsCount.set(response.total);
       },
       error: (err) => {
+        this.loadError.set(toApiError(err));
         console.error('Error loading pending approval products:', err);
-      }
+      },
     });
     this.dealService.getDealsAnalytics().subscribe({
       next: (response) => {
         this.activeDealsCount.set(response.activeDeals);
       },
       error: (err) => {
+        this.loadError.set(toApiError(err));
         console.error('Error loading active deals count:', err);
-      }
+      },
     });
   }
 }

@@ -28,10 +28,22 @@
                 </tr>
               </thead>
               <tbody class="divide-y divide-surface-container/50">
-                @if (loading()) {
-                  <tr>
-                    <td class="p-rally-md text-center text-on-surface-variant" colspan="5">Loading…</td>
-                  </tr>
+                @if (productsLoading()) {
+                  @for (skeleton of [1, 2, 3]; track skeleton) {
+                    <tr class="animate-pulse">
+                      <td class="p-rally-md"><div class="w-16 h-16 rounded-lg bg-surface-container-high"></div></td>
+                      <td class="p-rally-md">
+                        <div class="flex flex-col gap-1.5">
+                          <div class="h-4 w-40 bg-surface-container-high rounded"></div>
+                          <div class="h-3 w-24 bg-surface-container-high rounded"></div>
+                          <div class="h-4 w-16 bg-surface-container-high rounded"></div>
+                        </div>
+                      </td>
+                      <td class="p-rally-md"><div class="h-6 w-20 bg-surface-container-high rounded-full"></div></td>
+                      <td class="p-rally-md"><div class="h-6 w-20 bg-surface-container-high rounded-full"></div></td>
+                      <td class="p-rally-md text-right"><div class="h-8 w-24 bg-surface-container-high rounded-lg ml-auto"></div></td>
+                    </tr>
+                  }
                 } @else {
                   @for (product of sellerProducts().items; track product.id) {
                     <tr app-seller-product-row [product]="product" class="hover:bg-surface-container-lowest/80 transition-colors group"></tr>
