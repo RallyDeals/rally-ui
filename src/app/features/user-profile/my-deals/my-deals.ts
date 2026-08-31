@@ -6,7 +6,7 @@ import { StatCardInfo } from '../interfaces/stat-card-info';
 import { UserService } from '../user.service';
 import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { DealStatus } from '../../../shared/models/deal';
-import { ParticipationStatus } from '../../deals/interfaces/Participation';
+import { ParticipationStatus } from '../../deals/deals.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';

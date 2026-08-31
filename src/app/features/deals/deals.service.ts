@@ -19,10 +19,22 @@ export interface InviteLinkResponse {
   expiresAt: string;
 }
 
+export interface ParticipationResponse{
+  id: string,
+  dealId: string,
+  userId: string,
+  referredBy: string | null,
+  status: string,
+  joinedAt: Date,
+  leftAt: Date | null
+}
+
 export interface ParticipantSummary {
   userId: string;
   referredBy: string | null;
   joinedAt: string;
+  firstName: string;
+  lastName: string;
 }
 
 interface ParticipantStatusResponse {
@@ -34,6 +46,7 @@ interface ParticipantsPageResponse {
   activeCount: number;
   page: number;
   size: number;
+  totalPages: number;
 }
 
 interface SpringPage<T> {
@@ -42,6 +55,12 @@ interface SpringPage<T> {
   totalPages: number;
   number: number;
   size: number;
+}
+export enum ParticipationStatus {
+  PENDING = 'pending',
+  ACTIVE='active',
+  LEFT='left',
+  DECLINED='declined',
 }
 
 @Injectable({ providedIn: 'root' })
@@ -105,8 +124,8 @@ export class DealsService {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<Participation> {
-    return this.http.post<Participation>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
+  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<ParticipationResponse> {
+    return this.http.post<ParticipationResponse>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
   }
 
   leaveDeal(id: string): Observable<unknown> {
@@ -127,10 +146,8 @@ export class DealsService {
     return this.http.post<InviteLinkResponse>(`${environment.apiUrl}/deals/${dealId}/invite-link`, {});
   }
 
-  getDealParticipants(dealId: string): Observable<ParticipantSummary[]> {
-    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`).pipe(
-      map((res) => res.participants ?? [])
-    );
+  getDealParticipants(dealId: string): Observable<ParticipantsPageResponse> {
+    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`);
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {
@@ -151,16 +168,4 @@ export class DealsService {
       map(toDealOverview),
     );
   }
-
-}
-
-function discountOf(deal: DealOverview): number {
-  if (!deal.originalPrice || deal.originalPrice <= 0) {
-    return 0;
-  }
-  return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
-}
-
-function startTimeOf(deal: DealOverview): number {
-  return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }
