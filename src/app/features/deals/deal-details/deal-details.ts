@@ -16,6 +16,7 @@ import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../../../shared/components/payment-dialog/payment-dialog';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AvatarPipe } from '../../../shared/pipes/avatar-pipe';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',

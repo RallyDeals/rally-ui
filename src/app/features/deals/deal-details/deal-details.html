@@ -108,7 +108,8 @@
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="text-error font-label-sm text-label-sm mb-1 uppercase tracking-wider font-bold animate-pulse">
+                  <div
+                    class="text-error font-label-sm text-label-sm mb-1 uppercase tracking-wider font-bold animate-pulse">
                     Ends In
                   </div>
                   <div class="font-headline-md text-headline-md text-on-surface tabular-nums">
@@ -192,29 +193,25 @@
 
               <div class="flex items-center gap-rally-sm">
                 <div class="flex -space-x-3">
-                  @for (person of participants(); track person.initials) {
-                    <span
-                      class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white"
-                      [style.background-color]="person.color"
-                    >
-                      {{ person.initials }}
+                  @for (p of participants(); track p.userId) {
+                    @let avatar = fullName(p) | avatar;
+                    <div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white" [style.background-color]="avatar.color">
+                      {{ avatar.initials }}
+                    </div>
+                  } @empty {
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">
+                    No participants yet
                     </span>
                   }
                   @if (extraParticipants() > 0) {
-                    <span
-                      class="w-8 h-8 rounded-full border-2 border-white bg-surface-container flex items-center justify-center font-label-sm text-[10px] text-on-surface-variant z-10"
-                    >
-                      +{{ extraParticipants() }}
-                    </span>
+                    <span class="extra-count">+{{ extraParticipants() }}</span>
                   }
                 </div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant">
-                  @if (participants().length > 0) {
-                    {{ participants()[0].initials }} joined
-                  } @else {
-                    No participants yet
-                  }
-                </span>
+                @if(participants().length > 0) {
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">
+                    joined
+                  </span>
+                }
               </div>
             </div>
           </div>
@@ -258,7 +255,7 @@
               @if (tab === 'activity') {
                 <span
                   class="bg-primary-container text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse"
-                  >Live</span
+                >Live</span
                 >
               }
             </button>
@@ -308,7 +305,7 @@
                     <div class="flex justify-between gap-4 py-3 first:pt-0 last:pb-0">
                       <span
                         class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"
-                        >{{ spec.label }}</span
+                      >{{ spec.label }}</span
                       >
                       <span class="font-semibold text-on-surface text-right">{{ spec.value }}</span>
                     </div>
@@ -319,15 +316,16 @@
             @case ('activity') {
               <div class="md:col-span-2 flex flex-col gap-rally-sm">
                 @if (activity().length === 0) {
-                  <p class="font-body-md text-body-md text-on-surface-variant text-center py-rally-lg">No activity yet.</p>
+                  <p class="font-body-md text-body-md text-on-surface-variant text-center py-rally-lg">No activity
+                    yet.</p>
                 }
                 @for (entry of activity(); track entry.timestamp + entry.userId) {
                   <div
                     class="flex items-center gap-3 bg-surface-container-low p-rally-md rounded-xl border border-outline-variant/10"
                   >
                     <span class="material-symbols-outlined text-primary-container text-[24px]">{{
-                      activityIcon(entry.type)
-                    }}</span>
+                        activityIcon(entry.type)
+                      }}</span>
                     <div class="flex-1">
                       <p class="font-semibold text-on-surface text-body-md">
                         @if (entry.type === 'JOINED') {
@@ -358,7 +356,7 @@
                       {{ item.q }}
                       <span
                         class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180"
-                        >expand_more</span
+                      >expand_more</span
                       >
                     </summary>
                     <p class="mt-rally-sm font-body-md text-body-md text-on-surface-variant">
@@ -393,7 +391,7 @@
                       class="font-label-sm text-label-sm font-bold"
                       [class.text-primary-container]="milestone.reached"
                       [class.text-on-surface]="!milestone.reached"
-                      >{{ milestone.label }}</span
+                    >{{ milestone.label }}</span
                     >
                     <span class="text-[12px] text-on-surface-variant">{{ milestone.detail }}</span>
                   </div>
