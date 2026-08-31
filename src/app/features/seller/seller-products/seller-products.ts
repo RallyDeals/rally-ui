@@ -6,7 +6,6 @@ import { Observable, Subscription, interval, switchMap, startWith, forkJoin, of,
 import { catchError } from 'rxjs/operators';
 import { ProductsService } from '../../products/products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
-import { TokenService } from '../../../shared/services/token.service';
 import { Product } from '../../../shared/models/product';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
@@ -65,6 +64,7 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   products = signal<ProductRow[]>([]);
   total = signal(0);
+  allProductsTotal = signal(0);
   page = signal(1);
   limit = 10;
   loading = signal(true);
@@ -72,6 +72,7 @@ export class SellerProducts implements OnInit, OnDestroy {
   actionError = signal<ApiError | null>(null);
   statusFilter = signal<StatusFilter>('ALL');
   selectedIds = signal<Set<string>>(new Set());
+  hasActiveFilters = computed(() => this.statusFilter() !== 'ALL');
 
   readonly statusOptions: FilterPillOption[] = [
     { value: 'ALL', label: 'All Products' },
@@ -95,6 +96,24 @@ export class SellerProducts implements OnInit, OnDestroy {
     OUT_OF_STOCK: { dot: 'bg-error', text: 'text-error', label: 'Out of Stock' },
   };
 
+  emptyState = computed(() => {
+    if (this.hasActiveFilters() && this.allProductsTotal() > 0) {
+      return {
+        title: 'No products found',
+        message: 'Try adjusting your filters to see matching orders.',
+        icon: 'search_off',
+        actionLabel: null,
+      };
+    }
+
+    return {
+      title: 'No orders yet',
+      message: 'When you place an order, it will show up here.',
+      icon: 'shopping_bag',
+      actionLabel: 'Browse Products',
+    };
+  });
+
   readonly visibleProducts = computed(() => {
     const query = this.searchQuery().trim().toLowerCase();
     const items = this.products();
@@ -112,13 +131,14 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   readonly pendingCount = computed(
     () =>
-      this.products().filter(
-        (product) => !product.deleted && product.status === 'PENDING_APPROVAL',
-      ).length,
+      this.products().filter((product) => !product.deleted && product.status === 'PENDING_APPROVAL')
+        .length,
   );
 
   readonly lowStockCount = computed(
-    () => this.products().filter((product) => !product.deleted && product.stockStatus !== 'IN_STOCK').length,
+    () =>
+      this.products().filter((product) => !product.deleted && product.stockStatus !== 'IN_STOCK')
+        .length,
   );
 
   get fromIndex(): number {
@@ -139,7 +159,7 @@ export class SellerProducts implements OnInit, OnDestroy {
   }
 
   loadProducts() {
-    const sellerId = this.authService.currentUser()?.id
+    const sellerId = this.authService.currentUser()?.id;
     if (!sellerId) {
       this.loadError.set({
         message: 'Seller account not found.',
@@ -157,7 +177,10 @@ export class SellerProducts implements OnInit, OnDestroy {
     this.selectedIds.set(new Set());
     this.productsService
       .getSellerProducts(sellerId, {
-        status: this.statusFilter() === 'ALL' || this.statusFilter() === 'DELETED' ? undefined : this.statusFilter(),
+        status:
+          this.statusFilter() === 'ALL' || this.statusFilter() === 'DELETED'
+            ? undefined
+            : this.statusFilter(),
         deleted: this.statusFilter() === 'DELETED',
         includeDeleted: this.statusFilter() !== 'DELETED' ? false : undefined,
         page: this.page(),
@@ -165,8 +188,11 @@ export class SellerProducts implements OnInit, OnDestroy {
       })
       .subscribe({
         next: (response) => {
-          this.products.set(response.items.map(p => toProductRow(p)));
+          this.products.set(response.items.map((p) => toProductRow(p)));
           this.total.set(response.total);
+          if (!this.hasActiveFilters()) {
+            this.allProductsTotal.set(response.total);
+          }
           this.loading.set(false);
           this.startInventoryPoll();
         },
@@ -179,7 +205,7 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   private startInventoryPoll() {
     this.stopInventoryPoll();
-    const productIds = this.products().map(p => p.id);
+    const productIds = this.products().map((p) => p.id);
     if (productIds.length === 0) return;
 
     this.ngZone.runOutsideAngular(() => {
@@ -190,8 +216,8 @@ export class SellerProducts implements OnInit, OnDestroy {
         )
         .subscribe((inventoryMap) => {
           this.ngZone.run(() => {
-            this.products.update(rows =>
-              rows.map(row => {
+            this.products.update((rows) =>
+              rows.map((row) => {
                 const inv = inventoryMap.get(row.id);
                 return inv ? toProductRow(row, inv) : row;
               }),
@@ -209,15 +235,15 @@ export class SellerProducts implements OnInit, OnDestroy {
   private fetchAllInventory(productIds: string[]): Observable<Map<string, Inventory>> {
     if (productIds.length === 0) return of(new Map());
 
-    const requests = productIds.map(id =>
+    const requests = productIds.map((id) =>
       this.inventoryService.getInventory(id).pipe(
         catchError(() => of(null)),
-        map(inv => ({ id, inv })),
+        map((inv) => ({ id, inv })),
       ),
     );
 
     return forkJoin(requests).pipe(
-      map(results => {
+      map((results) => {
         const map = new Map<string, Inventory>();
         for (const { id, inv } of results) {
           if (inv) map.set(id, inv);
@@ -288,19 +314,17 @@ export class SellerProducts implements OnInit, OnDestroy {
     if (!product) {
       return;
     }
-    this.productsService
-      .deleteProduct(product.id)
-      .subscribe({
-        next: () => {
-          const next = new Set(this.selectedIds());
-          next.delete(product.id);
-          this.selectedIds.set(next);
-          this.loadProducts();
-        },
-        error: (err) => {
-          this.actionError.set(toApiError(err));
-        },
-      });
+    this.productsService.deleteProduct(product.id).subscribe({
+      next: () => {
+        const next = new Set(this.selectedIds());
+        next.delete(product.id);
+        this.selectedIds.set(next);
+        this.loadProducts();
+      },
+      error: (err) => {
+        this.actionError.set(toApiError(err));
+      },
+    });
   };
 
   restoreTarget = signal<Product | null>(null);
@@ -312,7 +336,8 @@ export class SellerProducts implements OnInit, OnDestroy {
     }
     return {
       title: `Restore "${product.name}"?`,
-      message: 'The product will be resubmitted for approval before it becomes visible in your store again.',
+      message:
+        'The product will be resubmitted for approval before it becomes visible in your store again.',
       icon: 'restore',
       iconTone: 'primary',
       confirmTone: 'primary',
