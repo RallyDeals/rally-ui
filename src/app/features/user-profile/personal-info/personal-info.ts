@@ -15,6 +15,7 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { UpdateProfileRequest } from '../../../core/auth/models';
 import { ChangePasswordRequest } from '../../../core/auth/models';
 import { AuthService } from '../../../core/auth/auth.service';
+import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
 
 interface EditableField {
   key: 'firstName' | 'lastName' | 'email' | 'phoneNumber';
@@ -57,10 +58,8 @@ export class PersonalInfo implements OnInit {
   changingPassword = signal(false);
   passwordSaveError = signal<ApiError | null>(null);
 
-  PROFILE_PLACEHOLDER =
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuBHSol_IxxKg-QlxhfK4We-hTAfWhkOLPIQ1TxgecpcFSkrQlLUqIdxLUVNdsiimfTGmgY2uHGSUDyILFA3LcqOdkOJMb21zUKK2d48TUodmjamQ2xf8Nd5QIq8WXRrn7CLxz-lpnoZO3_1WfE3baCJFBGr5LnVAt2xNmvTARnrX4W2qv6uFTtptYsnK1Q2UyTL5dueCR6WSemU-kTunJtXL1-qzfFLmHqa7hBGjMRZJEtBAuFE8Dd4awphHXylEZRkzA';
+  PROFILE_PLACEHOLDER = PROFILE_PICTURE_PLACEHOLDER;
 
-  // All optional, but email still gets format-validated if the user types something in
   form = this.fb.nonNullable.group({
     firstName: [''],
     lastName: [''],

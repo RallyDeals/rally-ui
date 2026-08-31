@@ -4,6 +4,7 @@ import { AuthService } from '../../core/auth/auth.service';
 import { ProfileSummary } from './components/profile-summary/profile-summary';
 import { ProfileTabs } from './components/profile-tabs/profile-tabs';
 import { ProfileTab } from './interfaces/profile-tab';
+import { PROFILE_PICTURE_PLACEHOLDER } from '../../shared/constants/placeholder';
 
 @Component({
   selector: 'app-user-profile',
@@ -14,8 +15,7 @@ export class UserProfile implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
 
-  avatarUrl =
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuBHSol_IxxKg-QlxhfK4We-hTAfWhkOLPIQ1TxgecpcFSkrQlLUqIdxLUVNdsiimfTGmgY2uHGSUDyILFA3LcqOdkOJMb21zUKK2d48TUodmjamQ2xf8Nd5QIq8WXRrn7CLxz-lpnoZO3_1WfE3baCJFBGr5LnVAt2xNmvTARnrX4W2qv6uFTtptYsnK1Q2UyTL5dueCR6WSemU-kTunJtXL1-qzfFLmHqa7hBGjMRZJEtBAuFE8Dd4awphHXylEZRkzA';
+  avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
   userName = '';
 
   tabs: ProfileTab[] = [
@@ -26,7 +26,8 @@ export class UserProfile implements OnInit {
   ];
 
   ngOnInit() {
-    this.userName = this.authService.currentUser()?.firstName + ' ' + this.authService.currentUser()?.lastName;
+    this.userName =
+      this.authService.currentUser()?.firstName + ' ' + this.authService.currentUser()?.lastName;
     this.avatarUrl = this.authService.currentUser()?.avatarUrl || this.avatarUrl;
   }
 
