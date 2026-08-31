@@ -63,6 +63,11 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
 }
+export interface UserPersonalInfo{
+  info: UserProfile,
+  dealsJoinedCount:number,
+  ordersCount:number,
+}
 
 /** GET /auth/me response */
 export interface UserProfile {
@@ -78,9 +83,6 @@ export interface UserProfile {
   emailVerified: boolean;
   emailVerifiedAt: string | null;
   createdAt: string;
-  /** Present only once the gateway aggregates these from other services. */
-  totalDealsJoined?: number;
-  totalOrdersMade?: number;
 }
 
 export interface AvatarUploadResponse{

@@ -13,6 +13,7 @@ import {
   RegisterResponse,
   TokenPairResponse,
   UpdateProfileRequest,
+  UserPersonalInfo,
   UserProfile,
   UserSummary,
   VerifyEmailRequest,
@@ -27,7 +28,7 @@ import {
 export class AuthService {
   private readonly http = inject(HttpClient);
   private readonly tokenService = inject(TokenService);
-  private readonly apiUrl = `${environment.apiUrl}/auth`;
+  private readonly apiUrl = `${environment.apiUrl}`;
 
   readonly currentUser = signal<UserSummary | null>(this.tokenService.readStoredUser());
   readonly isLoggedIn = computed(() => this.currentUser() !== null);
@@ -35,36 +36,36 @@ export class AuthService {
 
   /** POST /auth/login */
   login(request: LoginRequest, rememberMe = false): Observable<LoginResponse> {
-    return this.http.post<LoginResponse>(`${this.apiUrl}/login`, request).pipe(
+    return this.http.post<LoginResponse>(`${this.apiUrl}/auth/login`, request).pipe(
       tap((res) => this.establishSession(res, rememberMe)),
     );
   }
 
   /** POST /auth/register -> 201 */
   register(request: RegisterRequest): Observable<RegisterResponse> {
-    return this.http.post<RegisterResponse>(`${this.apiUrl}/register`, request);
+    return this.http.post<RegisterResponse>(`${this.apiUrl}/auth/register`, request);
   }
 
   /** POST /auth/verify-email -> returns a token pair (logs the user in) */
   verifyEmail(request: VerifyEmailRequest): Observable<LoginResponse> {
     return this.http
-      .post<LoginResponse>(`${this.apiUrl}/verify-email`, request)
+      .post<LoginResponse>(`${this.apiUrl}/auth/verify-email`, request)
       .pipe(tap((res) => this.establishSession(res, true)));
   }
 
   /** POST /auth/resend-verification-otp -> always 202 (no enumeration) */
   resendVerificationOtp(email: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/resend-verification-otp`, { email });
+    return this.http.post<void>(`${this.apiUrl}/auth/resend-verification-otp`, { email });
   }
 
   /** POST /auth/forgot-password -> always 202 (no enumeration) */
   forgotPassword(email: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/forgot-password`, { email });
+    return this.http.post<void>(`${this.apiUrl}/auth/forgot-password`, { email });
   }
 
   /** POST /auth/verify-email-otp -> checks the OTP without logging in */
   verifyEmailOtp(email: string, otp: string): Observable<OtpVerificationResponse> {
-    return this.http.post<OtpVerificationResponse>(`${this.apiUrl}/verify-email-otp`, {
+    return this.http.post<OtpVerificationResponse>(`${this.apiUrl}/auth/verify-email-otp`, {
       email,
       otp,
     });
@@ -72,7 +73,7 @@ export class AuthService {
 
   /** POST /auth/verify-reset-otp -> validates a reset OTP before showing the new-password form */
   verifyResetOtp(email: string, otp: string): Observable<OtpVerificationResponse> {
-    return this.http.post<OtpVerificationResponse>(`${this.apiUrl}/verify-reset-otp`, {
+    return this.http.post<OtpVerificationResponse>(`${this.apiUrl}/auth/verify-reset-otp`, {
       email,
       otp,
     });
@@ -80,7 +81,7 @@ export class AuthService {
 
   /** POST /auth/reset-password -> 204, revokes all sessions */
   resetPassword(email: string, otp: string, newPassword: string): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/reset-password`, {
+    return this.http.post<void>(`${this.apiUrl}/auth/reset-password`, {
       email,
       otp,
       newPassword,
@@ -92,7 +93,7 @@ export class AuthService {
     const refreshToken = this.tokenService.getRefreshToken();
     const persist = this.tokenService.isPersisted();
     return this.http
-      .post<TokenPairResponse>(`${this.apiUrl}/refresh`, { refreshToken })
+      .post<TokenPairResponse>(`${this.apiUrl}/auth/refresh`, { refreshToken })
       .pipe(
         tap((res) => this.tokenService.storeTokens(res.accessToken, res.refreshToken, persist)),
       );
@@ -102,7 +103,7 @@ export class AuthService {
   logout(): Observable<void> {
     const refreshToken = this.tokenService.getRefreshToken();
     // Fire-and-forget: clear local state even if the server call fails.
-    this.http.post<void>(`${this.apiUrl}/logout`, { refreshToken }).subscribe({
+    this.http.post<void>(`${this.apiUrl}/auth/logout`, { refreshToken }).subscribe({
       error: () => undefined,
     });
     this.clearSession();
@@ -114,14 +115,17 @@ export class AuthService {
 
   /** POST /auth/change-password -> 204, revokes all other sessions */
   changePassword(request: ChangePasswordRequest): Observable<void> {
-    return this.http.post<void>(`${this.apiUrl}/change-password`, request);
+    return this.http.post<void>(`${this.apiUrl}/auth/change-password`, request);
   }
 
   /** GET /auth/me */
   getProfile(): Observable<UserProfile> {
-    return this.http.get<UserProfile>(`${this.apiUrl}/me`);
+    return this.http.get<UserProfile>(`${this.apiUrl}/auth/me`);
   }
-
+  /** GET /profile/personal-info.    */
+  getPersonalInfo(): Observable<UserPersonalInfo> {
+    return this.http.get<UserPersonalInfo>(`${this.apiUrl}/profile/personal-info`);
+  }
   /**
    * PATCH /auth/me. Keys left undefined are omitted from the JSON body so the
    * backend's Optional fields keep their current values.
@@ -137,14 +141,14 @@ export class AuthService {
     if (request.phoneNumber !== undefined) {
       body.phoneNumber = request.phoneNumber;
     }
-    return this.http.patch<UserProfile>(`${this.apiUrl}/me`, body);
+    return this.http.patch<UserProfile>(`${this.apiUrl}/auth/me`, body);
   }
 
   /** POST /auth/me/avatar -> returns the stored image path (/uploads/avatars/...) */
   uploadAvatar(file: File): Observable<AvatarUploadResponse> {
     const formData = new FormData();
     formData.append('file', file);
-    return this.http.post<AvatarUploadResponse>(`${this.apiUrl}/me/avatar`, formData);
+    return this.http.post<AvatarUploadResponse>(`${this.apiUrl}/auth/me/avatar`, formData);
   }
 
   clearSession(): void {
