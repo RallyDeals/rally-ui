@@ -1,5 +1,4 @@
 import { Routes } from '@angular/router';
-import { SellerDashboard } from './seller-dashboard/seller-dashboard';
 import { SellerProducts } from './seller-products/seller-products';
 import { SellerProductForm } from './seller-product-form/seller-product-form';
 import { SellerDeals } from './seller-deals/seller-deals';
@@ -10,7 +9,8 @@ import { SellerOrderDetail } from './seller-order-detail/seller-order-detail';
 export const SELLER_ROUTES: Routes = [
   {
     path: '',
-    component: SellerDashboard,
+    redirectTo: 'products',
+    pathMatch: 'full',
   },
   {
     path: 'deals',
