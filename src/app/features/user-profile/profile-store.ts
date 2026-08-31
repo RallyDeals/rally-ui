@@ -3,7 +3,6 @@ import { AuthService } from '../../core/auth/auth.service';
 import { UserPersonalInfo, UserProfile } from '../../core/auth/models';
 import { ApiError } from '../../shared/models/api-error';
 import { toApiError } from '../../shared/utils/api-error.util';
-import { single } from 'rxjs';
 
 /**
  * Shared state for the user-profile section. Loaded once by the shell and
