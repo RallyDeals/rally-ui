@@ -2,6 +2,7 @@ export interface ProductQueryParams {
   q?: string;
   tag?: string;
   categoryId?: string;
+  sellerId?: string;
   minPrice?: number;
   maxPrice?: number;
   sort?: string;

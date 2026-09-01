@@ -84,7 +84,16 @@
               {{ deal.productDescription }}
             </p>
           </div>
-
+          @if (deal.sellerName) {
+            <a
+              class="font-label-sm text-label-sm"
+              [routerLink]="['/deals']"
+              [queryParams]="{ sellerId: deal.sellerId }"
+            >
+              Sold by
+              <span class="font-label-sm text-label-sm text-primary hover:underline">
+                {{ deal.sellerName }}</span> </a>
+          }
           <div
             class="bg-white/70 backdrop-blur-md rounded-xl p-rally-md flex flex-col gap-rally-md relative overflow-hidden border border-outline-variant/20 shadow-[0px_4px_20px_rgba(15,23,42,0.05)]"
           >
@@ -195,7 +204,9 @@
                 <div class="flex -space-x-3">
                   @for (p of participants(); track p.userId) {
                     @let avatar = fullName(p) | avatar;
-                    <div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white" [style.background-color]="avatar.color">
+                    <div
+                      class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white"
+                      [style.background-color]="avatar.color">
                       {{ avatar.initials }}
                     </div>
                   } @empty {
@@ -207,7 +218,7 @@
                     <span class="extra-count">+{{ extraParticipants() }}</span>
                   }
                 </div>
-                @if(participants().length > 0) {
+                @if (participants().length > 0) {
                   <span class="font-label-sm text-label-sm text-on-surface-variant">
                     joined
                   </span>

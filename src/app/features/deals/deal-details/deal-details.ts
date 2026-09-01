@@ -1,6 +1,7 @@
 import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription, interval, switchMap, startWith, catchError, of } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
@@ -71,6 +72,7 @@ const JOIN_POLL_TIMEOUT_MS = 30_000;
     TitleCasePipe,
     TimeAgoPipe,
     AvatarPipe,
+    RouterLink,
   ],
   templateUrl: './deal-details.html',
 })
@@ -81,6 +83,7 @@ export class DealDetails implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly titleService = inject(Title);
 
   private dealPollSub: Subscription | null = null;
   private joinPollSub: Subscription | null = null;
@@ -240,6 +243,7 @@ export class DealDetails implements OnInit {
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
+          this.titleService.setTitle(deal.productName);
           this.startDealPoll(id);
           this.loadActivity(id);
           this.loadParticipants(id);

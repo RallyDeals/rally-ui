@@ -93,6 +93,21 @@
                 </button>
               </span>
             }
+            @if (selectedSellerId()) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Seller filter
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove seller filter"
+                  (click)="onSellerChange(null)"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
             @if (selectedTag(); as tag) {
               <span
                 class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"

@@ -28,6 +28,7 @@ export class ProductsService {
         ...(params.q && { q: params.q }),
         ...(params.tag && { tag: params.tag }),
         ...(params.categoryId && { categoryId: params.categoryId }),
+        ...(params.sellerId && { sellerId: params.sellerId }),
         ...(params.minPrice !== undefined && { minPrice: params.minPrice }),
         ...(params.maxPrice !== undefined && { maxPrice: params.maxPrice }),
         ...(params.sort && { sort: params.sort }),

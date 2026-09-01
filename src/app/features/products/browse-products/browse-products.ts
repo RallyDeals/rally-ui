@@ -42,6 +42,7 @@ export class BrowseProducts implements OnInit {
   private lastSuccessfulPage = 1;
   searchQuery = signal('');
   selectedCategoryId = signal<string | null>(null);
+  selectedSellerId = signal<string | null>(null);
   selectedTag = signal<string | null>(null);
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
@@ -70,6 +71,7 @@ export class BrowseProducts implements OnInit {
   activeFilterCount = computed(() => {
     let count = 0;
     if (this.selectedCategoryId()) count += 1;
+    if (this.selectedSellerId()) count += 1;
     if (this.selectedTag()) count += 1;
     if (this.minPrice() !== null || this.maxPrice() !== null) count += 1;
     return count;
@@ -94,6 +96,7 @@ export class BrowseProducts implements OnInit {
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
       this.selectedCategoryId.set((params['categoryId'] as string | undefined) ?? null);
+      this.selectedSellerId.set((params['sellerId'] as string | undefined) ?? null);
       this.selectedTag.set((params['tag'] as string | undefined) ?? null);
       this.minPrice.set(parseOptionalNumber(params['minPrice']));
       this.maxPrice.set(parseOptionalNumber(params['maxPrice']));
@@ -110,6 +113,7 @@ export class BrowseProducts implements OnInit {
         q: this.searchQuery().trim() || undefined,
         tag: this.selectedTag() ?? undefined,
         categoryId: this.selectedCategoryId() ?? undefined,
+        sellerId: this.selectedSellerId() ?? undefined,
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
         sort: this.sortBy(),
@@ -192,6 +196,13 @@ export class BrowseProducts implements OnInit {
     });
   };
 
+  onSellerChange = (sellerId: string | null) => {
+    this.page.set(1);
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams({ sellerId: sellerId ?? undefined }),
+    });
+  };
+
   onTagChange = (tag: string | null) => {
     this.page.set(1);
     this.router.navigate(['/products'], {
@@ -236,11 +247,15 @@ export class BrowseProducts implements OnInit {
   ): Record<string, string> {
     const params: Record<string, string> = {};
     const categoryId = this.selectedCategoryId();
+    const sellerId = this.selectedSellerId();
     const tag = this.selectedTag();
     const minPrice = this.minPrice();
     const maxPrice = this.maxPrice();
     if (categoryId) {
       params['categoryId'] = categoryId;
+    }
+    if (sellerId) {
+      params['sellerId'] = sellerId;
     }
     if (tag) {
       params['tag'] = tag;
