@@ -3,12 +3,3 @@ export interface ProfileField {
   value: string;
   icon?: string;
 }
-
-export interface ProfileInfo {
-  avatarUrl: string;
-  avatarAlt: string;
-  joinedLabel: string;
-  totalDealsJoined: number;
-  totalOrdersMade: number;
-  fields: ProfileField[];
-}

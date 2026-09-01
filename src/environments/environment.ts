@@ -1,6 +1,5 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:8090',
-  paymentApiUrl: 'http://localhost:8089',
+  apiUrl: 'http://localhost:8080/',
   stripePublishableKey: 'pk_test_REPLACE_ME',
 };

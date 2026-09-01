@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, Signal } from '@angular/core';
 
 @Component({
   selector: 'app-profile-summary',
@@ -6,7 +6,7 @@ import { Component, input } from '@angular/core';
   templateUrl: './profile-summary.html',
 })
 export class ProfileSummary {
-  avatarUrl = input.required<string>();
-  avatarAlt = input.required<string>();
-  name = input.required<string>();
+  avatarUrl = input.required<string | null>();
+  avatarAlt = input.required<string|null>();
+  name = input.required<string|null>();
 }

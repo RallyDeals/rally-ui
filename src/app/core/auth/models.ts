@@ -63,6 +63,11 @@ export interface ChangePasswordRequest {
   currentPassword: string;
   newPassword: string;
 }
+export interface UserPersonalInfo{
+  info: UserProfile,
+  dealsJoinedCount:number,
+  ordersCount:number,
+}
 
 /** GET /auth/me response */
 export interface UserProfile {
@@ -80,6 +85,9 @@ export interface UserProfile {
   createdAt: string;
 }
 
+export interface AvatarUploadResponse{
+  path: string;
+}
 /**
  * PATCH /auth/me body.
  * Backend uses Optional<T> fields: omit a key to leave it unchanged,
