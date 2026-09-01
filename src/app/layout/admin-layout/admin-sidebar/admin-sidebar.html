@@ -27,7 +27,7 @@
     </nav>
   </div>
 
-  <div class="pt-rally-md">
+  <div class="pt-rally-md flex flex-col gap-rally-sm">
     <div class="bg-surface-container-highest rounded-xl p-rally-sm flex items-center gap-rally-sm">
       <div class="w-8 h-8 rounded-full bg-primary flex items-center justify-center">
         <span class="material-symbols-outlined text-on-primary text-[18px]">person</span>
@@ -37,5 +37,13 @@
         <p class="text-[10px] text-on-surface-variant truncate">{{ adminEmail }}</p>
       </div>
     </div>
+    <button
+      type="button"
+      class="flex items-center gap-rally-sm px-rally-md py-rally-sm rounded-xl text-error hover:bg-error-container/20 transition-colors"
+      (click)="logout()"
+    >
+      <span class="material-symbols-outlined">logout</span>
+      <span class="font-body-md">Logout</span>
+    </button>
   </div>
 </div>

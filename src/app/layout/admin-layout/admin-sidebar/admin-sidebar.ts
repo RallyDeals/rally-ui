@@ -4,6 +4,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { Logo } from '../../../shared/components/logo/logo';
 import { NgClass } from '@angular/common';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface NavItem {
   label: string;
@@ -21,6 +22,7 @@ export class AdminSidebar {
   close = output<void>();
 
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -56,4 +58,10 @@ export class AdminSidebar {
       ? `${base} bg-primary-container text-on-primary-container shadow-md`
       : `${base} text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface`;
   }
+
+  logout = () => {
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/auth/login']);
+    });
+  };
 }
