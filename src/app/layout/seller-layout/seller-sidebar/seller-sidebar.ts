@@ -3,6 +3,7 @@ import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
+import { AuthService } from '../../../core/auth/auth.service';
 
 interface NavItem {
   label: string;
@@ -21,6 +22,7 @@ export class SellerSidebar {
   close = output<void>();
 
   private readonly router = inject(Router);
+  private readonly authService = inject(AuthService);
   private readonly currentUrl = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -34,8 +36,6 @@ export class SellerSidebar {
     { label: 'Deals', symbol: 'group_add', path: '/seller/deals' },
     { label: 'Orders', symbol: 'receipt_long', path: '/seller/orders' },
   ];
-
-  readonly storeItem: NavItem = { label: 'Back to Store', symbol: 'storefront', path: '/home' };
 
   readonly storeName = 'Alex Store';
   readonly avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
@@ -52,4 +52,10 @@ export class SellerSidebar {
       ? `${base} bg-primary-container text-on-primary font-semibold shadow-sm`
       : `${base} text-on-surface-variant hover:bg-surface-container`;
   }
+
+  logout = () => {
+    this.authService.logout().subscribe(() => {
+      this.router.navigate(['/auth/login']);
+    });
+  };
 }

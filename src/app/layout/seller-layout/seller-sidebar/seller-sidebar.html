@@ -35,10 +35,14 @@
   </nav>
 
   <div class="mt-auto pt-rally-md border-t border-outline-variant">
-    <a [class]="navClass(storeItem)" [routerLink]="storeItem.path">
-      <span class="material-symbols-outlined">{{ storeItem.symbol }}</span>
-      {{ storeItem.label }}
-    </a>
+    <button
+      type="button"
+      class="flex items-center gap-rally-sm px-4 py-3 rounded-lg w-full text-error hover:bg-error-container/20 transition-colors"
+      (click)="logout()"
+    >
+      <span class="material-symbols-outlined">logout</span>
+      Logout
+    </button>
     <div class="flex items-center gap-rally-sm mt-rally-md px-4">
       <img
         alt="User Profile"
