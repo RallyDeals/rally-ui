@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { Accordion } from './accordion/accordion';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
@@ -15,6 +15,7 @@ import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { Countdown } from '../../../shared/components/countdown/countdown';
+import { AuthService } from '../../../core/auth/auth.service';
 
 export interface DisplayDeal {
   id: string;
@@ -114,10 +115,12 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   constructor(
     private readonly route: ActivatedRoute,
+    private readonly router: Router,
     private readonly productsService: ProductsService,
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
     private readonly titleService: Title,
+    private readonly authService: AuthService,
   ) {}
 
   get imageSrc(): string {
@@ -186,6 +189,12 @@ export class ProductDetails implements OnInit, OnDestroy {
   addToCart = () => {
     const product = this.product();
     if (!product || this.outOfStock()) {
+      return;
+    }
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: `/products/${product.id}` },
+      });
       return;
     }
     this.cartService.add(product, this.quantity());

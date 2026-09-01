@@ -58,6 +58,7 @@ export const routes: Routes = [
       {
         path: 'cart',
         component: Cart,
+        canActivate: [authGuard],
         title: 'Cart',
       },
       {
