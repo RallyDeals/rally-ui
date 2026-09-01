@@ -1,9 +1,10 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
 import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
 import { AuthService } from '../../../core/auth/auth.service';
+import { IconButton } from '../../../shared/components/icon-button/icon-button';
 
 interface NavItem {
   label: string;
@@ -13,7 +14,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-seller-sidebar',
-  imports: [RouterLink],
+  imports: [RouterLink, IconButton],
   templateUrl: './seller-sidebar.html',
   styleUrl: './seller-sidebar.css',
 })
@@ -37,7 +38,13 @@ export class SellerSidebar {
     { label: 'Orders', symbol: 'receipt_long', path: '/seller/orders' },
   ];
 
-  readonly storeName = 'Alex Store';
+  storeName = '';
+  storeEmail = '';
+  ngOnInit() {
+    this.storeName =
+      this.authService.currentUser()?.firstName + ' ' + this.authService.currentUser()?.lastName;
+    this.storeEmail = this.authService.currentUser()?.email || '';
+  }
   readonly avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
   isActive(item: NavItem): boolean {
     return item.path !== null && this.currentUrl() === item.path;

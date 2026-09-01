@@ -34,25 +34,18 @@
     }
   </nav>
 
-  <div class="mt-auto pt-rally-md border-t border-outline-variant">
-    <button
-      type="button"
-      class="flex items-center gap-rally-sm px-4 py-3 rounded-lg w-full text-error hover:bg-error-container/20 transition-colors"
-      (click)="logout()"
-    >
-      <span class="material-symbols-outlined">logout</span>
-      Logout
-    </button>
-    <div class="flex items-center gap-rally-sm mt-rally-md px-4">
+  <div class="flex items-center justify-between gap-rally-sm mt-auto pt-rally-md border-t border-outline-variant">
+    <div class="flex items-center gap-rally-sm px-4 min-w-0">
       <img
         alt="User Profile"
-        class="w-10 h-10 rounded-full object-cover border border-outline-variant"
+        class="w-10 h-10 rounded-full object-cover border border-outline-variant shrink-0"
         [src]="avatarUrl"
       />
-      <div>
-        <p class="font-label-sm text-label-sm font-semibold text-on-surface">{{ storeName }}</p>
-        <p class="text-[10px] text-on-surface-variant">Seller Account</p>
+      <div class="min-w-0">
+        <p class="font-label-sm text-label-sm font-semibold text-on-surface truncate">{{ storeName }}</p>
+        <p class="text-[10px] text-on-surface-variant truncate">{{ storeEmail }}</p>
       </div>
     </div>
+    <app-icon-button symbol="logout" label="Logout" tone="error" (click)="logout()" />
   </div>
 </div>
