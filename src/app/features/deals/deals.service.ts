@@ -91,13 +91,15 @@ export class DealsService {
         size: limit,
         ...(search && { search }),
         ...(status && { status }),
+        ...(categories && { categories }),
+        ...(sellerId && { sellerId }),
         ...(productId && { productId }),
         ...(minPrice !== undefined && { minPrice }),
         ...(maxPrice !== undefined && { maxPrice }),
         ...(sort && sort !== 'relevance' && { sort }),
       },
     }).pipe(
-      map((spring) => ({
+      map((spring): PageResponse<DealOverview> => ({
         items: spring.content.map(toDealOverview),
         page: spring.number + 1,
         limit: spring.size,
