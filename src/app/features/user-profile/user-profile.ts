@@ -1,4 +1,4 @@
-import { Component, inject, computed, OnInit } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
 import { AuthService } from '../../core/auth/auth.service';
 import { ProfileSummary } from './components/profile-summary/profile-summary';
@@ -21,7 +21,7 @@ export class UserProfile {
   private readonly router = inject(Router);
 
   readonly avatarUrl = computed(() =>
-    resolveImageUrl(this.store.profileInfo()?.profilePicture, PLACEHOLDER_IMAGE),
+    resolveImageUrl(this.store.profileInfo()?.profilePicture, PROFILE_PICTURE_PLACEHOLDER),
   );
 
   readonly userName = computed(() => this.store.profileInfo()?.name ?? '');
