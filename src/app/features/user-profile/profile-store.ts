@@ -1,6 +1,6 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { AuthService } from '../../core/auth/auth.service';
-import { UserPersonalInfo, UserProfile } from '../../core/auth/models';
+import { UserProfile } from '../../core/auth/models';
 import { ApiError } from '../../shared/models/api-error';
 import { toApiError } from '../../shared/utils/api-error.util';
 

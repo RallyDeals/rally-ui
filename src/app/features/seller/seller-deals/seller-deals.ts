@@ -5,7 +5,6 @@ import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { FilterPills } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
-import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
 import { MetricCard } from '../components/metric-card/metric-card';
@@ -37,7 +36,6 @@ const PAGE_SIZE = 5;
     Pagination,
     FilterPills,
     SearchInput,
-    IconButton,
     DealStatusBadge,
     DealProgress,
     MetricCard,

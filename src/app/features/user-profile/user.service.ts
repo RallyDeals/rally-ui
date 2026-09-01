@@ -34,10 +34,6 @@ export class UserService {
   private readonly authService = inject(AuthService);
   private readonly apiUrl = `${environment.apiUrl}/profile`;
 
-  getMyProfile(): Observable<MyProfile> {
-    return this.http.get<MyProfile>(`${this.apiUrl}/personal-info`);
-  }
-
   /**
    * GET /profile/my-deals — gateway-composed from Participation (the deals this user
    * joined), enriched with each deal's own record and its product display fields.
@@ -70,34 +66,5 @@ export class UserService {
    */
   getMyDealsSummary(): Observable<MyDealsSummary> {
     return this.http.get<MyDealsSummary>(`${this.apiUrl}/my-deals/summary`);
-  }
-
-  /**
-   * PATCH /auth/me. Keys left undefined are omitted from the JSON body so the
-   * backend's Optional fields keep their current values.
-   */
-  updateProfile(request: UpdateProfileRequest): Observable<UserProfile> {
-    const body: UpdateProfileRequest = {};
-    if (request.firstName !== undefined) {
-      body.firstName = request.firstName;
-    }
-    if (request.lastName !== undefined) {
-      body.lastName = request.lastName;
-    }
-    if (request.phoneNumber !== undefined) {
-      body.phoneNumber = request.phoneNumber;
-    }
-    return this.http.patch<UserProfile>(`${environment.apiUrl}/auth/me`, body).pipe(
-      tap((updated) => {
-        const current = this.authService.currentUser();
-        if (current) {
-          this.authService.currentUser.set({
-            ...current,
-            firstName: updated.firstName,
-            lastName: updated.lastName ?? '',
-          });
-        }
-      }),
-    );
   }
 }

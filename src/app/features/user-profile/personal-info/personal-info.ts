@@ -9,15 +9,8 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
-import { MyProfile } from '../interfaces/my-profile';
-import { UserService } from '../user.service';
-import { DatePipe, NgOptimizedImage } from '@angular/common';
-import { ErrorState } from '../../../shared/components/error-state/error-state';
-import { UpdateProfileRequest } from '../../../core/auth/models';
-import { ChangePasswordRequest } from '../../../core/auth/models';
 import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
 
 /** Mirrors the backend limits enforced by ProfileService. */
@@ -32,33 +25,9 @@ function notBlank(control: AbstractControl): ValidationErrors | null {
     : { blank: true };
 }
 
-
-interface EditableField {
-  key: 'firstName' | 'lastName' | 'email' | 'phoneNumber';
-  label: string;
-  icon?: string;
-  type: string;
-}
-
-function passwordsMatchValidator(group: AbstractControl): ValidationErrors | null {
-  const newPassword = group.get('newPassword')?.value;
-  const confirmPassword = group.get('confirmPassword')?.value;
-
-  if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-    group.get('confirmPassword')?.setErrors({ mismatch: true });
-    return { mismatch: true };
-  }
-
-  if (group.get('confirmPassword')?.hasError('mismatch')) {
-    group.get('confirmPassword')?.setErrors(null);
-  }
-
-  return null;
-}
-
 @Component({
   selector: 'app-personal-info',
-  imports: [InfoField, ReactiveFormsModule, InputTextModule, ButtonModule, ErrorModal, DatePipe, NgOptimizedImage],
+  imports: [InfoField, ReactiveFormsModule, InputTextModule, ButtonModule, ErrorModal],
   templateUrl: './personal-info.html',
 })
 export class PersonalInfo {
@@ -91,7 +60,7 @@ export class PersonalInfo {
     if (preview) {
       return preview;
     }
-    return resolveImageUrl(this.profile()?.profilePicture, PLACEHOLDER_IMAGE);
+    return resolveImageUrl(this.profile()?.profilePicture, PROFILE_PICTURE_PLACEHOLDER);
   });
 
   readonly joinedLabel = computed(() => {

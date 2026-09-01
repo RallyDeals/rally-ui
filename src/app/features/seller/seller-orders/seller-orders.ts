@@ -16,7 +16,6 @@ import { BriefSellerOrdersResponse } from '../../orders/interfaces/brief-seller-
 import { SellerOrdersParams } from '../../orders/interfaces/seller-orders-params';
 import { SellerOrdersStatistics } from '../../orders/interfaces/seller-orders-statistics';
 import { SellerOrderRow } from './seller-order-row/seller-order-row';
-import { RouterLink } from '@angular/router';
 
 
 const PAGE_SIZE = 5;
@@ -28,8 +27,7 @@ const PAGE_SIZE = 5;
     Pagination,
     SearchInput,
     MetricCard,
-    SellerOrderRow,
-    RouterLink,
+    SellerOrderRow
   ],
   templateUrl: './seller-orders.html',
   styleUrl: './seller-orders.css',
