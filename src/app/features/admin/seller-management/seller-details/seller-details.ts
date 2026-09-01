@@ -12,6 +12,7 @@ import { SellerDetailsHeader } from './seller-details-header/seller-details-head
 import { SellerDetailsStats } from './seller-details-stats/seller-details-stats';
 import { SellerProductRow } from './seller-product-row/seller-product-row';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
+import { DealsService } from '../../../deals/deals.service';
 
 const PAGE_SIZE = 10;
 
@@ -23,6 +24,7 @@ const PAGE_SIZE = 10;
 export class SellerDetails implements OnInit {
   private readonly userService = inject(UserService);
   private readonly productsService = inject(ProductsService);
+  private readonly dealService = inject(DealsService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private sellerId = '';
 
@@ -53,6 +55,7 @@ export class SellerDetails implements OnInit {
     this.userService.getSellerById(this.sellerId).subscribe({
       next: (seller) => {
         this.seller.set(seller);
+        this.loadActiveDealsCount();
         this.loading.set(false);
       },
       error: (err) => {
@@ -73,6 +76,19 @@ export class SellerDetails implements OnInit {
       error: (err) => {
         this.productsError.set(toApiError(err));
         this.productsLoading.set(false);
+      },
+    });
+  }
+
+  loadActiveDealsCount(){
+    this.dealService.getSellerDeals(this.sellerId, { status: 'active', limit: 1 }).subscribe({
+      next: (deals) => {
+        this.seller.update((seller) => {
+          if (seller) {
+            return { ...seller, activeDeals: deals.total };
+          }
+          return null;
+        });
       },
     });
   }
