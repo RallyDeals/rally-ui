@@ -1,48 +1,4 @@
-@if (loadError(); as loadError) {
-  <app-error-state [error]="loadError" />
-}
-@else if (loading()) {
-  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl">
-    <!-- Left Column skeleton -->
-    <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start">
-      <div class="w-full max-w-[280px] aspect-square rounded-2xl bg-surface-container-high animate-pulse"></div>
-      <div class="flex flex-col gap-rally-xs w-full max-w-70">
-        <div class="h-3 w-32 bg-surface-container-high rounded animate-pulse"></div>
-        <div class="w-full h-px bg-outline-variant/50 my-rally-sm"></div>
-        <div class="flex justify-between w-full">
-          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
-          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
-        </div>
-        <div class="flex justify-between w-full mt-rally-xs">
-          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
-          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Right Column skeleton -->
-    <div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl border border-outline-variant p-rally-lg">
-      <div class="flex flex-col gap-rally-lg">
-        <div class="flex items-center gap-rally-sm">
-          <div class="w-8 h-8 rounded-full bg-surface-container-high animate-pulse"></div>
-          <div class="h-5 w-40 bg-surface-container-high rounded animate-pulse"></div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
-          @for (field of [1, 2, 3, 4]; track field) {
-            <div class="flex flex-col gap-rally-xs">
-              <div class="h-3 w-20 bg-surface-container-high rounded animate-pulse"></div>
-              <div class="h-10 w-full bg-surface-container-high rounded-lg animate-pulse"></div>
-            </div>
-          }
-        </div>
-        <div class="flex items-center justify-end">
-          <div class="h-9 w-32 bg-surface-container-high rounded-lg animate-pulse"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-}
-@else if (profile() !== null) {
+@if (profile() !== null) {
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl relative mb-8">
     <!-- Left Column: Visual/Avatar side -->
     <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start relative group">
@@ -116,12 +72,13 @@
               <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
             </div>
             @if (!isEditing()) {
-              <p-button
+              <button
+                pButton
                 label="Edit"
                 icon="pi pi-pencil"
                 size="small"
-                [text]="true"
-                (onClick)="startEdit()" />
+                variant="text"
+                (click)="startEdit()"></button>
             }
           </div>
 
@@ -204,18 +161,20 @@
               </div>
 
               <div class="flex items-center gap-rally-sm justify-end">
-                <p-button
+                <button
+                  pButton
                   label="Cancel"
                   severity="secondary"
                   size="small"
-                  [text]="true"
-                  (onClick)="cancelEdit()" />
-                <p-button
+                  variant="text"
+                  (click)="cancelEdit()"></button>
+                <button
+                  pButton
                   label="Save"
                   icon="pi pi-check"
                   size="small"
                   type="submit"
-                  [loading]="submitting()" />
+                  [loading]="submitting()"></button>
               </div>
             </form>
           }
