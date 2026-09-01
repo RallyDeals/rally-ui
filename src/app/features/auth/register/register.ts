@@ -40,6 +40,7 @@ export class Register {
       firstName: ['', Validators.required],
       lastName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
+      phone: ['' , [Validators.required]],
       password: [
         '',
         [
@@ -87,8 +88,8 @@ export class Register {
     this.error.set(null);
 
     // Only send the fields the API expects (no confirmPassword/acceptTerms).
-    const { firstName, lastName, email, password, role } = this.form.getRawValue();
-    this.authService.register({ firstName, lastName, email, password, role }).subscribe({
+    const { firstName, lastName, email, password, role , phone } = this.form.getRawValue();
+    this.authService.register({ firstName, lastName, email, password, phoneNumber:phone ,role }).subscribe({
       next: () => {
         this.router.navigate(['/auth/verify-email'], {
           queryParams: { email: this.form.getRawValue().email },

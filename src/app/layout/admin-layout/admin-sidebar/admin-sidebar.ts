@@ -32,6 +32,7 @@ export class AdminSidebar implements OnInit {
     ),
     { initialValue: this.router.url },
   );
+  protected readonly avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
 
   readonly navItems: NavItem[] = [
     { label: 'Product Approvals', symbol: 'verified_user', path: '/admin/product-approvals' },
@@ -64,10 +65,8 @@ export class AdminSidebar implements OnInit {
       : `${base} text-on-surface-variant hover:bg-surface-container-high hover:text-on-surface`;
   }
 
-  logout = () => {
-    this.authService.logout().subscribe(() => {
-      this.router.navigate(['/auth/login']);
-    });
-  };
-  protected readonly avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
+  logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/');
+  }
 }

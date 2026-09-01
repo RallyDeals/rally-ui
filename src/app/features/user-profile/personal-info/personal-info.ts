@@ -1,21 +1,37 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import {
-  AbstractControl,
-  FormBuilder,
-  ReactiveFormsModule,
-  ValidationErrors,
-  Validators,
-} from '@angular/forms';
+import { Component, ElementRef, ViewChild, computed, inject, signal } from '@angular/core';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
+import { ButtonModule } from 'primeng/button';
+import { InputTextModule } from 'primeng/inputtext';
+import { InfoField } from './info-field/info-field';
+import { ProfileField } from '../interfaces/profile-info';
+import { ProfileStore } from '../profile-store';
+import { AuthService } from '../../../core/auth/auth.service';
+import { ApiError } from '../../../shared/models/api-error';
+import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
+import { formatShortDate } from '../../../shared/utils/date-format.util';
+import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { MyProfile } from '../interfaces/my-profile';
 import { UserService } from '../user.service';
 import { DatePipe, NgOptimizedImage } from '@angular/common';
-import { ApiError } from '../../../shared/models/api-error';
-import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { UpdateProfileRequest } from '../../../core/auth/models';
 import { ChangePasswordRequest } from '../../../core/auth/models';
-import { AuthService } from '../../../core/auth/auth.service';
 import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
+
+/** Mirrors the backend limits enforced by ProfileService. */
+const FIRST_NAME_MAX_LENGTH = 100;
+const LAST_NAME_MAX_LENGTH = 100;
+const PHONE_NUMBER_MAX_LENGTH = 30;
+
+/** Required must also fail on whitespace-only input. */
+function notBlank(control: AbstractControl): ValidationErrors | null {
+  return typeof control.value === 'string' && control.value.trim().length > 0
+    ? null
+    : { blank: true };
+}
+
 
 interface EditableField {
   key: 'firstName' | 'lastName' | 'email' | 'phoneNumber';
@@ -42,133 +58,196 @@ function passwordsMatchValidator(group: AbstractControl): ValidationErrors | nul
 
 @Component({
   selector: 'app-personal-info',
-  imports: [ReactiveFormsModule, DatePipe, ErrorState, NgOptimizedImage],
+  imports: [InfoField, ReactiveFormsModule, InputTextModule, ButtonModule, ErrorModal, DatePipe, NgOptimizedImage],
   templateUrl: './personal-info.html',
 })
-export class PersonalInfo implements OnInit {
-  profile = signal<MyProfile | null>(null);
-  userService = inject(UserService);
-  authService = inject(AuthService);
-  fb = inject(FormBuilder);
-  loading = signal(false);
-  saving = signal(false);
-  loadError = signal<ApiError | null>(null);
-  saveError = signal<ApiError | null>(null);
+export class PersonalInfo {
+  private readonly store = inject(ProfileStore);
+  private readonly authService = inject(AuthService);
+  private readonly fb = inject(FormBuilder);
 
-  changingPassword = signal(false);
-  passwordSaveError = signal<ApiError | null>(null);
+  readonly profile = this.store.profileInfo;
+  readonly ordersCount = this.store.ordersCount;
+  readonly dealsJoinedCount = this.store.dealsJoinedCount;
 
-  PROFILE_PLACEHOLDER = PROFILE_PICTURE_PLACEHOLDER;
+  /** Mirrors the backend limits enforced by ImageStorageService. */
+  static readonly ALLOWED_AVATAR_TYPES = new Set(['image/svg+xml', 'image/png', 'image/jpeg']);
+  static readonly AVATAR_MAX_SIZE_BYTES = 5 * 1024 * 1024;
 
-  form = this.fb.nonNullable.group({
-    firstName: [''],
-    lastName: [''],
-    phoneNumber: [''],
+  @ViewChild('fileInput') readonly fileInput!: ElementRef<HTMLInputElement>;
+
+  readonly isEditing = signal(false);
+  readonly submitting = signal(false);
+  readonly actionError = signal<ApiError | null>(null);
+  readonly saved = signal(false);
+
+  readonly avatarUploading = signal(false);
+  readonly previewUrl = signal<string | null>(null);
+  readonly avatarError = signal<ApiError | null>(null);
+
+  /** Display priority: live preview (uploading) > committed URL from store > fallback. */
+  readonly displayAvatarUrl = computed(() => {
+    const preview = this.previewUrl();
+    if (preview) {
+      return preview;
+    }
+    return resolveImageUrl(this.profile()?.profilePicture, PLACEHOLDER_IMAGE);
   });
 
-  passwordForm = this.fb.nonNullable.group(
-    {
-      currentPassword: ['', [Validators.required]],
-      newPassword: ['', [Validators.required, Validators.minLength(8)]],
-      confirmPassword: ['', [Validators.required]],
-    },
-    { validators: passwordsMatchValidator },
-  );
+  readonly joinedLabel = computed(() => {
+    const createdAt = this.profile()?.createdAt;
+    return createdAt ? `Joined ${formatShortDate(createdAt)}` : '';
+  });
 
-  fields: EditableField[] = [
-    { key: 'firstName', label: 'First Name', type: 'text' },
-    { key: 'lastName', label: 'Last Name', type: 'text' },
-    { key: 'phoneNumber', label: 'Phone Number', icon: 'phone_iphone', type: 'tel' },
-  ];
-
-  ngOnInit() {
-    this.loading.set(true);
-    this.userService.getMyProfile().subscribe({
-      next: (profile) => {
-        this.profile.set(profile);
-        this.resetFormFromProfile(profile);
-        this.loading.set(false);
-      },
-      error: (err) => {
-        this.loading.set(false);
-        this.loadError.set(toApiError(err));
-      },
-    });
-  }
-
-  save() {
-    if (this.form.invalid || this.form.pristine || this.saving()) {
-      return;
-    }
-    const raw = this.form.getRawValue();
-    const request: UpdateProfileRequest = {};
-    (Object.keys(raw) as (keyof typeof raw)[]).forEach((key) => {
-      if (this.form.get(key)?.dirty) {
-        request[key] = raw[key];
-      }
-    });
-    if (Object.keys(request).length === 0) {
-      return;
-    }
-    this.saving.set(true);
-    this.saveError.set(null);
-    this.userService.updateProfile(request).subscribe({
-      next: () => {
-        this.saving.set(false);
-        const current = this.profile();
-        if (current) {
-          const updated = { ...current, info: { ...current.info, ...request } };
-          this.profile.set(updated);
-          this.resetFormFromProfile(updated);
-        }
-      },
-      error: (err) => {
-        this.saving.set(false);
-        this.saveError.set(toApiError(err));
-      },
-    });
-  }
-
-  discard() {
+  readonly fields = computed<ProfileField[]>(() => {
     const profile = this.profile();
-    if (profile) {
-      this.resetFormFromProfile(profile);
+    if (!profile) {
+      return [];
     }
+    return [
+      { label: 'First Name', value: profile.firstName },
+      { label: 'Last Name', value: profile.lastName ?? '' },
+      { label: 'Email Address', value: profile.email, icon: 'mail' },
+      { label: 'Phone Number', value: profile.phoneNumber ?? '', icon: 'phone_iphone' },
+    ];
+  });
+
+  readonly form = this.fb.nonNullable.group({
+    firstName: [
+      '',
+      [Validators.required, notBlank, Validators.maxLength(FIRST_NAME_MAX_LENGTH)],
+    ],
+    lastName: ['', Validators.maxLength(LAST_NAME_MAX_LENGTH)],
+    phoneNumber: ['', Validators.maxLength(PHONE_NUMBER_MAX_LENGTH)],
+  });
+
+  startEdit(): void {
+    const profile = this.profile();
+    if (!profile) {
+      return;
+    }
+    this.form.reset({
+      firstName: profile.firstName,
+      lastName: profile.lastName ?? '',
+      phoneNumber: profile.phoneNumber ?? '',
+    });
+    this.actionError.set(null);
+    this.saved.set(false);
+    this.isEditing.set(true);
   }
 
-  changePassword() {
-    if (this.passwordForm.invalid || this.passwordForm.pristine || this.changingPassword()) {
+  cancelEdit(): void {
+    this.isEditing.set(false);
+    this.actionError.set(null);
+  }
+
+  closeActionError(): void {
+    this.actionError.set(null);
+  }
+
+  closeAvatarError(): void {
+    this.avatarError.set(null);
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    input.value = '';
+
+    if (!file) {
       return;
     }
 
-    const { currentPassword, newPassword } = this.passwordForm.getRawValue();
-    const request: ChangePasswordRequest = { currentPassword, newPassword };
+    if (!PersonalInfo.ALLOWED_AVATAR_TYPES.has(file.type)) {
+      this.avatarError.set({
+        message: 'Unsupported file type. Use SVG, PNG, or JPG.',
+        path: '',
+        status: 400,
+        timestamp: new Date().toISOString(),
+        title: 'Invalid file type',
+      });
+      return;
+    }
 
-    this.changingPassword.set(true);
-    this.passwordSaveError.set(null);
+    if (file.size > PersonalInfo.AVATAR_MAX_SIZE_BYTES) {
+      this.avatarError.set({
+        message: 'Image too large. Maximum size is 5MB.',
+        path: '',
+        status: 400,
+        timestamp: new Date().toISOString(),
+        title: 'File too large',
+      });
+      return;
+    }
 
-    this.authService.changePassword(request).subscribe({
-      next: () => {
-        this.changingPassword.set(false);
-        this.passwordForm.reset();
+    const previousPreview = this.previewUrl();
+    this.previewUrl.set(URL.createObjectURL(file));
+    if (previousPreview) {
+      URL.revokeObjectURL(previousPreview);
+    }
+
+    this.avatarUploading.set(true);
+    this.avatarError.set(null);
+
+    this.authService.uploadAvatar(file).subscribe({
+      next: (res) => {
+        this.store.applyAvatarPath(res.path);
+        this.avatarUploading.set(false);
+        const preview = this.previewUrl();
+        if (preview) {
+          URL.revokeObjectURL(preview);
+        }
+        this.previewUrl.set(null);
       },
       error: (err) => {
-        this.changingPassword.set(false);
-        this.passwordSaveError.set(toApiError(err));
+        this.avatarUploading.set(false);
+        const preview = this.previewUrl();
+        if (preview) {
+          URL.revokeObjectURL(preview);
+        }
+        this.previewUrl.set(null);
+        this.avatarError.set(toApiError(err));
       },
     });
   }
 
-  discardPassword() {
-    this.passwordForm.reset();
-    this.passwordSaveError.set(null);
+  isInvalid(name: 'firstName' | 'lastName' | 'phoneNumber'): boolean {
+    const control = this.form.controls[name];
+    return control.touched && control.invalid;
   }
 
-  private resetFormFromProfile(profile: MyProfile) {
-    this.form.reset({
-      firstName: profile.info.firstName,
-      lastName: profile.info.lastName,
-      phoneNumber: profile.info.phoneNumber,
-    });
+  onSubmit(): void {
+    if (this.form.invalid || this.submitting()) {
+      this.form.markAllAsTouched();
+      return;
+    }
+    const profile = this.profile();
+    if (!profile) {
+      return;
+    }
+
+    const values = this.form.getRawValue();
+    this.submitting.set(true);
+    this.saved.set(false);
+
+    this.authService
+      .updateProfile({
+        firstName: values.firstName.trim(),
+        lastName: values.lastName.trim(),
+        phoneNumber: values.phoneNumber.trim(),
+      })
+      .subscribe({
+        next: (updated) => {
+          this.store.setProfile(updated);
+          this.authService.updateStoredUser(updated.firstName, updated.lastName ?? '');
+          this.submitting.set(false);
+          this.isEditing.set(false);
+          this.saved.set(true);
+        },
+        error: (err) => {
+          this.submitting.set(false);
+          this.actionError.set(toApiError(err));
+        },
+      });
   }
 }

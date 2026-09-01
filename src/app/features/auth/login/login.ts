@@ -30,8 +30,8 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  readonly rememberMe = signal<true | false>(false);
 
+  readonly rememberMe = signal<boolean>(false);
   readonly submitting = signal(false);
   readonly error = signal<ApiError | null>(null);
 
@@ -40,8 +40,8 @@ export class Login {
     password: ['', [Validators.required]],
   });
 
-  onChecked($event: Event) {
-    this.rememberMe.set(!this.rememberMe());
+  onChecked($event: Event): void {
+    this.rememberMe.update((value) => !value);
   }
 
   onSubmit(): void {
@@ -49,14 +49,21 @@ export class Login {
       this.form.markAllAsTouched();
       return;
     }
+
     this.submitting.set(true);
     this.error.set(null);
 
-    this.authService.login(this.form.getRawValue(), this.rememberMe()).subscribe({
+    const { email, password } = this.form.getRawValue();
+
+    this.authService.login({ email, password }, this.rememberMe()).subscribe({
       next: (response) => {
-        if (response.user.role === 'ADMIN') this.router.navigateByUrl('admin');
-        else if (response.user.role === 'SELLER') this.router.navigateByUrl('seller');
-        else this.router.navigateByUrl(`/`);
+        if (response.user.role === 'ADMIN') {
+          this.router.navigateByUrl('admin');
+        } else if (response.user.role === 'SELLER') {
+          this.router.navigateByUrl('seller');
+        } else {
+          this.router.navigateByUrl('/');
+        }
       },
       error: (err) => {
         this.submitting.set(false);
@@ -64,12 +71,20 @@ export class Login {
 
         // Unverified email -> continue the verification flow instead of an error banner.
         if (apiError.status === 403 && /verif/i.test(apiError.message)) {
-          this.authService.resendVerificationOtp(this.form.getRawValue().email);
-          this.router.navigate(['/auth/verify-email'], {
-            queryParams: { email: this.form.getRawValue().email },
+          this.authService.resendVerificationOtp(email).subscribe({
+            next: () => {
+              this.router.navigate(['/auth/verify-email'], {
+                queryParams: { email },
+              });
+            },
+            error: (otpErr) => {
+              // Handle potential failure of resending OTP if needed
+              this.error.set(toApiError(otpErr));
+            }
           });
           return;
         }
+
         this.error.set(apiError);
       },
     });

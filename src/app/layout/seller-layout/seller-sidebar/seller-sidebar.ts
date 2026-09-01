@@ -60,9 +60,8 @@ export class SellerSidebar {
       : `${base} text-on-surface-variant hover:bg-surface-container`;
   }
 
-  logout = () => {
-    this.authService.logout().subscribe(() => {
-      this.router.navigate(['/auth/login']);
-    });
-  };
+  logout(): void {
+    this.authService.logout();
+    this.router.navigateByUrl('/');
+  }
 }
