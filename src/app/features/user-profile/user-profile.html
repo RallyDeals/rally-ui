@@ -4,7 +4,71 @@
   @if (store.loadError(); as err) {
   <app-error-state [error]="err" [showRetry]="true" (retry)="store.load()" />
   } @else if (!store.profileInfo()) {
-  <p class="text-body-lg text-on-surface-variant">Loading profile...</p>
+  <!-- Skeleton: header -->
+  <div
+    class="mb-rally-lg flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+    <div class="flex flex-col gap-rally-xs">
+      <div class="h-8 w-56 bg-surface-container-high rounded animate-pulse"></div>
+      <div class="h-4 w-72 bg-surface-container-high rounded animate-pulse"></div>
+    </div>
+    <div class="flex items-center gap-rally-sm">
+      <div
+        class="flex items-center gap-rally-sm bg-surface-container-lowest p-rally-sm rounded-lg border border-outline-variant shadow-sm">
+        <div class="w-10 h-10 rounded-full bg-surface-container-high animate-pulse"></div>
+        <div class="h-4 w-24 bg-surface-container-high rounded animate-pulse"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Skeleton: tabs -->
+  <div class="mb-rally-lg border-b border-outline-variant">
+    <nav class="-mb-px flex">
+      @for (tab of tabs; track tab.id) {
+        <div class="flex-1 flex items-center justify-center py-2 px-1 sm:py-4 sm:px-2">
+          <div class="h-4 w-16 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+      }
+    </nav>
+  </div>
+
+  <!-- Skeleton: content -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-xl">
+    <div class="lg:col-span-4 flex flex-col gap-rally-md items-center lg:items-start">
+      <div class="w-full max-w-[280px] aspect-square rounded-2xl bg-surface-container-high animate-pulse"></div>
+      <div class="flex flex-col gap-rally-xs w-full max-w-70">
+        <div class="h-3 w-32 bg-surface-container-high rounded animate-pulse"></div>
+        <div class="w-full h-px bg-outline-variant/50 my-rally-sm"></div>
+        <div class="flex justify-between w-full">
+          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
+          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+        <div class="flex justify-between w-full mt-rally-xs">
+          <div class="h-3 w-28 bg-surface-container-high rounded animate-pulse"></div>
+          <div class="h-3 w-8 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="lg:col-span-8 bg-surface-container-lowest rounded-2xl border border-outline-variant p-rally-lg">
+      <div class="flex flex-col gap-rally-lg">
+        <div class="flex items-center gap-rally-sm">
+          <div class="w-8 h-8 rounded-full bg-surface-container-high animate-pulse"></div>
+          <div class="h-5 w-40 bg-surface-container-high rounded animate-pulse"></div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-lg">
+          @for (field of [1, 2, 3, 4]; track field) {
+            <div class="flex flex-col gap-rally-xs">
+              <div class="h-3 w-20 bg-surface-container-high rounded animate-pulse"></div>
+              <div class="h-10 w-full bg-surface-container-high rounded-lg animate-pulse"></div>
+            </div>
+          }
+        </div>
+        <div class="flex items-center justify-end">
+          <div class="h-9 w-32 bg-surface-container-high rounded-lg animate-pulse"></div>
+        </div>
+      </div>
+    </div>
+  </div>
   } @else {
   <!-- Header Section -->
   <header
@@ -19,14 +83,7 @@
     </div>
     <div class="flex items-center gap-rally-sm">
       <app-profile-summary [avatarUrl]="avatarUrl()" avatarAlt="User Profile"
-        [name]="userName()" />
-      <button
-        class="w-10 h-10 flex items-center justify-center rounded-full hover:bg-surface-container-high transition-colors cursor-pointer"
-        (click)="logout()"
-        title="Logout">
-        <span
-          class="material-symbols-outlined text-on-surface-variant">logout</span>
-      </button>
+        [name]="userName()" (logout)="logout()" />
     </div>
   </header>
 

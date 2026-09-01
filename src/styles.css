@@ -1,4 +1,4 @@
-@layer tailwind-base, primeng, tailwind-utilities;
+@layer tailwind-base, base, primeng, tailwind-utilities;
 
 @import 'tailwindcss/theme.css' layer(tailwind-base);
 @import 'tailwindcss/preflight.css' layer(tailwind-base);
@@ -160,6 +160,14 @@ body {
 }
 .icon-sm {
   font-size: 14px;
+}
+
+/* Keep icon glyphs invisible rather than flashing as fallback text (see index.html). */
+.fonts-loading .material-symbols-outlined,
+.fonts-loading .icon-lg,
+.fonts-loading .icon-md,
+.fonts-loading .icon-sm {
+  visibility: hidden;
 }
 
 .label-caps {

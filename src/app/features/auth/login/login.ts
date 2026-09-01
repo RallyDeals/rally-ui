@@ -9,6 +9,7 @@ import { AuthSwitchLink } from '../components/auth-switch-link/auth-switch-link'
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
+import { InputPassword } from 'primeng/inputpassword';
 
 @Component({
   selector: 'app-login',
@@ -20,6 +21,7 @@ import { toApiError } from '../../../shared/utils/api-error.util';
     RouterLink,
     Logo,
     AuthSwitchLink,
+    InputPassword,
   ],
   templateUrl: './login.html',
   styleUrl: './login.css',
@@ -64,7 +66,6 @@ export class Login {
         }
       },
       error: (err) => {
-        console.log(err);
         this.submitting.set(false);
         const apiError = toApiError(err);
 

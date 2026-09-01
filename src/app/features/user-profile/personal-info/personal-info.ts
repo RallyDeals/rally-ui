@@ -9,9 +9,9 @@ import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
+import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
 
 /** Mirrors the backend limits enforced by ProfileService. */
 const FIRST_NAME_MAX_LENGTH = 100;
@@ -60,7 +60,7 @@ export class PersonalInfo {
     if (preview) {
       return preview;
     }
-    return resolveImageUrl(this.profile()?.profilePicture, PLACEHOLDER_IMAGE);
+    return resolveImageUrl(this.profile()?.profilePicture, PROFILE_PICTURE_PLACEHOLDER);
   });
 
   readonly joinedLabel = computed(() => {

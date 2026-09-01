@@ -5,7 +5,6 @@ import {
 } from '../../../shared/components/filter-pills/filter-pills';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
-import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { MetricCard } from '../components/metric-card/metric-card';
 import { OrderService } from '../../orders/order.service';
 import { formatShortDate } from '../../../shared/utils/date-format.util';
@@ -27,9 +26,8 @@ const PAGE_SIZE = 5;
     FilterPills,
     Pagination,
     SearchInput,
-    PageHeader,
     MetricCard,
-    SellerOrderRow,
+    SellerOrderRow
   ],
   templateUrl: './seller-orders.html',
   styleUrl: './seller-orders.css',
@@ -87,7 +85,9 @@ export class SellerOrders {
   onDateRangeChange = (days: string) => {
     const daysNum = parseInt(days, 10);
     this.startDate.set(daysAgoISO(daysNum));
-    this.dateLabel.set(this.dateRangeOptions.find(opt => opt.value === days)?.label || 'Last 30 Days');
+    this.dateLabel.set(
+      this.dateRangeOptions.find((opt) => opt.value === days)?.label || 'Last 30 Days',
+    );
     this.page.set(1);
     this.loadPage();
   };

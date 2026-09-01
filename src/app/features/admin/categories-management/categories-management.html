@@ -29,9 +29,24 @@
             </thead>
             <tbody class="text-body-md font-body-md text-on-surface">
               @if (loading()) {
-                <tr>
-                  <td class="px-rally-md py-rally-md text-center text-on-surface-variant" colspan="4">Loading…</td>
-                </tr>
+                @for (skeleton of [1, 2, 3, 4]; track skeleton) {
+                  <tr class="animate-pulse">
+                    <td class="px-rally-md py-rally-md">
+                      <div class="flex items-center gap-rally-sm">
+                        <div class="w-10 h-10 rounded-lg bg-surface-container-high shrink-0"></div>
+                        <div class="h-4 w-32 bg-surface-container-high rounded"></div>
+                      </div>
+                    </td>
+                    <td class="px-rally-md py-rally-md"><div class="h-4 w-40 bg-surface-container-high rounded"></div></td>
+                    <td class="px-rally-md py-rally-md"><div class="h-4 w-16 bg-surface-container-high rounded"></div></td>
+                    <td class="px-rally-md py-rally-md text-right">
+                      <div class="flex justify-end gap-rally-xs">
+                        <div class="h-8 w-8 bg-surface-container-high rounded-full"></div>
+                        <div class="h-8 w-8 bg-surface-container-high rounded-full"></div>
+                      </div>
+                    </td>
+                  </tr>
+                }
               } @else {
                 @for (category of categories(); track category.id) {
                   <tr app-category-row [category]="category" (edit)="openUpdateDialog($event)" (delete)="onCategoryDelete($event)" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>

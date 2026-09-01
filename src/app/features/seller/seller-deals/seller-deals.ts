@@ -5,20 +5,23 @@ import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { FilterPills } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
-import { IconButton } from '../../../shared/components/icon-button/icon-button';
 import { DealStatusBadge } from '../components/deal-status-badge/deal-status-badge';
 import { DealProgress, ProgressTone } from '../components/deal-progress/deal-progress';
 import { MetricCard } from '../components/metric-card/metric-card';
-import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
-import { DealsService } from '../../deals/deals.service';
+import {
+  ConfirmDialog,
+  ConfirmDialogRequest,
+} from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { DealStatus } from '../../../shared/models/deal';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { PageResponse } from '../../products/page-response';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
-import { TokenService } from '../../../shared/services/token.service';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { DealRowActions } from './deal-row-actions/deal-row-actions';
 import { DEAL_STATUS_OPTIONS, DealRow, PROGRESS_TONES, StatusFilter, formatCountdown, toDealRow } from './seller-deals.model';
 import { AuthService } from '../../../core/auth/auth.service';
+import { ApiError } from '../../../shared/models/api-error';
+import { toApiError } from '../../../shared/utils/api-error.util';
+import { DealsService } from '../../deals/deals.service';
 
 const COUNTDOWN_TICK_MS = 1_000;
 
@@ -33,7 +36,6 @@ const PAGE_SIZE = 5;
     Pagination,
     FilterPills,
     SearchInput,
-    IconButton,
     DealStatusBadge,
     DealProgress,
     MetricCard,
@@ -53,9 +55,6 @@ export class SellerDeals implements OnInit, OnDestroy {
   private dealsPollSub: Subscription | null = null;
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
-  // Ticks once a second so active rows show a live countdown between the 30s polls
-  // instead of a value frozen until the next fetch. endTime itself is always the
-  // backend's value (re-synced on every poll); this only re-renders it per second.
   private readonly now = signal(Date.now());
 
   readonly statusOptions = DEAL_STATUS_OPTIONS;
@@ -70,6 +69,7 @@ export class SellerDeals implements OnInit, OnDestroy {
   total = signal(0);
   deals = signal<DealRow[]>([]);
   loading = signal(true);
+  loadingError = signal<ApiError|null>(null);
   deleteTarget = signal<DealRow | null>(null);
 
   readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
@@ -129,7 +129,12 @@ export class SellerDeals implements OnInit, OnDestroy {
 
   loadDeals() {
     this.loading.set(true);
-    const sellerId = this.authService.currentUser()?.id ?? 'a1b2c3d4-1111-4a1b-8c2d-000000000001';
+    const sellerId = this.authService.currentUser()?.id;
+    if (!sellerId) {
+      this.loading.set(false);
+      this.loadingError.set(toApiError(new Error('Unauthorized: no seller ID found for current user')));
+      return;
+    }
 
     this.dealsService.getSellerDeals(sellerId, this.currentParams()).subscribe({
       next: (response) => {

@@ -5,6 +5,7 @@ import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { Product } from '../../../../shared/models/product';
 import { CartService } from '../../../cart/cart.service';
 import { ImageFallbackDirective } from '../../../../shared/directives/image-fallback.directive';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-product-card',
@@ -32,6 +33,7 @@ export class ProductCard implements OnDestroy {
   constructor(
     private readonly router: Router,
     private readonly cartService: CartService,
+    private readonly authService: AuthService,
   ) {}
 
   openDetails = () => {
@@ -40,6 +42,12 @@ export class ProductCard implements OnDestroy {
 
   addToCart = (event: Event) => {
     event.stopPropagation();
+    if (!this.authService.isLoggedIn()) {
+      this.router.navigate(['/auth/login'], {
+        queryParams: { returnUrl: `/products/${this.product().id}` },
+      });
+      return;
+    }
     this.cartService.add(this.product());
     this.addedToCart.emit(this.product().id);
     this.added.set(true);

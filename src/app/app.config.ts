@@ -23,7 +23,7 @@ const RallyPreset = definePreset(Aura, {
       800: '{orange.800}',
       900: '{orange.900}',
       950: '{orange.950}',
-    },
+    }
   },
 });
 

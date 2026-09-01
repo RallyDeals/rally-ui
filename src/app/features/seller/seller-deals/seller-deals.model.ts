@@ -1,7 +1,8 @@
 import { FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { ProgressTone } from '../components/deal-progress/deal-progress';
 import { DealStatus } from '../../../shared/models/deal';
-import { DealOverview } from '../../deals/interfaces/DealOverview';
+import { DealOverview } from '../../deals/interfaces/deal-overview';
+import { timeRemainingInSeconds } from '../../../shared/utils/deal-time.util';
 
 export interface DealRow {
   id: string;
@@ -74,11 +75,8 @@ function timeLabel(deal: DealOverview): string {
 }
 
 function urgentLabel(deal: DealOverview): boolean {
-  return (
-    deal.status === DealStatus.ACTIVE &&
-    deal.timeRemainingInSeconds > 0 &&
-    deal.timeRemainingInSeconds < 6 * 3600
-  );
+  const seconds = timeRemainingInSeconds(deal.endTime);
+  return deal.status === DealStatus.ACTIVE && seconds > 0 && seconds < 6 * 3600;
 }
 
 export function toDealRow(deal: DealOverview): DealRow {

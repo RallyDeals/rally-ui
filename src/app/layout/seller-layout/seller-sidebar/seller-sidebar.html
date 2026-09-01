@@ -34,33 +34,18 @@
     }
   </nav>
 
-  <div class="mt-auto pt-rally-md border-t border-outline-variant">
-    <a [class]="navClass(storeItem)" [routerLink]="storeItem.path">
-      <span class="material-symbols-outlined">{{ storeItem.symbol }}</span>
-      {{ storeItem.label }}
-    </a>
-    <button type="button" [class]="navClass(settingsItem)" disabled>
-      <span class="material-symbols-outlined">{{ settingsItem.symbol }}</span>
-      {{ settingsItem.label }}
-    </button>
-    <div class="flex items-center gap-rally-sm mt-rally-md px-4">
+  <div class="flex items-center justify-between px-4 mt-auto pt-rally-md border-t border-outline-variant">
+    <div class="flex items-center gap-rally-sm  min-w-0">
       <img
         alt="User Profile"
-        class="w-10 h-10 rounded-full object-cover border border-outline-variant"
+        class="w-10 h-10 rounded-full object-cover border border-outline-variant shrink-0"
         [src]="avatarUrl"
       />
-      <div>
-        <p class="font-label-sm text-label-sm font-semibold text-on-surface">{{ storeName }}</p>
-        <p class="text-[10px] text-on-surface-variant">Seller Account</p>
+      <div class="min-w-0">
+        <p class="font-label-sm text-label-sm font-semibold text-on-surface truncate">{{ storeName }}</p>
+        <p class="text-[10px] text-on-surface-variant truncate">{{ storeEmail }}</p>
       </div>
     </div>
-    <button
-      type="button"
-      class="flex items-center gap-rally-sm px-4 py-3 rounded-lg text-on-surface-variant hover:bg-surface-container hover:text-on-surface transition-colors cursor-pointer mt-rally-sm"
-      (click)="logout()"
-    >
-      <span class="material-symbols-outlined">logout</span>
-      Logout
-    </button>
+    <app-icon-button symbol="logout" label="Logout" tone="error" (click)="logout()" />
   </div>
 </div>

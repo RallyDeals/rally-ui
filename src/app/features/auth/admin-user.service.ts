@@ -9,15 +9,6 @@ import { Role, UpdateProfileRequest, UserProfile } from '../../core/auth/models'
 import { UserQueryParams } from './interfaces/user-query-params';
 import { SellerQueryParams } from './interfaces/seller-query-params';
 
-/** Shape returned by GET /users/sellers and GET /users/sellers/{id} */
-interface SellerListItem {
-  id: string;
-  name: string;
-  email: string;
-  avatarUrl: string | null;
-  joinedAt: string;
-}
-
 /** Response of GET /users/{id}/roles */
 export interface UserRoleResponse {
   id: string;
@@ -61,15 +52,12 @@ export class UserService {
       httpParams = httpParams.set('search', search);
     }
     return this.http
-      .get<PageResponse<SellerListItem>>(`${this.apiUrl}/sellers`, { params: httpParams })
-      .pipe(mapPage((item) => toSeller(item)));
+      .get<PageResponse<Seller>>(`${this.apiUrl}/sellers`, { params: httpParams });
   }
 
   /** GET /users/sellers/{id} */
   getSellerById(id: string): Observable<Seller> {
-    return this.http
-      .get<SellerListItem>(`${this.apiUrl}/sellers/${id}`)
-      .pipe(mapSingle(toSeller));
+    return this.http.get<Seller>(`${this.apiUrl}/sellers/${id}`);
   }
 
   /** GET /users/{id} — admin view of any user */
@@ -101,53 +89,4 @@ export class UserService {
   getUserRoles(id: string): Observable<UserRoleResponse> {
     return this.http.get<UserRoleResponse>(`${this.apiUrl}/${id}/roles`);
   }
-}
-
-function toSeller(item: SellerListItem): Seller {
-  // The API does not expose per-seller product/approval/deal counters yet,
-  // so they default to 0 until a source for them exists.
-  return {
-    id: item.id,
-    name: item.name,
-    email: item.email,
-    avatarUrl: item.avatarUrl ?? undefined,
-    joinedAt: item.joinedAt,
-    productsCount: 0,
-    pendingApprovals: 0,
-    activeDeals: 0,
-  };
-}
-
-function mapPage<TIn, TOut>(
-  transform: (item: TIn) => TOut,
-): (source: Observable<PageResponse<TIn>>) => Observable<PageResponse<TOut>> {
-  return (source) =>
-    new Observable((observer) => {
-      const sub = source.subscribe({
-        next: (page) =>
-          observer.next({
-            items: page.items.map(transform),
-            page: page.page,
-            limit: page.limit,
-            total: page.total,
-          }),
-        error: (err) => observer.error(err),
-        complete: () => observer.complete(),
-      });
-      return () => sub.unsubscribe();
-    });
-}
-
-function mapSingle<TIn, TOut>(
-  transform: (item: TIn) => TOut,
-): (source: Observable<TIn>) => Observable<TOut> {
-  return (source) =>
-    new Observable((observer) => {
-      const sub = source.subscribe({
-        next: (value) => observer.next(transform(value)),
-        error: (err) => observer.error(err),
-        complete: () => observer.complete(),
-      });
-      return () => sub.unsubscribe();
-    });
 }

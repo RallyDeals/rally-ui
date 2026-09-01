@@ -17,7 +17,7 @@ export class SellerRow {
   readonly initials = computed(() => this.seller().name.charAt(0).toUpperCase());
 
   readonly flagLabel = computed<string | undefined>(() => {
-    const pendingApprovals = this.seller().pendingApprovals;
+    const pendingApprovals = this.seller().totalPendingProducts;
     if (pendingApprovals >= HIGH_VOLUME_THRESHOLD) {
       return 'High Volume';
     }
@@ -27,5 +27,5 @@ export class SellerRow {
     return undefined;
   });
 
-  readonly pulsing = computed(() => this.seller().pendingApprovals >= HIGH_VOLUME_THRESHOLD);
+  readonly pulsing = computed(() => this.seller().totalPendingProducts >= HIGH_VOLUME_THRESHOLD);
 }

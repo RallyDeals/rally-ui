@@ -1,8 +1,10 @@
-import { Component, inject, input, output } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { Router, NavigationEnd, RouterLink } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { filter, map } from 'rxjs';
+import { PROFILE_PICTURE_PLACEHOLDER } from '../../../shared/constants/placeholder';
 import { AuthService } from '../../../core/auth/auth.service';
+import { IconButton } from '../../../shared/components/icon-button/icon-button';
 
 interface NavItem {
   label: string;
@@ -12,7 +14,7 @@ interface NavItem {
 
 @Component({
   selector: 'app-seller-sidebar',
-  imports: [RouterLink],
+  imports: [RouterLink, IconButton],
   templateUrl: './seller-sidebar.html',
   styleUrl: './seller-sidebar.css',
 })
@@ -31,19 +33,19 @@ export class SellerSidebar {
   );
 
   readonly navItems: NavItem[] = [
-    { label: 'Overview', symbol: 'dashboard', path: '/seller' },
     { label: 'My Products', symbol: 'inventory_2', path: '/seller/products' },
     { label: 'Deals', symbol: 'group_add', path: '/seller/deals' },
     { label: 'Orders', symbol: 'receipt_long', path: '/seller/orders' },
   ];
 
-  readonly settingsItem: NavItem = { label: 'Settings', symbol: 'settings', path: null };
-  readonly storeItem: NavItem = { label: 'Back to Store', symbol: 'storefront', path: '/home' };
-
-  readonly storeName = 'Alex Store';
-  readonly avatarUrl =
-    'https://lh3.googleusercontent.com/aida-public/AB6AXuCgxNrJsmbVdEsMq9E2yT7qkWEDEhhtW1gAlQKbdD0W-FyPJK6rhVuRLNUh9IoxlximM6CpdwvZOyQ1MoQN2VGx5p-DMDTeKHbvQXUCNRZfsHK0jhwVysf-7Y-4TY3PoqcRbignibynp97Ye0XNL7SwYGZ-ZVlnDFm1WiFLebxwJASm6kEoR3G_INAwp-yITH8yMr6wQiaU_6I_HaMM7t5X2LWa2P_h2-K2XspnTlMP2x5YYN5x4Qs106T9lYaK8wbwqGZg8vDtXMA';
-
+  storeName = '';
+  storeEmail = '';
+  ngOnInit() {
+    this.storeName =
+      this.authService.currentUser()?.firstName + ' ' + this.authService.currentUser()?.lastName;
+    this.storeEmail = this.authService.currentUser()?.email || '';
+  }
+  readonly avatarUrl = PROFILE_PICTURE_PLACEHOLDER;
   isActive(item: NavItem): boolean {
     return item.path !== null && this.currentUrl() === item.path;
   }

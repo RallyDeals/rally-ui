@@ -10,8 +10,8 @@ import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
 import { DealsService } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
-import { DealOverview } from '../interfaces/DealOverview';
-import { DealSortKey } from '../interfaces/DealsQueryParams';
+import { DealOverview } from '../interfaces/deal-overview';
+import { DealSortKey } from '../interfaces/deals-query-params';
 
 const DEFAULT_SORT: DealSortKey = 'relevance';
 const DEALS_PER_PAGE = 6;

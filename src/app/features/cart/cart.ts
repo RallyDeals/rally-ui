@@ -10,6 +10,7 @@ import { OrderService } from '../orders/order.service';
 import { ApiError } from '../../shared/models/api-error';
 import { toApiError } from '../../shared/utils/api-error.util';
 import { ErrorModal } from '../../shared/components/error-modal/error-modal';
+import { StripeCardForm } from '../user-profile/my-payment-methods/stripe-card-form/stripe-card-form';
 
 const TAX_RATE = 0.08;
 
@@ -21,6 +22,7 @@ const TAX_RATE = 0.08;
     OrderSummary,
     CheckoutAddress,
     PaymentMethodPicker,
+    StripeCardForm,
     ErrorModal,
     RouterLink,
   ],

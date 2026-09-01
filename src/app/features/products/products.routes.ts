@@ -5,10 +5,12 @@ import { ProductDetails } from './product-details/product-details';
 export const PRODUCTS_ROUTES: Routes = [
   {
     path: '',
-    component: BrowseProducts
+    component: BrowseProducts,
+    title: 'Products',
   },
   {
     path: ':id',
     component: ProductDetails,
+    title: 'Product Details',
   }
 ];

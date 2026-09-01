@@ -28,7 +28,7 @@
         />
       </aside>
 
-      <div class="min-w-0">
+      <div class="min-w-0 md:w-full">
         <div class="filter-toolbar">
           <div class="search-box">
             <button
@@ -88,6 +88,21 @@
                   class="hover:text-error transition-colors hover:cursor-pointer"
                   aria-label="Remove category filter"
                   (click)="onCategoryChange(null)"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
+            @if (selectedSellerId()) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Seller filter
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove seller filter"
+                  (click)="onSellerChange(null)"
                 >
                   <span class="icon-md">close</span>
                 </button>

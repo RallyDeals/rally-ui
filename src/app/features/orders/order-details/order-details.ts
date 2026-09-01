@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { OrderHeader } from './order-header/order-header';
 import { ShippingAddressCard } from './shipping-address-card/shipping-address-card';
 import { PaymentMethodCard } from './payment-method-card/payment-method-card';
@@ -35,6 +36,7 @@ const TAX_RATE = 0.08;
 export class OrderDetails {
   private orderService = inject(OrderService);
   private activatedRoute = inject(ActivatedRoute);
+  private titleService = inject(Title);
   orderId = this.activatedRoute.snapshot.paramMap.get('orderId');
   order = signal<DetailedOrderResponse | null>(null);
   header = signal<OrderHeaderInfo | null>(null);
@@ -58,6 +60,7 @@ export class OrderDetails {
         },
         next: (response) => {
           this.order.set(response);
+          this.titleService.setTitle(`Order #${response.orderId.slice(0, 8).toUpperCase()}`);
           this.header.set({
             deliveryType: 'STANDARD DELIVERY',
             placedDate: response.createdAt,

@@ -1,13 +1,13 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, inject, computed } from '@angular/core';
 import { Router, RouterOutlet } from '@angular/router';
+import { AuthService } from '../../core/auth/auth.service';
 import { ProfileSummary } from './components/profile-summary/profile-summary';
 import { ProfileTabs } from './components/profile-tabs/profile-tabs';
 import { ProfileTab } from './interfaces/profile-tab';
+import { PROFILE_PICTURE_PLACEHOLDER } from '../../shared/constants/placeholder';
 import { ProfileStore } from './profile-store';
 import { ErrorState } from '../../shared/components/error-state/error-state';
-import { PLACEHOLDER_IMAGE } from '../../shared/constants/placeholder';
 import { resolveImageUrl } from '../../shared/utils/image-url';
-import { AuthService } from '../../core/auth/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -21,16 +21,16 @@ export class UserProfile {
   private readonly router = inject(Router);
 
   readonly avatarUrl = computed(() =>
-    resolveImageUrl(this.store.profileInfo()?.profilePicture, PLACEHOLDER_IMAGE),
+    resolveImageUrl(this.store.profileInfo()?.profilePicture, PROFILE_PICTURE_PLACEHOLDER),
   );
 
   readonly userName = computed(() => this.store.profileInfo()?.name ?? '');
 
   tabs: ProfileTab[] = [
-    { id: 'personal-info', label: 'Personal Info' },
-    { id: 'my-orders', label: 'My Orders' },
-    { id: 'my-deals', label: 'My Deals' },
-    { id: 'my-payment-methods', label: 'My Payment Methods' },
+    { id: 'info', label: 'My Info' },
+    { id: 'orders', label: 'My Orders' },
+    { id: 'deals', label: 'My Deals' },
+    { id: 'cards', label: 'My Cards' },
     { id: 'security', label: 'Security' },
   ];
 

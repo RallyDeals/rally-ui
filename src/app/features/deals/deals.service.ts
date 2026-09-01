@@ -3,15 +3,14 @@ import { environment } from '../../../environments/environment';
 import { HttpClient } from '@angular/common/http';
 import { Observable, map } from 'rxjs';
 import { PageResponse } from '../products/page-response';
-import { DealStatus } from '../../shared/models/deal';
-import { DealOverview } from './interfaces/DealOverview';
-import { DealDetails } from './interfaces/DealDetails';
-import { DealsAnalyticsResponse } from './interfaces/DealsAnalyticsResponse';
-import { DealsQueryParams, DealSortKey } from './interfaces/DealsQueryParams';
-import { CreateDealRequest } from './interfaces/CreateDealRequest';
-import { ActivityEvent } from './interfaces/ActivityEvent';
-import { Participation } from './interfaces/Participation';
+import { DealOverview } from './interfaces/deal-overview';
+import { DealDetails } from './interfaces/deal-details';
+import { DealsAnalyticsResponse } from './interfaces/deals-analytics-response';
+import { DealsQueryParams, DealSortKey } from './interfaces/deals-query-params';
+import { CreateDealRequest } from './interfaces/create-deal-request';
+import { ActivityEvent } from './interfaces/activity-event';
 import { resolveImageUrl } from '../../shared/utils/image-url';
+import { DealResponse, toDealOverview } from './deal-overview.mapper';
 
 export interface InviteLinkResponse {
   code: string;
@@ -20,10 +19,26 @@ export interface InviteLinkResponse {
   expiresAt: string;
 }
 
+export interface ParticipationResponse{
+  id: string,
+  dealId: string,
+  userId: string,
+  referredBy: string | null,
+  status: string,
+  joinedAt: Date,
+  leftAt: Date | null
+}
+
 export interface ParticipantSummary {
   userId: string;
   referredBy: string | null;
   joinedAt: string;
+  firstName: string;
+  lastName: string;
+}
+
+interface ParticipantStatusResponse {
+  status: string;
 }
 
 interface ParticipantsPageResponse {
@@ -31,29 +46,7 @@ interface ParticipantsPageResponse {
   activeCount: number;
   page: number;
   size: number;
-}
-
-interface DealResponse {
-  id: string;
-  productId: string;
-  sellerId: string;
-  originalPrice: number;
-  dealPrice: number;
-  dealStock: number;
-  currentParticipants: number;
-  authorizedCount: number;
-  minParticipants: number;
-  status: string;
-  startTime: string | null;
-  durationMinutes: number;
-  endTime: string | null;
-  timeRemainingSeconds: number | null;
-  createdAt: string;
-  productName: string | null;
-  productImageUrl: string | null;
-  category: string | null;
-  sku: string | null;
-  sellerName: string | null;
+  totalPages: number;
 }
 
 interface SpringPage<T> {
@@ -62,6 +55,12 @@ interface SpringPage<T> {
   totalPages: number;
   number: number;
   size: number;
+}
+export enum ParticipationStatus {
+  PENDING = 'pending',
+  ACTIVE='active',
+  LEFT='left',
+  DECLINED='declined',
 }
 
 @Injectable({ providedIn: 'root' })
@@ -79,7 +78,6 @@ export class DealsService {
     const status = params.status;
     const categories = params.categories?.length ? params.categories : undefined;
     const sellerId = params.sellerId;
-    const participantId = params.userId;
     const productId = params.productId;
     const minPrice = params.minPrice;
     const maxPrice = params.maxPrice;
@@ -95,15 +93,14 @@ export class DealsService {
         ...(status && { status }),
         ...(categories && { categories }),
         ...(sellerId && { sellerId }),
-        ...(participantId && { participantId }),
         ...(productId && { productId }),
         ...(minPrice !== undefined && { minPrice }),
         ...(maxPrice !== undefined && { maxPrice }),
         ...(sort && sort !== 'relevance' && { sort }),
       },
     }).pipe(
-      map((spring) => ({
-        items: spring.content.map(this.toDealOverview),
+      map((spring): PageResponse<DealOverview> => ({
+        items: spring.content.map(toDealOverview),
         page: spring.number + 1,
         limit: spring.size,
         total: spring.totalElements,
@@ -115,14 +112,10 @@ export class DealsService {
     return this.getDealsOverview({ ...params, sellerId });
   }
 
-  getMyDeals(buyerId: string, params: Omit<DealsQueryParams, 'userId'> = {}): Observable<PageResponse<DealOverview>> {
-    return this.getDealsOverview({ ...params, userId: buyerId });
-  }
-
   getDealsDetails(id: string): Observable<DealDetails | null> {
     return this.http.get<DealResponse>(`${this.baseUrl}/${id}`).pipe(
       map((res) => ({
-        ...this.toDealOverview(res),
+        ...toDealOverview(res),
         productDescription: `Group deal for the ${res.productName ?? 'this product'}.`,
         productImages: res.productImageUrl ? [resolveImageUrl(res.productImageUrl)] : [],
       })),
@@ -133,16 +126,18 @@ export class DealsService {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<Participation> {
-    return this.http.post<Participation>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
+  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<ParticipationResponse> {
+    return this.http.post<ParticipationResponse>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
   }
 
   leaveDeal(id: string): Observable<unknown> {
     return this.http.delete(`${this.baseUrl}/${id}/leave`);
   }
 
-  isActiveParticipation(dealId: string, participationId: string): Observable<boolean> {
-    return this.http.get<boolean>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`);
+  getParticipationStatus(dealId: string, participationId: string): Observable<ParticipationStatus> {
+    return this.http
+      .get<ParticipantStatusResponse>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`)
+      .pipe(map((res) => res.status.toLowerCase() as ParticipationStatus));
   }
 
   getDealActivity(id: string): Observable<ActivityEvent[]> {
@@ -153,67 +148,26 @@ export class DealsService {
     return this.http.post<InviteLinkResponse>(`${environment.apiUrl}/deals/${dealId}/invite-link`, {});
   }
 
-  getDealParticipants(dealId: string): Observable<ParticipantSummary[]> {
-    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`).pipe(
-      map((res) => res.participants ?? [])
-    );
+  getDealParticipants(dealId: string): Observable<ParticipantsPageResponse> {
+    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`);
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {
     return this.http.post<DealResponse>(this.baseUrl, request).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
 
   updateDeal(id: string, request: CreateDealRequest): Observable<DealOverview> {
     const { productId, ...patchBody } = request;
     return this.http.patch<DealResponse>(`${this.baseUrl}/${id}`, patchBody).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
 
   cancelDeal(id: string): Observable<DealOverview | null> {
     return this.http.post<DealResponse>(`${this.baseUrl}/${id}/cancel`, {}).pipe(
-      map(this.toDealOverview),
+      map(toDealOverview),
     );
   }
-
-  private toDealOverview(res: DealResponse): DealOverview {
-    const neededCount = Math.max(0, res.minParticipants - res.currentParticipants);
-    const progressPercent = res.dealStock > 0
-      ? Math.min(100, Math.round((res.currentParticipants / res.dealStock) * 100))
-      : 0;
-    return {
-      id: res.id,
-      productId: res.productId,
-      productName: res.productName ?? 'Unknown Product',
-      productImageUrl: resolveImageUrl(res.productImageUrl),
-      category: res.category ?? 'Uncategorized',
-      sku: res.sku ?? '',
-      sellerId: res.sellerId,
-      sellerName: res.sellerName ?? '',
-      originalPrice: res.originalPrice,
-      dealPrice: res.dealPrice,
-      dealStock: res.dealStock,
-      currentParticipants: res.currentParticipants,
-      neededCount,
-      progressPercent,
-      minParticipants: res.minParticipants,
-      status: res.status.toLowerCase() as DealStatus,
-      durationMinutes: res.durationMinutes,
-      endTime: res.endTime ? new Date(res.endTime) : new Date(),
-      timeRemainingInSeconds: res.timeRemainingSeconds ?? 0,
-    };
-  }
-}
-
-function discountOf(deal: DealOverview): number {
-  if (!deal.originalPrice || deal.originalPrice <= 0) {
-    return 0;
-  }
-  return Math.round((1 - deal.dealPrice / deal.originalPrice) * 100);
-}
-
-function startTimeOf(deal: DealOverview): number {
-  return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }

@@ -84,7 +84,16 @@
               {{ deal.productDescription }}
             </p>
           </div>
-
+          @if (deal.sellerName) {
+            <a
+              class="font-label-sm text-label-sm"
+              [routerLink]="['/deals']"
+              [queryParams]="{ sellerId: deal.sellerId }"
+            >
+              Sold by
+              <span class="font-label-sm text-label-sm text-primary hover:underline">
+                {{ deal.sellerName }}</span> </a>
+          }
           <div
             class="bg-white/70 backdrop-blur-md rounded-xl p-rally-md flex flex-col gap-rally-md relative overflow-hidden border border-outline-variant/20 shadow-[0px_4px_20px_rgba(15,23,42,0.05)]"
           >
@@ -108,7 +117,8 @@
                   </div>
                 </div>
                 <div class="text-right">
-                  <div class="text-error font-label-sm text-label-sm mb-1 uppercase tracking-wider font-bold animate-pulse">
+                  <div
+                    class="text-error font-label-sm text-label-sm mb-1 uppercase tracking-wider font-bold animate-pulse">
                     Ends In
                   </div>
                   <div class="font-headline-md text-headline-md text-on-surface tabular-nums">
@@ -160,7 +170,7 @@
                   </span>
                   {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
                 </button>
-                @if (joined() && !isClosed()) {
+                @if ((joined() === 'active' || joined() === 'pending') && !isClosed()) {
                   <button
                     class="w-full bg-transparent border border-error/40 hover:border-error hover:text-error text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                     (click)="leaveDeal()"
@@ -173,7 +183,7 @@
 
               <div class="flex flex-col gap-rally-xs">
                 <div class="flex justify-between font-label-sm text-label-sm text-on-surface font-semibold">
-                  <span>{{ deal.currentParticipants }} Joined</span>
+                  <span>{{ deal.authorizedCount }} Joined</span>
                   <span>Target: {{ deal.dealStock }}</span>
                 </div>
                 <div class="progress-track">
@@ -192,29 +202,27 @@
 
               <div class="flex items-center gap-rally-sm">
                 <div class="flex -space-x-3">
-                  @for (person of participants(); track person.initials) {
-                    <span
+                  @for (p of participants(); track p.userId) {
+                    @let avatar = fullName(p) | avatar;
+                    <div
                       class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center font-label-sm text-[10px] text-white"
-                      [style.background-color]="person.color"
-                    >
-                      {{ person.initials }}
+                      [style.background-color]="avatar.color">
+                      {{ avatar.initials }}
+                    </div>
+                  } @empty {
+                    <span class="font-label-sm text-label-sm text-on-surface-variant">
+                    No participants yet
                     </span>
                   }
                   @if (extraParticipants() > 0) {
-                    <span
-                      class="w-8 h-8 rounded-full border-2 border-white bg-surface-container flex items-center justify-center font-label-sm text-[10px] text-on-surface-variant z-10"
-                    >
-                      +{{ extraParticipants() }}
-                    </span>
+                    <span class="extra-count">+{{ extraParticipants() }}</span>
                   }
                 </div>
-                <span class="font-label-sm text-label-sm text-on-surface-variant">
-                  @if (participants().length > 0) {
-                    {{ participants()[0].initials }} joined
-                  } @else {
-                    No participants yet
-                  }
-                </span>
+                @if (participants().length > 0) {
+                  <span class="font-label-sm text-label-sm text-on-surface-variant">
+                    joined
+                  </span>
+                }
               </div>
             </div>
           </div>
@@ -258,7 +266,7 @@
               @if (tab === 'activity') {
                 <span
                   class="bg-primary-container text-white text-[10px] px-1.5 py-0.5 rounded-full animate-pulse"
-                  >Live</span
+                >Live</span
                 >
               }
             </button>
@@ -308,7 +316,7 @@
                     <div class="flex justify-between gap-4 py-3 first:pt-0 last:pb-0">
                       <span
                         class="text-on-surface-variant font-label-sm text-label-sm uppercase tracking-wider"
-                        >{{ spec.label }}</span
+                      >{{ spec.label }}</span
                       >
                       <span class="font-semibold text-on-surface text-right">{{ spec.value }}</span>
                     </div>
@@ -319,23 +327,26 @@
             @case ('activity') {
               <div class="md:col-span-2 flex flex-col gap-rally-sm">
                 @if (activity().length === 0) {
-                  <p class="font-body-md text-body-md text-on-surface-variant text-center py-rally-lg">No activity yet.</p>
+                  <p class="font-body-md text-body-md text-on-surface-variant text-center py-rally-lg">No activity
+                    yet.</p>
                 }
                 @for (entry of activity(); track entry.timestamp + entry.userId) {
                   <div
                     class="flex items-center gap-3 bg-surface-container-low p-rally-md rounded-xl border border-outline-variant/10"
                   >
                     <span class="material-symbols-outlined text-primary-container text-[24px]">{{
-                      entry.type === 'JOINED' ? 'group_add' : 'person_remove'
-                    }}</span>
+                        activityIcon(entry.type)
+                      }}</span>
                     <div class="flex-1">
                       <p class="font-semibold text-on-surface text-body-md">
                         @if (entry.type === 'JOINED') {
                           A participant joined the rally
                         } @else if (entry.type === 'LEFT') {
                           A participant left the rally
-                        } @else if(entry.type === 'PENDING'){
+                        } @else if (entry.type === 'PENDING') {
                           A participant is pending
+                        } @else if (entry.type === 'DECLINED') {
+                          A participant's payment was declined
                         }
                       </p>
                       <p class="font-label-sm text-label-sm text-on-surface-variant">{{ entry.timestamp | timeAgo }}</p>
@@ -356,7 +367,7 @@
                       {{ item.q }}
                       <span
                         class="material-symbols-outlined text-on-surface-variant transition-transform group-open:rotate-180"
-                        >expand_more</span
+                      >expand_more</span
                       >
                     </summary>
                     <p class="mt-rally-sm font-body-md text-body-md text-on-surface-variant">
@@ -391,7 +402,7 @@
                       class="font-label-sm text-label-sm font-bold"
                       [class.text-primary-container]="milestone.reached"
                       [class.text-on-surface]="!milestone.reached"
-                      >{{ milestone.label }}</span
+                    >{{ milestone.label }}</span
                     >
                     <span class="text-[12px] text-on-surface-variant">{{ milestone.detail }}</span>
                   </div>

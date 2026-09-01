@@ -1,9 +1,4 @@
-export type ProfileTabId =
-  | 'personal-info'
-  | 'my-orders'
-  | 'my-deals'
-  | 'my-payment-methods'
-  | 'security';
+export type ProfileTabId = 'info' | 'orders' | 'deals' | 'cards' | 'security';
 
 export interface ProfileTab {
   id: ProfileTabId;

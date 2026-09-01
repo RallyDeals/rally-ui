@@ -1,11 +1,9 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { OrderPhaseBadge } from '../components/order-phase-badge/order-phase-badge';
 import { OrderService } from '../../orders/order.service';
-import { formatMoney } from '../../../shared/utils/money.util';
-import { formatShortDate } from '../../../shared/utils/date-format.util';
 import { orderCode } from '../../../shared/utils/order-code.util';
 import { DetailedSellerOrderResponse } from '../../orders/interfaces/detailed-seller-order-response';
 import { ApiError } from '../../../shared/models/api-error';
@@ -31,6 +29,7 @@ import { ImageFallbackDirective } from '../../../shared/directives/image-fallbac
 export class SellerOrderDetail {
   private readonly route = inject(ActivatedRoute);
   private readonly orderService = inject(OrderService);
+  private readonly titleService = inject(Title);
 
   private readonly orderId = this.route.snapshot.paramMap.get('id') ?? '';
   readonly order = signal<DetailedSellerOrderResponse | undefined>(undefined);
@@ -51,6 +50,7 @@ export class SellerOrderDetail {
     this.orderService.getSellerOrderById(this.orderId).subscribe({
       next: (order) => {
         this.order.set(order);
+        this.titleService.setTitle(`Order ${orderCode(this.orderId)}`);
       },
       error: (err) => {
         this.error.set(toApiError(err));

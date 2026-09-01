@@ -1,6 +1,7 @@
 import { Component, DestroyRef, NgZone, OnInit, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, TitleCasePipe } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { Title } from '@angular/platform-browser';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { Subscription, interval, switchMap, startWith, catchError, of } from 'rxjs';
 import { Breadcrumbs, BreadcrumbItem } from '../../../shared/components/breadcrumbs/breadcrumbs';
 import { Countdown } from '../../../shared/components/countdown/countdown';
@@ -8,15 +9,15 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { PrimaryBtn } from '../../../shared/components/buttons/primary-btn/primary-btn';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
-import { DealsService, ParticipantSummary } from '../deals.service';
+import { DealsService, ParticipantSummary, ParticipationStatus } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
-import { DealDetails as DealDetailsModel } from '../interfaces/DealDetails';
-import { ActivityEvent } from '../interfaces/ActivityEvent';
-import { Participation, ParticipationStatus } from '../interfaces/Participation';
+import { DealDetails as DealDetailsModel } from '../interfaces/deal-details';
+import { ActivityEvent } from '../interfaces/activity-event';
 import { dealBadge } from '../deal-badge';
 import { PaymentDialog } from '../../../shared/components/payment-dialog/payment-dialog';
 import { TimeAgoPipe } from '../../../shared/pipes/time-ago.pipe';
 import { AuthService } from '../../../core/auth/auth.service';
+import { AvatarPipe } from '../../../shared/pipes/avatar-pipe';
 
 const STATUS_LABELS: Record<DealStatus, string> = {
   [DealStatus.PENDING]: 'Gathering',
@@ -40,10 +41,6 @@ function dealStartTime(deal: DealDetailsModel): number {
 }
 
 type DealTab = 'description' | 'specifications' | 'activity' | 'faq';
-
-const AVATAR_INITIALS = ['SM', 'JK', 'AL', 'RZ', 'PD', 'MT', 'NO', 'KW'];
-const AVATAR_COLORS = ['#f97316', '#006c49', '#be0037', '#9d4300', '#7c4dff', '#00796b'];
-
 const FAQS = [
   {
     q: 'How does a group deal work?',
@@ -61,11 +58,22 @@ const FAQS = [
 
 const DEAL_POLL_INTERVAL_MS = 15_000;
 const JOIN_POLL_INTERVAL_MS = 3_000;
-const JOIN_POLL_TIMEOUT_MS = 10_000;
+const JOIN_POLL_TIMEOUT_MS = 30_000;
 
 @Component({
   selector: 'app-deal-details',
-  imports: [Breadcrumbs, Countdown, ErrorState, PrimaryBtn, PaymentDialog, CurrencyPipe, TitleCasePipe, TimeAgoPipe],
+  imports: [
+    Breadcrumbs,
+    Countdown,
+    ErrorState,
+    PrimaryBtn,
+    PaymentDialog,
+    CurrencyPipe,
+    TitleCasePipe,
+    TimeAgoPipe,
+    AvatarPipe,
+    RouterLink,
+  ],
   templateUrl: './deal-details.html',
 })
 export class DealDetails implements OnInit {
@@ -75,6 +83,7 @@ export class DealDetails implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
+  private readonly titleService = inject(Title);
 
   private dealPollSub: Subscription | null = null;
   private joinPollSub: Subscription | null = null;
@@ -107,7 +116,7 @@ export class DealDetails implements OnInit {
 
   activeImage = computed(() => this.selectedImage() ?? this.deal()?.productImageUrl ?? '');
 
-  participants = signal<{ initials: string; color: string }[]>([]);
+  participants = signal<ParticipantSummary[]>([]);
   extraParticipants = signal(0);
 
   specs = computed(() => {
@@ -169,7 +178,7 @@ export class DealDetails implements OnInit {
 
   spotsLeft = computed(() => {
     const deal = this.deal();
-    return deal ? Math.max(0, deal.dealStock - deal.currentParticipants) : 0;
+    return deal ? Math.max(0, deal.dealStock - deal.authorizedCount) : 0;
   });
 
   progress = computed(() => {
@@ -177,7 +186,7 @@ export class DealDetails implements OnInit {
     if (!deal || deal.dealStock <= 0) {
       return 0;
     }
-    return Math.min(100, Math.max(0, Math.round((deal.currentParticipants / deal.dealStock) * 100)));
+    return Math.min(100, Math.max(0, Math.round((deal.authorizedCount / deal.dealStock) * 100)));
   });
 
   isFull = computed(() => {
@@ -234,6 +243,7 @@ export class DealDetails implements OnInit {
       next: (deal) => {
         if (deal) {
           this.deal.set(deal);
+          this.titleService.setTitle(deal.productName);
           this.startDealPoll(id);
           this.loadActivity(id);
           this.loadParticipants(id);
@@ -262,24 +272,16 @@ export class DealDetails implements OnInit {
 
   private loadParticipants(dealId: string) {
     this.dealsService.getDealParticipants(dealId).subscribe({
-      next: (list) => {
-        const shown = list.slice(0, 3);
-        this.participants.set(
-          shown.map((p, i) => ({
-            initials: this.toInitials(p.userId),
-            color: AVATAR_COLORS[i % AVATAR_COLORS.length],
-          }))
-        );
-        this.extraParticipants.set(Math.max(0, list.length - 3));
+      next: (page) => {
+        const shown = page.participants.slice(0, 3);
+        this.participants.set(shown);
+        this.extraParticipants.set(Math.max(0, page.activeCount - shown.length));
       },
     });
   }
 
-  private toInitials(userId: string): string {
-    const hex = userId.replace(/-/g, '');
-    const first = parseInt(hex.slice(0, 8), 16) % 26;
-    const second = parseInt(hex.slice(8, 16), 16) % 26;
-    return String.fromCharCode(65 + first) + String.fromCharCode(65 + second);
+  fullName(p: ParticipantSummary): string {
+    return `${p.firstName} ${p.lastName}`.trim();
   }
 
   private checkJoinedFromActivity(events: ActivityEvent[]) {
@@ -288,15 +290,33 @@ export class DealDetails implements OnInit {
 
     const userEvent = events
       .filter((e) => e.userId === userId)
-      .reduce((latest: ActivityEvent | null, e) =>
-        !latest || e.timestamp > latest.timestamp ? e : latest, null);
+      .reduce(
+        (latest: ActivityEvent | null, e) =>
+          !latest || e.timestamp > latest.timestamp ? e : latest,
+        null,
+      );
 
-    let joined: ParticipationStatus = 'left';
-    if (userEvent) {
-      if (userEvent.type === 'JOINED') joined = 'active';
-      else if (userEvent.type === 'PENDING') joined = 'pending';
+    if (!userEvent) {
+      this.joined.set(null);
+      return;
     }
-    this.joined.set(joined);
+
+    switch (userEvent.type) {
+      case 'JOINED':
+        this.joined.set(ParticipationStatus.ACTIVE);
+        break;
+      case 'PENDING':
+        this.joined.set(ParticipationStatus.PENDING);
+        break;
+      case 'DECLINED':
+        this.joined.set(null);
+        this.joinError.set('Your last payment attempt was declined. Please try again.');
+        break;
+      case 'LEFT':
+      default:
+        this.joined.set(ParticipationStatus.LEFT);
+        break;
+    }
   }
 
   private startDealPoll(dealId: string) {
@@ -328,32 +348,54 @@ export class DealDetails implements OnInit {
         .pipe(
           startWith(0),
           switchMap(() =>
-            this.dealsService.isActiveParticipation(dealId, participationId).pipe(catchError(() => of(null))),
+            this.dealsService
+              .getParticipationStatus(dealId, participationId)
+              .pipe(catchError(() => of(null))),
           ),
         )
-        .subscribe((active: boolean | null) => {
-          if (!active) {
-            if (Date.now() > deadline) {
-              this.ngZone.run(() => {
-                this.joinPending.set(false);
-                this.joinError.set('Still processing — check back in a moment.');
-              });
-              this.stopJoinStatusPoll();
-            }
-            return;
-          }
-          this.ngZone.run(() => {
-            this.joinPending.set(false);
-            if (active) {
-              this.joined.set('active');
+        .subscribe((status: ParticipationStatus | null) => {
+          if (status === 'active') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joinError.set(null);
+              this.joined.set(ParticipationStatus.ACTIVE);
               this.loadActivity(dealId);
               this.loadParticipants(dealId);
-            } else {
-              this.joined.set('left');
-              this.joinError.set('Payment could not be authorized. Please try again.');
-            }
-          });
-          this.stopJoinStatusPoll();
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          if (status === 'declined') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joined.set(null);
+              this.joinError.set(
+                'Your payment was declined. Please try again with a different payment method.',
+              );
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          if (status === 'left') {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joined.set(null);
+              this.joinError.set('Your join request could not be completed. Please try again.');
+            });
+            this.stopJoinStatusPoll();
+            return;
+          }
+
+          // status is 'pending', or the check failed transiently (null): keep polling until the deadline.
+          if (Date.now() > deadline) {
+            this.ngZone.run(() => {
+              this.joinPending.set(false);
+              this.joinError.set("We're still processing your payment — check back in a moment.");
+            });
+            this.stopJoinStatusPoll();
+          }
         });
     });
   }
@@ -364,7 +406,7 @@ export class DealDetails implements OnInit {
   }
 
   joinDeal = () => {
-    if (this.authService.isLoggedIn()) {
+    if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
       });
@@ -395,7 +437,7 @@ export class DealDetails implements OnInit {
     }
     this.dealsService.leaveDeal(deal.id).subscribe({
       next: () => {
-        this.joined.set('left');
+        this.joined.set(ParticipationStatus.LEFT);
         this.loadActivity(deal.id);
         this.loadParticipants(deal.id);
       },
@@ -418,7 +460,10 @@ export class DealDetails implements OnInit {
 
   private copyToClipboard(url: string): void {
     if (navigator.clipboard?.writeText) {
-      navigator.clipboard.writeText(url).then(() => this.showCopied(), () => this.fallbackCopy(url));
+      navigator.clipboard.writeText(url).then(
+        () => this.showCopied(),
+        () => this.fallbackCopy(url),
+      );
     } else {
       this.fallbackCopy(url);
     }
@@ -443,6 +488,19 @@ export class DealDetails implements OnInit {
       document.body.removeChild(textarea);
     }
     this.showCopied();
+  }
+
+  activityIcon(type: ActivityEvent['type']): string {
+    switch (type) {
+      case 'JOINED':
+        return 'group_add';
+      case 'PENDING':
+        return 'hourglass_top';
+      case 'DECLINED':
+        return 'cancel';
+      default:
+        return 'person_remove';
+    }
   }
 
   retry = () => {

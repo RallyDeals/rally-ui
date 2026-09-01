@@ -11,7 +11,7 @@ export type DealSortKey =
 
 export interface DealsQueryParams {
   // buyer browse + dashboards
-  search?: string; // product name/seller name
+  search?: string; // product name
 
   // buyer browse
   categories?: string[];
@@ -22,9 +22,6 @@ export interface DealsQueryParams {
   // dashboards + buyer profile
   sellerId?: string;
   status?: DealStatus | string;
-
-  // buyer profile ("my deals" — all statuses, scoped to deals this buyer joined)
-  userId?: string;
 
   // product details
   productId?: string;

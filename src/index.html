@@ -6,6 +6,8 @@
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
       rel="stylesheet"
@@ -14,6 +16,24 @@
       href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&amp;family=Geist:wght@500&amp;display=swap"
       rel="stylesheet"
     />
+    <script>
+      // Material Symbols glyphs render as literal fallback text (e.g. "search")
+      // until the icon font finishes loading. Hide icons behind `.fonts-loading`
+      // until the font is ready (or a timeout elapses) so they never flash as text.
+      (function () {
+        var html = document.documentElement;
+        html.classList.add('fonts-loading');
+        var reveal = function () {
+          html.classList.remove('fonts-loading');
+        };
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(reveal, reveal);
+        } else {
+          reveal();
+        }
+        setTimeout(reveal, 2000);
+      })();
+    </script>
   </head>
   <body
     class="font-body-md text-on-surface antialiased selection:bg-primary-container selection:text-on-primary-container"

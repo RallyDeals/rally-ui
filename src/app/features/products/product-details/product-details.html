@@ -22,7 +22,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg items-start mt-6">
         <div class="lg:col-span-7">
           <div
-            class="product-details__image group relative aspect-[4/3] overflow-hidden rounded-xl bg-surface-container-low"
+            class="product-details__image group relative aspect-4/3 overflow-hidden rounded-xl bg-surface-container-low"
           >
             <img
               class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -60,7 +60,7 @@
               {{ product.category?.name ?? 'Uncategorized' }}
             </p>
             <h1
-              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mt-10"
+              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mt-5"
             >
               {{ product.name }}
             </h1>
@@ -90,6 +90,18 @@
               Read more
             </button>
           </div>
+
+          @if (product.sellerName) {
+            <a
+              class="font-label-sm text-label-sm"
+              [routerLink]="['/products']"
+              [queryParams]="{ sellerId: product.sellerId }"
+            >
+              Sold by
+              <span class="font-label-sm text-label-sm text-primary hover:underline">
+                {{ product.sellerName }}</span>
+            </a>
+          }
 
           <div class="flex items-center gap-rally-md">
             @if (outOfStock()) {
@@ -178,7 +190,7 @@
                     ${{ deal.originalPrice }}
                   </span>
                 </p>
-                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal !px-4 !py-2">
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal px-4! py-2!">
                   <span class="material-symbols-outlined">groups</span>
                   Join Deal
                 </a>
