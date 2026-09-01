@@ -1,0 +1,253 @@
+<section class="flex-1 space-y-rally-md">
+  <!-- Page Top Bar (search + actions) -->
+  <header
+    class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
+  >
+    <div class="w-full max-w-xs">
+      <app-search-input
+        placeholder="Search..."
+        [value]="searchQuery()"
+        (valueChange)="onSearchInput($event)"
+        (clear)="clearSearch()"
+      />
+    </div>
+    <div class="flex items-center gap-1 sm:gap-rally-sm">
+      <button
+        type="button"
+        class="flex items-center gap-2 px-4 sm:px-6 py-2 bg-primary text-on-primary rounded-xl font-bold hover:bg-primary/90 transition-all shadow-sm active:scale-95"
+        [routerLink]="['/seller/products/new']"
+      >
+        <span class="material-symbols-outlined text-lg sm:text-xl">add</span>
+        <span class="hidden sm:inline">Add Product</span>
+        <span class="sm:hidden text-xs">Add</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- Page Header & Stats -->
+  <app-page-header
+    title="Product Inventory"
+    subtitle="Manage your storefront listings and stock levels in real-time."
+  >
+    <app-stat-card label="Total Items" [value]="total().toString()" symbol="inventory" tone="primary" />
+    <app-stat-card label="Pending" [value]="pendingCount().toString()" symbol="pending_actions" tone="neutral" />
+    <app-stat-card label="Low Stock" [value]="lowStockCount().toString()" symbol="warning" tone="error" />
+  </app-page-header>
+
+  <!-- Filter Bar -->
+  <div
+    class="bg-surface-container-lowest p-rally-sm rounded-2xl border border-outline-variant shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-rally-sm"
+  >
+    <div class="flex items-center gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+      <div
+        class="shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
+      >
+        <span class="material-symbols-outlined text-body-md">filter_list</span>
+        <span class="font-bold text-sm">Filters</span>
+      </div>
+      <div class="h-6 w-px bg-outline-variant/30 shrink-0"></div>
+      <app-filter-pills
+        [options]="statusOptions"
+        [selected]="statusFilter()"
+        (selectedChange)="onStatusChange($event)"
+      />
+    </div>
+    <div class="flex items-center gap-rally-sm self-end sm:self-auto">
+      <p class="text-xs text-on-surface-variant hidden md:block">
+        Showing {{ fromIndex }}-{{ toIndex }} of {{ total() }}
+      </p>
+      <app-pagination
+        [page]="page()"
+        [totalPages]="totalPages()"
+        (pageChange)="goToPage($event)"
+        [compact]="true"
+      />
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+    <div class="overflow-x-auto no-scrollbar">
+      @if (loading()) {
+        <div class="p-rally-xl space-y-rally-sm">
+          @for (skeleton of [1, 2, 3, 4]; track skeleton) {
+            <div class="h-16 bg-surface-container-low rounded-lg animate-pulse"></div>
+          }
+        </div>
+      } @else if (products().length === 0) {
+        <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
+          <span class="material-symbols-outlined text-on-surface-variant text-[40px]">{{ emptyState().icon }}</span>
+          <h2 class="section-title-plain">{{ emptyState().title }}</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+            {{ emptyState().message }}
+          </p>
+          @if (emptyState().actionLabel) {
+            <a
+              routerLink="/products"
+              class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+            >
+              {{ emptyState().actionLabel }}
+            </a>
+          }
+        </div>
+      } @else {
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant sticky top-0 z-10">
+              <th class="table-head-cell">Product</th>
+              <th class="table-head-cell">SKU</th>
+              <th class="table-head-cell text-center">Category</th>
+              <th class="table-head-cell text-right">Price</th>
+              <th class="table-head-cell text-center">Status</th>
+              <th class="table-head-cell text-center">Stock Status</th>
+              <th class="table-head-cell">Created</th>
+              <th class="table-head-cell text-center">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/30">
+            @for (product of visibleProducts(); track product.id) {
+              <tr class="product-row-hover group">
+                <td class="table-cell">
+                  <div class="flex items-center gap-4">
+                    <div
+                      class="w-14 h-14 rounded-xl bg-surface-container overflow-hidden border border-outline-variant/50 shrink-0"
+                    >
+                      <img
+                        alt="Product"
+                        class="w-full h-full object-cover"
+                        [src]="resolveImageUrl(product.imageUrl, placeholderImage)"
+                        fallbackSrc="/assets/placeholder.svg"
+                      />
+                    </div>
+                    <div class="truncate max-w-50">
+                      <p class="font-bold text-on-surface group-hover:text-primary transition-colors truncate">
+                        {{ product.name }}
+                      </p>
+                      <p class="text-xs text-on-surface-variant truncate">{{ product.id.slice(0, 8).toUpperCase() }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="table-cell text-sm font-label-sm text-on-surface-variant">{{ product.sku }}</td>
+                <td class="table-cell text-center">
+                  <span
+                    class="px-3 py-1 bg-surface-container rounded-full text-[10px] font-bold text-on-surface-variant uppercase tracking-wider"
+                  >
+                    {{ product.category?.name ?? 'Uncategorized' }}
+                  </span>
+                </td>
+                <td class="table-cell text-right">
+                  <p class="font-bold text-on-surface">${{ product.basePrice.toFixed(2) }}</p>
+                  <p class="text-[10px] text-secondary font-bold">Group Price: ${{ product.groupPrice.toFixed(2) }}</p>
+                </td>
+                <td class="table-cell text-center">
+                  <span
+                    class="inline-flex px-2 py-0.5 rounded-full text-[11px] font-bold capitalize"
+                    [ngClass]="
+                      product.deleted
+                        ? 'bg-surface-container text-on-surface-variant'
+                        : statusBadgeClasses[product.status]
+                    "
+                  >
+                    {{ product.deleted ? 'deleted' : product.status.replace('_', ' ').toLowerCase() }}
+                  </span>
+                </td>
+                <td class="table-cell text-center">
+                  <div class="flex items-center justify-center gap-2">
+                    <span class="w-2 h-2 rounded-full" [class]="stockStatusConfig[product.stockStatus].dot"></span>
+                    <div class="flex flex-col items-start">
+                      <span class="text-sm font-semibold" [class]="stockStatusConfig[product.stockStatus].text">
+                        {{ stockStatusConfig[product.stockStatus].label }}
+                      </span>
+                      <span class="text-[10px] text-on-surface-variant">
+                        {{ product.availableStock }}/{{ product.totalStock }} available
+                      </span>
+                    </div>
+                  </div>
+                </td>
+                <td class="table-cell text-sm text-on-surface-variant">
+                  {{ product.createdAt | date: 'mediumDate' }}
+                </td>
+                <td class="table-cell text-center">
+                  <div class="flex justify-center gap-2">
+                    @if (product.deleted) {
+                      <app-icon-button
+                        symbol="restore"
+                        label="Restore product"
+                        tone="primary"
+                        (click)="restoreProduct(product)"
+                      />
+                    } @else {
+                      <app-icon-button
+                        symbol="edit"
+                        label="Edit product"
+                        tone="primary"
+                        [routerLink]="['/seller/products', product.id, 'edit']"
+                      />
+                      <app-icon-button
+                        symbol="delete"
+                        label="Delete product"
+                        tone="error"
+                        (click)="deleteProduct(product)"
+                      />
+                    }
+                  </div>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+
+    <!-- Table Footer / Pagination -->
+    <div
+      class="bg-surface-container-low px-4 py-3 border-t border-outline-variant flex flex-col sm:flex-row items-center justify-between gap-4"
+    >
+      <p class="text-xs text-on-surface-variant text-center sm:text-left">
+        {{ selectedIds().size > 0 ? selectedIds().size + ' product(s) selected' : 'Products synced with the catalog service.' }}
+      </p>
+      <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="goToPage($event)" />
+    </div>
+  </div>
+
+  <!-- Insights Bento -->
+  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-rally-gutter">
+    <app-insight-card
+      symbol="trending_up"
+      title="Sales Velocity"
+      body="Track how fast your listings convert into group deals."
+      cta="View Insights"
+      tone="primary"
+    />
+    <app-insight-card
+      symbol="groups"
+      title="Active Deals"
+      body="See which of your listings are part of live RALLY events."
+      cta="Manage Deals"
+      tone="secondary"
+      (ctaClick)="goToDeals()"
+    />
+    <app-insight-card
+      symbol="rocket_launch"
+      title="Promote Inventory"
+      body="Feature your approved products in the next flash sale event."
+      cta="Get Started"
+      tone="inverse"
+    />
+  </div>
+
+  <app-confirm-dialog
+    [confirm]="deleteRequest()"
+    (confirmed)="onDeleteConfirmed()"
+    (closed)="closeDeleteDialog()"
+  />
+
+  <app-confirm-dialog
+    [confirm]="restoreRequest()"
+    (confirmed)="onRestoreConfirmed()"
+    (closed)="closeRestoreDialog()"
+  />
+
+  <app-error-modal [error]="loadError()" (closed)="closeLoadError()" />
+  <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
+</section>

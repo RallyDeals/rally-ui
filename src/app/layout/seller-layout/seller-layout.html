@@ -1,0 +1,59 @@
+<div class="h-screen flex overflow-hidden bg-surface body-text">
+  <!-- Mobile Drawer Overlay -->
+  <div
+    class="fixed inset-0 bg-on-background/40 z-[60] md:hidden transition-opacity duration-300"
+    [ngClass]="drawerOpen() ? 'opacity-100' : 'opacity-0 pointer-events-none'"
+    (click)="closeDrawer()"
+  ></div>
+
+  <!-- Mobile Drawer -->
+  <aside
+    class="fixed inset-y-0 left-0 w-72 bg-surface-container-lowest z-[70] shadow-2xl p-rally-md flex flex-col md:hidden transition-transform duration-300"
+    [ngClass]="drawerOpen() ? 'translate-x-0' : '-translate-x-full'"
+  >
+    <app-seller-sidebar [showClose]="true" (close)="closeDrawer()" />
+  </aside>
+
+  <!-- TopNavBar (Mobile) -->
+  <header
+    class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md shadow-sm border-b border-outline-variant md:hidden"
+  >
+    <div class="flex justify-between items-center px-rally-gutter py-rally-md max-w-rally-container-max mx-auto">
+      <div class="flex items-center gap-rally-sm">
+        <button
+          type="button"
+          class="p-rally-base text-on-surface-variant hover:text-primary transition-colors"
+          (click)="openDrawer()"
+          aria-label="Open menu"
+        >
+          <span class="material-symbols-outlined">menu</span>
+        </button>
+        <div class="font-display-lg-mobile text-display-lg-mobile font-black text-primary tracking-tighter">
+          RALLY.
+        </div>
+      </div>
+      <div class="flex items-center gap-rally-xs">
+        <button type="button" class="p-rally-base text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined">notifications</span>
+        </button>
+        <button type="button" class="p-rally-base text-on-surface-variant hover:text-primary transition-colors">
+          <span class="material-symbols-outlined">account_circle</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Desktop SideNavBar -->
+  <aside
+    class="hidden md:flex flex-col h-full fixed left-0 top-0 w-64 bg-surface-container-lowest border-r border-outline-variant z-40 p-rally-md"
+  >
+    <app-seller-sidebar />
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 h-full overflow-y-auto md:ml-64 pt-20 md:pt-0 bg-background">
+    <div class="p-rally-md lg:p-rally-xl">
+      <router-outlet />
+    </div>
+  </main>
+</div>

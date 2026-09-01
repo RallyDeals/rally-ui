@@ -1,3 +1,97 @@
 import { Routes } from '@angular/router';
+import { AuthLayout } from './layout/auth-layout/auth-layout';
+import { MainLayout } from './layout/main-layout/main-layout';
+import { Home } from './pages/home/home';
+import { About } from './pages/about/about';
+import { Contact } from './pages/contact/contact';
+import { Categories } from './features/categories/categories';
+import { AUTH_ROUTES } from './features/auth/auth.routes';
+import { PRODUCTS_ROUTES } from './features/products/products.routes';
+import { DEALS_ROUTES } from './features/deals/deals.routes';
+import { SELLER_ROUTES } from './features/seller/seller.routes';
+import { Cart } from './features/cart/cart';
+import { USER_PROFILE_ROUTES } from './features/user-profile/user-profile.routes';
+import { SellerLayout } from './layout/seller-layout/seller-layout';
+import { AdminLayout } from './layout/admin-layout/admin-layout';
+import { ADMIN_ROUTES } from './features/admin/admin.routes';
+import { OrderDetails } from './features/orders/order-details/order-details';
+import { authGuard } from './core/guards/auth.guard';
+import { sellerGuard } from './core/guards/seller.guard';
+import { adminGuard } from './core/guards/admin.guard';
 
-export const routes: Routes = [];
+
+export const routes: Routes = [
+  {
+    path: '',
+    pathMatch: 'full',
+    redirectTo: 'home',
+  },
+  {
+    path: 'auth',
+    component: AuthLayout,
+    children: AUTH_ROUTES,
+  },
+  {
+    path: '',
+    component: MainLayout,
+    children: [
+      {
+        path: 'home',
+        component: Home,
+        title: 'Home',
+      },
+      {
+        path: 'about-us',
+        component: About,
+        title: 'About Us',
+      },
+      {
+        path: 'contact-us',
+        component: Contact,
+        title: 'Contact Us',
+      },
+      {
+        path: 'categories',
+        component: Categories,
+        title: 'Categories',
+      },
+      {
+        path: 'cart',
+        component: Cart,
+        canActivate: [authGuard],
+        title: 'Cart',
+      },
+      {
+        path: 'orders/:orderId',
+        component: OrderDetails,
+        canActivate: [authGuard],
+        title: 'Order Details',
+      },
+      {
+        path: 'profile',
+        canActivate: [authGuard],
+        children: USER_PROFILE_ROUTES,
+      },
+      {
+        path: 'products',
+        children: PRODUCTS_ROUTES
+      },
+      {
+        path: 'deals',
+        children: DEALS_ROUTES
+      }
+    ],
+  },
+  {
+    path: 'seller',
+    component: SellerLayout,
+    canActivate: [authGuard, sellerGuard],
+    children: SELLER_ROUTES
+  },
+  {
+    path: 'admin',
+    component: AdminLayout,
+    canActivate: [authGuard, adminGuard],
+    children: ADMIN_ROUTES
+  },
+];

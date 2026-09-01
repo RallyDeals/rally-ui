@@ -1,0 +1,65 @@
+<div
+  class="bg-surface-container-low/15 rounded-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-rally-md relative"
+>
+  <div class="relative w-full max-w-md">
+    <span class="material-symbols-outlined absolute left-rally-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+    <input
+      class="w-full bg-surface-container-lowest text-on-surface text-body-md font-body-md rounded-full py-2 pl-12 pr-4 border-none outline-none shadow-sm transition-shadow focus:outline-none focus:ring-0 focus:border-none focus:shadow-sm"
+      placeholder="Search users by name or email..."
+      type="text"
+      [value]="search()"
+      (input)="searchChange.emit($any($event.target).value)"
+    />
+  </div>
+  <div class="flex items-center gap-rally-sm flex-wrap w-full lg:w-auto relative">
+    <button
+      type="button"
+      (click)="toggleOpen()"
+      class="flex items-center gap-rally-xs bg-surface-container-lowest rounded-full px-rally-sm py-2 shadow-sm cursor-pointer border-none outline-none focus:outline-none focus:ring-0"
+    >
+      <span class="material-symbols-outlined text-[16px] text-on-surface-variant">filter_list</span>
+      <span class="text-label-sm font-label-sm text-on-surface uppercase tracking-wide">Filter</span>
+      @if (activeCount() > 0) {
+        <span class="inline-flex items-center justify-center w-5 h-5 rounded-full bg-primary text-on-primary text-[11px] font-label-sm">
+          {{ activeCount() }}
+        </span>
+      }
+      <span class="material-symbols-outlined text-[16px] text-on-surface-variant transition-transform" [class.rotate-180]="open()"
+        >expand_more</span
+      >
+    </button>
+
+    @if (open()) {
+      <div
+        class="absolute right-0 top-full mt-1 z-30 w-64 bg-surface-container-lowest rounded-lg shadow-lg border border-outline-variant/30 overflow-hidden py-rally-xs"
+      >
+        <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
+          <input type="checkbox" [checked]="isAllSelected()" (change)="selectAll()" class="accent-primary" />
+          <span class="text-body-md font-body-md text-on-surface">All Users</span>
+        </label>
+
+        <div class="border-t border-outline-variant/30 my-rally-xs"></div>
+        <p class="px-rally-md py-rally-xs text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wide">Type</p>
+        <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
+          <input type="checkbox" [checked]="isTypeChecked('buyer')" (change)="toggleType('buyer')" class="accent-primary" />
+          <span class="text-body-md font-body-md text-on-surface">Buyers</span>
+        </label>
+        <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
+          <input type="checkbox" [checked]="isTypeChecked('seller')" (change)="toggleType('seller')" class="accent-primary" />
+          <span class="text-body-md font-body-md text-on-surface">Sellers</span>
+        </label>
+
+        <div class="border-t border-outline-variant/30 my-rally-xs"></div>
+        <p class="px-rally-md py-rally-xs text-label-sm font-label-sm text-on-surface-variant uppercase tracking-wide">Status</p>
+        <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
+          <input type="checkbox" [checked]="isStatusChecked('active')" (change)="toggleStatus('active')" class="accent-primary" />
+          <span class="text-body-md font-body-md text-on-surface">Active</span>
+        </label>
+        <label class="flex items-center gap-rally-sm px-rally-md py-rally-xs cursor-pointer hover:bg-surface-container transition-colors">
+          <input type="checkbox" [checked]="isStatusChecked('banned')" (change)="toggleStatus('banned')" class="accent-primary" />
+          <span class="text-body-md font-body-md text-on-surface">Banned</span>
+        </label>
+      </div>
+    }
+  </div>
+</div>

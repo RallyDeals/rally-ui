@@ -1,0 +1,25 @@
+<footer class="w-full bg-surface-container-low py-rally-xl">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter grid grid-cols-2 md:grid-cols-4 gap-rally-lg mb-rally-lg">
+    <div class="col-span-2 md:col-span-1">
+      <div class="text-primary font-display-lg text-[24px] font-bold mb-rally-md">RALLY</div>
+      <p class="text-on-surface-variant font-body-md">The premier destination for group-buying and social e-commerce.</p>
+    </div>
+    <app-footer-col [title]="'Shop'" [items]="[
+      { text: 'New Arrivals', route: '/shop/new-arrivals' },
+      { text: 'Top Deals', route: '/shop/top-deals' },
+      { text: 'Categories', route: '/shop/categories' }
+    ]" />
+    <app-footer-col [title]="'Legal'" [items]="[
+      { text: 'Privacy Policy', route: '/legal/privacy-policy' },
+      { text: 'Terms of Service', route: '/legal/terms-of-service' },
+      { text: 'Cookie Policy', route: '/legal/cookie-policy' }
+    ]" />
+    <app-footer-col [title]="'Info'" [items]="[
+      { text: 'About Us', route: '/about-us' },
+      { text: 'Contact Us', route: '/contact-us' }
+    ]" />
+  </div>
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter pt-rally-md border-t border-outline-variant/30 text-center text-on-surface-variant font-label-sm">
+    © 2024 RALLY E-Commerce. All rights reserved.
+  </div>
+</footer>

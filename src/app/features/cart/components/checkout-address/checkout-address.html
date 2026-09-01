@@ -1,0 +1,16 @@
+<section
+  class="bg-surface-container-lowest rounded-lg soft-shadow p-rally-md border border-outline-variant/30"
+>
+  <div class="flex items-center gap-rally-xs mb-rally-sm text-on-surface-variant">
+    <span class="icon-lg">location_on</span>
+    <h2 class="label-caps-plain">Shipping Address</h2>
+  </div>
+  <textarea
+    class="input-field w-full p-rally-sm rounded-lg font-body-md text-body-md bg-surface-container-low text-on-surface placeholder-on-surface-variant/50 border border-outline-variant resize-none"
+    style="border-radius: 0.5rem"
+    rows="3"
+    placeholder="Street address, city, state, ZIP"
+    [value]="address()"
+    (input)="onInput($any($event.target).value)"
+  ></textarea>
+</section>

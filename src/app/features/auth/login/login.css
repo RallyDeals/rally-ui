@@ -1,0 +1,6 @@
+.bg-pattern {
+  background-color: #faf8ff; /* Using background token */
+  background-image: radial-gradient(#dae2fd 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+

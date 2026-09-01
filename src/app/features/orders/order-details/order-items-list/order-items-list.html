@@ -1,0 +1,11 @@
+<section class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm">
+  <div
+    class="px-rally-md py-rally-sm flex justify-between items-center bg-[#f4f5f8] border-b border-surface-container text-sm">
+    <span class="body-text">Order Items ({{ itemCount() }})</span>
+  </div>
+  <div class="flex flex-col">
+    @for (item of items(); track item.productName) {
+      <app-order-item-row [item]="item" />
+    }
+  </div>
+</section>

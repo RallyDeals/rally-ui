@@ -1,0 +1,16 @@
+.glass-nav {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+#mobile-menu {
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.2s ease;
+}
+#mobile-menu.hidden {
+  display: none;
+  opacity: 0;
+  transform: translateY(-10px);
+}
+#mobile-menu.flex {
+  opacity: 1;
+  transform: translateY(0);
+}

@@ -1,0 +1,115 @@
+<section class="flex-1 space-y-rally-sm">
+  <header
+    class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
+  >
+    <div class="w-full max-w-xs">
+      <app-search-input
+        placeholder="Search orders..."
+        [value]="searchQuery()"
+        (valueChange)="onSearchInput($event)"
+        (clear)="clearSearch()"
+      />
+    </div>
+    <div class="flex items-center gap-2 px-4 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest">
+      <span class="material-symbols-outlined text-sm text-primary-container">calendar_month</span>
+      <select
+        [value]="dateRangeOptions.find(opt => opt.label === dateLabel())?.value || '30'"
+        (change)="onDateRangeChange($any($event.target).value)"
+        class="bg-transparent border-none outline-none cursor-pointer font-label-sm text-on-surface"
+      >
+        @for (option of dateRangeOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
+        }
+      </select>
+    </div>
+  </header>
+  <!-- Quick Stats -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
+    <app-metric-card
+      label="Total Orders"
+      [value]="analytics().totalOrders.toString()"
+      symbol="receipt_long"
+      [trendLabel]="dateLabel()"
+    />
+    <app-metric-card
+      label="Revenue"
+      [value]="analytics().revenue.toString()"
+      symbol="payments"
+      [trendLabel]="dateLabel()"
+    />
+    <app-metric-card
+      label="Pending"
+      [value]="analytics().pendingOrders.toString()"
+      symbol="pending_actions"
+      [trendLabel]="dateLabel()"
+    />
+    <app-metric-card
+      label="Delivered"
+      [value]="analytics().deliveredOrders.toString()"
+      symbol="inventory_2"
+      [trendLabel]="dateLabel()"
+    />
+  </div>
+
+  <!-- Filter Bar -->
+  <div
+    class="bg-surface-container-lowest p-rally-sm rounded-2xl border border-outline-variant shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-rally-sm"
+  >
+    <div class="flex items-center gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+      <div
+        class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
+      >
+        <span class="material-symbols-outlined text-body-md">filter_list</span>
+        <span class="font-bold text-sm">Filters</span>
+      </div>
+      <div class="h-6 w-px bg-outline-variant/30 shrink-0"></div>
+      <app-filter-pills
+        [options]="phaseOptions"
+        [selected]="phaseFilter()"
+        (selectedChange)="onPhaseChange($event)"
+      />
+    </div>
+    <div class="flex items-center gap-rally-sm self-end sm:self-auto">
+      <p class="text-xs text-on-surface-variant hidden md:block">
+        Showing {{ rangeStart() }}-{{ rangeEnd() }} of {{ total() }}
+      </p>
+      <app-pagination
+        [page]="page()"
+        [totalPages]="totalPages()"
+        (pageChange)="onPageChange($event)"
+        [compact]="true"
+      />
+    </div>
+  </div>
+
+  <!-- Orders Table -->
+  <div class="bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm overflow-hidden">
+    <div class="overflow-x-auto no-scrollbar">
+      @if (orders().length === 0) {
+        <div class="text-center py-16">
+          <span class="material-symbols-outlined text-5xl text-primary mb-4 block">receipt_long</span>
+          <h3 class="section-title mb-1">No orders found</h3>
+          <p class="body-subtle">Try adjusting your search or status filter.</p>
+        </div>
+      } @else {
+        <table class="w-full text-left border-collapse">
+          <thead>
+            <tr class="bg-surface-container-low border-b border-outline-variant">
+              <th class="table-head-cell">Product</th>
+              <th class="table-head-cell text-center">Order</th>
+              <th class="table-head-cell text-center">Pricing &amp; Qty</th>
+              <th class="table-head-cell text-center">Status</th>
+              <th class="table-head-cell text-center">Date</th>
+              <th class="table-head-cell text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-outline-variant/30">
+            @for (order of orders(); track order.orderId) {
+              <tr app-seller-order-row [order]="order"></tr>
+            }
+          </tbody>
+        </table>
+      }
+    </div>
+  </div>
+</section>

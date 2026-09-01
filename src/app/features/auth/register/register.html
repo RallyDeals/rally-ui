@@ -1,0 +1,235 @@
+<!-- Split Screen Layout -->
+<main class="flex-1 flex flex-col md:flex-row w-full min-h-screen">
+  <!-- Left Side: Lifestyle Image Canvas (Hidden on mobile) -->
+  <div
+    class="hidden md:flex md:w-1/2 relative bg-surface-container-low overflow-hidden items-center justify-center">
+    <div
+      class="absolute inset-0 bg-cover bg-center z-0"
+      style="
+        background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcpUFJG3rsvg-jCpOdQ7A1mwQJLyB4Ab-nB1-ZsKo4I3_vD9MnDxX29nDQu7I9d_KVGR51_SxBa7DoHB4Ez7mFho6aV4iq5USDZuddVPXKMy9jX1ngvrl1vkWa0n2EGLRyAyOSsu1b7y4e_vqzxPtfpzsPf4I6ZWcHMyItRmLwhSe959idZ3MwxI0x_9kUYNA5atImAOkA9QPLyChHHB4yOz7rmIlJatOQ8DpdyhN9st6hk6ZGlcSW3zVrX48tBh9ATAHQ8MKwWqw');
+      "></div>
+    <!-- Atmospheric overlay to ensure text legibility and brand tone -->
+    <div
+      class="absolute inset-0 bg-linear-to-t from-on-surface/80 via-on-surface/20 to-transparent z-10"></div>
+    <div
+      class="relative z-20 p-rally-xl flex flex-col justify-end h-full w-full text-surface-bright">
+      <h1 class="font-display-lg text-display-lg font-bold mb-rally-sm">
+        Shop Together.<br />Save More.
+      </h1>
+      <p class="font-body-lg text-body-lg max-w-md opacity-90">
+        Join the Rally community to unlock exclusive group-buy discounts on
+        premium brands. The
+        power of collective purchasing.
+      </p>
+    </div>
+  </div>
+
+  <!-- Right Side: Registration Form -->
+  <div
+    class="w-full md:w-1/2 flex items-center justify-center p-gutter bg-surface">
+    <div
+      class="w-full max-w-md bg-white rounded-xl shadow-sm p-rally-md glass-panel relative">
+      <!-- Brand Logo Anchor -->
+      <div class="mb-rally-sm">
+        <app-logo />
+      </div>
+      <div class="mb-rally-sm">
+        <h2 class="font-headline-md text-headline-md mb-rally-xs">Create your
+          account</h2>
+        <p class="font-body-md text-body-md text-on-surface-variant">
+          Start unlocking community deals today.
+        </p>
+      </div>
+
+      @if (error(); as err) {
+      <div
+        class="flex items-center gap-2 px-3 py-2 mb-rally-xs rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
+        role="alert">
+        <span class="material-symbols-outlined"
+          style="font-size: 18px">error</span>
+        <span>{{ err.message }}</span>
+      </div>
+      }
+
+      <!-- Registration Form -->
+      <form class="space-y-rally-xs" [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-xs">
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="firstName">First Name</label>
+            <input
+              pInputText
+              id="firstName"
+              formControlName="firstName"
+              type="text"
+              placeholder="John"
+              autocomplete="given-name"
+              style="border-radius: 0.5rem"
+              class="w-full rounded-lg font-body-md text-body-md"
+            />
+            @if (form.controls.firstName.touched &&
+            form.controls.firstName.invalid) {
+            <small class="text-error">First name is required.</small>
+            }
+          </div>
+
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="lastName">Last Name</label>
+            <input
+              pInputText
+              id="lastName"
+              formControlName="lastName"
+              type="text"
+              placeholder="Doe"
+              autocomplete="family-name"
+              style="border-radius: 0.5rem"
+              class="w-full rounded-lg font-body-md text-body-md" />
+            @if (form.controls.lastName.touched && form.controls.lastName.invalid)
+            {
+            <small class="text-error">Last name is required.</small>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label
+            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+            for="email">Email Address</label>
+          <input
+            pInputText
+            id="email"
+            formControlName="email"
+            type="email"
+            placeholder="jane@example.com"
+            autocomplete="email"
+            style="border-radius: 0.5rem"
+            class="w-full rounded-lg font-body-md text-body-md" />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+          <small class="text-error">Enter a valid email address.</small>
+          }
+        </div>
+        <div>
+          <label
+            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+            for="phone">Phone Number</label>
+          <input
+            pInputText
+            id="phone"
+            formControlName="phone"
+            type="tel"
+            placeholder="+201011111111"
+            autocomplete="tel"
+            class="w-full rounded-lg font-body-md text-body-md" />
+          @if (form.controls.phone.touched && form.controls.phone.invalid) {
+          <small class="text-error">Enter a valid phone number.</small>
+          }
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-xs">
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="password">Password</label>
+            <input
+              pInputPassword
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [fluid]="true"
+              style="border-radius: 0.5rem"
+              class="font-body-md text-body-md" />
+            @if (form.controls.password.touched && form.controls.password.invalid)
+            {
+            <small class="text-error">
+              8–64 characters with upper, lower, digit and special character.
+            </small>
+            }
+          </div>
+
+          <div>
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="confirmPassword">Confirm Password</label>
+            <input
+              pInputPassword
+              id="confirmPassword"
+              formControlName="confirmPassword"
+              placeholder="••••••••"
+              autocomplete="new-password"
+              [fluid]="true"
+              style="border-radius: 0.5rem"
+              class="font-body-md text-body-md" />
+            @if (passwordMismatch) {
+            <small class="text-error">Passwords do not match.</small>
+            }
+          </div>
+        </div>
+
+        <div>
+          <label
+            class="block font-label-sm text-label-sm text-on-surface mb-rally-xs">I
+            want to be</label>
+          <div class="grid grid-cols-2 gap-rally-xs" role="radiogroup"
+            aria-label="Account type">
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="selectedRole === 'BUYER'"
+              (click)="selectRole('BUYER')"
+              class="role-btn flex flex-col items-center justify-center gap-1 py-3 rounded-lg border font-label-sm text-label-sm transition-all"
+              [class.role-btn-selected]="selectedRole === 'BUYER'">
+              <span class="material-symbols-outlined"
+                style="font-size: 20px">shopping_bag</span>
+              Buyer
+            </button>
+            <button
+              type="button"
+              role="radio"
+              [attr.aria-checked]="selectedRole === 'SELLER'"
+              (click)="selectRole('SELLER')"
+              class="role-btn flex flex-col items-center justify-center gap-1 py-3 rounded-lg border font-label-sm text-label-sm transition-all"
+              [class.role-btn-selected]="selectedRole === 'SELLER'">
+              <span class="material-symbols-outlined"
+                style="font-size: 20px">storefront</span>
+              Seller
+            </button>
+          </div>
+        </div>
+        <div class="pt-rally-xs">
+          <label class="flex items-start gap-2 cursor-pointer">
+            <input
+              class="w-4 h-4 mt-0.5 rounded border-outline-variant text-primary-container focus:ring-primary-container/20"
+              type="checkbox"
+              formControlName="acceptTerms" />
+            <span class="font-label-sm text-label-sm text-on-surface-variant">
+              I agree to the Terms of Service and Privacy Policy.
+            </span>
+          </label>
+          @if (termsNotAccepted) {
+          <small class="text-error">You must accept the terms to
+            continue.</small>
+          }
+        </div>
+
+        <div class="pt-rally-sm">
+          <p-button
+            type="submit"
+            label="Create Account"
+            [loading]="submitting()"
+            [fluid]="true"
+            styleClass="rounded-lg font-semibold" />
+        </div>
+      </form>
+
+      <app-auth-switch-link
+        prompt="Already have an account?"
+        linkText="Sign in"
+        linkPath="/auth/login"
+        wrapperClass="mt-rally-sm" />
+    </div>
+  </div>
+</main>

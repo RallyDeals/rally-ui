@@ -1,0 +1,31 @@
+<main class="w-full pt-10 pb-rally-xl bg-[#faf8ff] min-h-screen">
+  <div class="flex flex-col w-full relative">
+    <div class="max-w-rally-container-max mx-auto px-rally-gutter w-full space-y-rally-md">
+      @if (error(); as error) {
+        <app-error-state [error]="error" />
+      } @else {
+        @if (header(); as header) {
+          <app-order-header [info]="header" />
+        }
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-md">
+          <div class="lg:col-span-8 space-y-rally-md">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-md">
+              @if (shippingAddress(); as shippingAddress) {
+                <app-shipping-address-card [address]="shippingAddress" />
+              }
+              @if (paymentMethod(); as paymentMethod) {
+                <app-payment-method-card [method]="paymentMethod" />
+              }
+            </div>
+            <app-order-items-list [items]="orderItems()" />
+          </div>
+          <div class="lg:col-span-4">
+            @if (orderSummary(); as orderSummary) {
+              <app-order-summary [summary]="orderSummary" />
+            }
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</main>

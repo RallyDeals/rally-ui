@@ -1,0 +1,33 @@
+@if (display(); as display) {
+  <div
+    class="fixed inset-0 z-[100] flex items-center justify-center bg-black/50 px-rally-gutter"
+    (click)="dismiss()"
+  >
+    <div
+      class="bg-surface-container-lowest rounded-lg shadow-lg w-full max-w-sm p-rally-lg flex flex-col items-center text-center gap-rally-sm"
+      (click)="$event.stopPropagation()"
+    >
+      <span class="material-symbols-outlined text-error text-[36px]">{{ display.icon }}</span>
+      <h2 class="section-title-plain">{{ display.title }}</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant">{{ display.message }}</p>
+      <div class="flex items-center gap-rally-sm mt-rally-xs w-full">
+        <button
+          type="button"
+          (click)="dismiss()"
+          class="flex-1 py-2 rounded-lg border border-outline text-on-surface font-label-sm text-label-sm hover:border-primary hover:text-primary transition-colors"
+        >
+          Dismiss
+        </button>
+        @if (display.actionLabel && display.actionLink) {
+          <a
+            [routerLink]="display.actionLink"
+            (click)="dismiss()"
+            class="btn-primary flex-1 py-2 rounded-lg font-label-sm text-label-sm text-center"
+          >
+            {{ display.actionLabel }}
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+}

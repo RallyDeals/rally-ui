@@ -1,0 +1,14 @@
+<div class="flex flex-col gap-rally-xs">
+  <label class="font-label-sm text-on-surface-variant uppercase tracking-widest ml-rally-xs">{{ field().label }}</label>
+  <div class="relative flex items-center">
+    @if (field().icon) {
+      <span class="material-symbols-outlined absolute left-rally-md text-on-surface-variant">{{ field().icon }}</span>
+    }
+    <div
+      class="w-full bg-surface-container-low py-rally-sm rounded-xl text-on-surface font-body-md shadow-inner border border-outline-variant/30"
+      [class]="field().icon ? 'pl-rally-xl pr-rally-md' : 'px-rally-md'"
+    >
+      {{ field().value }}
+    </div>
+  </div>
+</div>

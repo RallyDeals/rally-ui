@@ -1,0 +1,48 @@
+<nav
+  class="glass-nav bg-surface/70 border-b border-outline-variant/30 shadow-sm fixed top-0 w-full z-50 transition-all duration-300"
+  id="main-nav">
+  <div class="grid grid-cols-[1fr_auto_1fr] items-center px-rally-gutter py-3 max-w-rally-container-max mx-auto">
+    <!-- Left: Mobile Toggle & Logo -->
+    <div class="flex items-center gap-rally-sm sm:gap-rally-md">
+      <button class="md:hidden -ml-2 text-on-surface-variant hover:text-primary transition-colors h-[24px]" id="menu-toggle"
+              (click)="toggleMenu()">
+        <span class="material-symbols-outlined text-primary" id="menu-icon">menu</span>
+      </button>
+      <app-logo />
+    </div>
+    <!-- Center: Navigation Links (Desktop) -->
+    <app-desktop-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink()" [setSelectedLink]="setSelectedLink" />
+    <!-- Right: Actions -->
+    @if (loggedIn) {
+      <div class="flex items-center gap-1 sm:gap-rally-sm justify-self-end">
+        @if (isSeller()) {
+          <a routerLink="/seller" class="px-3 py-1.5 bg-primary-container text-on-primary rounded-lg font-label-sm font-semibold hover:opacity-90 transition-all text-xs flex items-center gap-1">
+            <span class="material-symbols-outlined text-sm">dashboard</span>
+            Seller Dashboard
+          </a>
+        }
+        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors relative hover:cursor-pointer" routerLink="/cart"
+                (click)="setSelectedLink('cart')">
+          <span class="material-symbols-outlined">shopping_cart</span>
+          <span class="absolute top-1.5 right-1.5 w-2 h-2 bg-primary rounded-full"></span>
+        </button>
+        <button class="p-2 text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer" routerLink="/profile"
+                (click)="setSelectedLink('profile')">
+          <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">account_circle</span>
+        </button>
+      </div>
+    }@else{
+      <div class="w-17 justify-self-end">
+        <app-primary-btn content="Sign In" bgClass="bg-on-primary-fixed-variant" routerLink="/auth/login" />
+      </div>
+    }
+  </div>
+  <!-- Mobile Navigation Menu -->
+  <div
+    [ngClass]="menuVisible ? 'max-h-96 opacity-100 py-4' : 'max-h-0 opacity-0 py-0 pointer-events-none'"
+    class="absolute top-full left-0 w-full bg-surface border-b border-outline-variant/30 flex flex-col overflow-hidden px-rally-gutter shadow-lg transition-all duration-500 ease-out md:hidden"
+    id="mobile-menu"
+  >
+    <app-mobile-nav-links [navLinks]="navLinks" [selectedLink]="selectedLink()" [setSelectedLink]="setSelectedLink" />
+  </div>
+</nav>

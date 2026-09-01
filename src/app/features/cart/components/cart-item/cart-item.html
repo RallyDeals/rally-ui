@@ -1,0 +1,46 @@
+<article
+  class="bg-surface-container-lowest rounded-lg soft-shadow p-rally-sm flex flex-col sm:flex-row sm:items-center gap-rally-sm hover:shadow-lg transition-all duration-300 border border-outline-variant/10"
+>
+  <div
+    class="w-20 h-20 shrink-0 rounded-lg overflow-hidden bg-surface-container-low border border-outline-variant/20"
+  >
+    <img [src]="imageSrc()" [alt]="item().imageAlt" class="w-full h-full object-cover" />
+  </div>
+  <div
+    class="grow flex flex-col sm:flex-row sm:items-center justify-between gap-rally-sm w-full min-w-0"
+  >
+    <h3 class="font-body-lg font-semibold text-on-surface truncate">{{ item().name }}</h3>
+    <div class="flex items-center justify-between sm:justify-end gap-rally-md w-full sm:w-auto">
+      <div
+        class="flex items-center bg-surface-container-low rounded-lg border border-outline-variant/40"
+      >
+        <button
+          type="button"
+          [disabled]="item().quantity === 1"
+          class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors rounded-l-lg disabled:text-on-surface-variant/40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+          (click)="onDecrement()(item().id)"
+        >
+          -
+        </button>
+        <span class="w-7 text-center font-label-sm font-semibold">{{ item().quantity }}</span>
+        <button
+          type="button"
+          class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors rounded-r-lg"
+          (click)="onIncrement()(item().id)"
+        >
+          +
+        </button>
+      </div>
+      <div class="font-headline-md text-on-surface w-16 shrink-0 text-right">
+        ${{ subtotal().toFixed(2) }}
+      </div>
+      <button
+        aria-label="Remove item"
+        class="text-on-surface-variant hover:text-error transition-colors p-1 shrink-0"
+        (click)="onRemove()(item().id)"
+      >
+        <span class="material-symbols-outlined text-[20px]">close</span>
+      </button>
+    </div>
+  </div>
+</article>

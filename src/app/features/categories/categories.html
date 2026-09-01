@@ -1,0 +1,63 @@
+<section class="bg-surface-container-low py-rally-xl md:pb-24">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    <div class="mb-10">
+      <h1
+        class="font-display-lg text-display-lg-mobile md:text-display-md font-bold text-on-surface mb-2"
+      >
+        Browse Categories
+      </h1>
+      <p class="body-subtle">
+        Explore our product range and find what fits your group deal.
+      </p>
+    </div>
+
+    @if (loading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
+          <div class="card-surface p-6 animate-pulse">
+            <div class="w-12 h-12 rounded-lg bg-surface-container mb-4"></div>
+            <div class="h-4 bg-surface-container rounded mb-2 w-1/2"></div>
+            <div class="h-3 bg-surface-container rounded w-3/4"></div>
+          </div>
+        }
+      </div>
+    } @else if (error(); as error) {
+      <app-error-state [error]="error" />
+    } @else {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (category of categories(); track category.id) {
+          <a
+            class="card-surface group p-6 flex flex-col hover:cursor-pointer"
+            [routerLink]="['/products']"
+            [queryParams]="{ categoryId: category.id }"
+          >
+            <span
+              class="material-symbols-outlined text-4xl text-primary mb-4 group-hover:scale-110 transition-transform"
+            >
+              {{ category.icon }}
+            </span>
+            <h2
+              class="section-title mb-1 group-hover:text-primary transition-colors"
+            >
+              {{ category.name }}
+            </h2>
+            <p class="font-body-md text-sm text-on-surface-variant mb-4">
+              {{ category.description }}
+            </p>
+            <p class="text-xs text-on-surface-variant/80 mb-4">
+              {{ category.productsCount }} product{{ category.productsCount !== 1 ? 's' : '' }}
+            </p>
+            <span
+              class="mt-auto inline-flex items-center gap-1 text-primary font-semibold group-hover:gap-2 transition-all"
+            >
+              Browse products
+              <span class="icon-lg">arrow_forward</span>
+            </span>
+          </a>
+        } @empty {
+          <p class="body-subtle">No categories found.</p>
+        }
+      </div>
+    }
+  </div>
+</section>

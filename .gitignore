@@ -36,9 +36,17 @@ yarn-error.log
 /coverage
 /libpeerconnection.log
 testem.log
+ng-serve.log
 /typings
 __screenshots__/
 
 # System files
 .DS_Store
 Thumbs.db
+
+# Environment files with local secrets
+/src/environments/environment.development.ts
+
+# Local session & agent notes (not part of the repo)
+SESSION.md
+AGENTS.md

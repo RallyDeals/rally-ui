@@ -1,0 +1,44 @@
+<section class="bg-surface-container-low py-rally-xl md:py-24">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    <div class="flex justify-between items-end mb-10">
+      <div>
+        <h2 class="section-title mb-2">Featured Deals</h2>
+        <p class="body-subtle">Hot products close to unlocking their final tier.</p>
+      </div>
+      <a
+        class="hidden md:flex items-center gap-1 text-primary font-semibold hover:text-primary-container transition-colors"
+        routerLink="/deals">
+        View All <span class="icon-lg">arrow_forward</span>
+      </a>
+    </div>
+    @if (loading()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (i of [1,2,3]; track i) {
+          <div class="card-surface overflow-hidden flex flex-col animate-pulse">
+            <div class="h-48 bg-surface-container"></div>
+            <div class="p-6 space-y-4">
+              <div class="h-5 bg-surface-container rounded w-3/4"></div>
+              <div class="h-4 bg-surface-container rounded w-1/2"></div>
+              <div class="h-8 bg-surface-container rounded w-1/3 mt-4"></div>
+              <div class="h-10 bg-surface-container rounded w-full mt-4"></div>
+            </div>
+          </div>
+        }
+      </div>
+    } @else if (deals().length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        @for (deal of deals(); track deal.id; let last = $last) {
+          <app-deal-card [deal]="deal" [extraClasses]="last ? 'hidden lg:flex' : ''" />
+        }
+      </div>
+    } @else {
+      <div class="text-center py-16">
+        <span class="material-symbols-outlined text-on-surface-variant text-[48px] mb-4 block">local_fire_department</span>
+        <p class="font-body-lg text-on-surface-variant">No active deals right now. Check back soon!</p>
+      </div>
+    }
+    <div class="mt-8 text-center md:hidden">
+      <a class="btn-ghost border border-outline w-full py-3 block" routerLink="/deals">View All Deals</a>
+    </div>
+  </div>
+</section>

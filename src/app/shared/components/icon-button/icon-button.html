@@ -1,0 +1,10 @@
+<button
+  type="button"
+  class="p-2 rounded-lg transition-all"
+  [class]="buttonClass()"
+  [attr.aria-label]="label()"
+  [routerLink]="routerLink() || null"
+  (click)="click.emit($event)"
+>
+  <span class="material-symbols-outlined text-lg">{{ symbol() }}</span>
+</button>

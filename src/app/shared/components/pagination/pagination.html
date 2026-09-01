@@ -1,0 +1,56 @@
+@if (compact()) {
+  <div class="flex border border-outline-variant rounded-xl overflow-hidden shadow-sm">
+    <button
+      type="button"
+      class="flex items-center justify-center p-2 bg-surface-container-lowest hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      (click)="goToPage(page() - 1)"
+      [disabled]="page() <= 1"
+      aria-label="Previous page"
+    >
+      <span class="icon-lg">chevron_left</span>
+    </button>
+    <button
+      type="button"
+      class="flex items-center justify-center p-2 bg-surface-container-lowest border-l border-outline-variant hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+      (click)="goToPage(page() + 1)"
+      [disabled]="page() >= totalPages()"
+      aria-label="Next page"
+    >
+      <span class="icon-lg">chevron_right</span>
+    </button>
+  </div>
+} @else {
+  <nav class="flex items-center gap-rally-xs" aria-label="Pagination">
+  <button
+    class="pagination__btn"
+    (click)="goToPage(page() - 1)"
+    [disabled]="page() <= 1"
+    aria-label="Previous page"
+  >
+    <span class="icon-lg">chevron_left</span>
+  </button>
+
+  @for (item of pages(); track $index) {
+    @if (item === '...') {
+      <span class="pagination__ellipsis">…</span>
+    } @else {
+      <button
+        class="pagination__btn"
+        [class.pagination__btn-active]="item === page()"
+        (click)="goToPage(item)"
+      >
+        {{ item }}
+      </button>
+    }
+  }
+
+  <button
+    class="pagination__btn"
+    (click)="goToPage(page() + 1)"
+    [disabled]="page() >= totalPages()"
+    aria-label="Next page"
+  >
+    <span class="icon-lg">chevron_right</span>
+  </button>
+</nav>
+}

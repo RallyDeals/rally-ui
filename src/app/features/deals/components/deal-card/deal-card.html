@@ -1,0 +1,62 @@
+<article
+  [routerLink]="['/deals', deal().id]"
+  class="group bg-surface-container-lowest rounded-xl soft-shadow hover-lift overflow-hidden flex flex-col relative border border-outline-variant/10 hover:border-primary-container/60 transition-colors cursor-pointer"
+>
+  <div class="h-48 relative bg-surface-container-low overflow-hidden">
+    <img
+      class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+      [src]="resolveImageUrl(deal().productImageUrl)"
+      [alt]="deal().productName"
+    />
+    <div
+      [class]="'absolute top-4 left-4 z-10 flex gap-2 px-2 py-1 rounded font-label-sm text-label-sm backdrop-blur-sm ' + badge().bgClass + ' ' + badge().textClass"
+    >
+      <span class="material-symbols-outlined icon-sm">{{ badge().icon }}</span>
+      {{ badge().text }}
+    </div>
+  </div>
+
+  <div class="p-rally-md flex-1 flex flex-col">
+    <h3
+      class="font-headline-md text-[20px] leading-[28px] text-on-surface mb-2 line-clamp-1 group-hover:text-primary transition-colors"
+    >
+      {{ deal().productName }}
+    </h3>
+
+    <div class="mb-4">
+      <div class="flex items-center gap-rally-sm flex-wrap">
+        <span class="font-headline-md text-headline-md text-primary">${{ deal().dealPrice }}</span>
+        @if (savingsPercent() > 0) {
+          <span class="save-badge">
+            Save {{ savingsPercent() }}%
+          </span>
+        }
+      </div>
+      <p class="font-body-md text-body-md text-on-surface-variant line-through mt-1.5">
+        ${{ deal().originalPrice }}
+      </p>
+    </div>
+
+    <div class="mt-auto bg-surface-container-low rounded-lg p-3 border border-outline-variant/20">
+      <div class="flex justify-between items-center mb-2">
+        <span class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider">
+          Progress
+        </span>
+        <span class="font-label-sm text-label-sm text-on-surface font-semibold">
+          {{ progress() }}% Full
+        </span>
+      </div>
+      <div class="progress-track mb-2">
+        <div class="h-full progress-gradient rounded-full relative" [style.width.%]="progress()">
+          <div class="progress-tip"></div>
+        </div>
+      </div>
+      <div class="flex justify-between items-center mt-2">
+        <span class="font-body-md text-[14px] text-on-surface-variant">
+          <strong class="text-on-surface">{{ spotsLeft() }}</strong> spots left
+        </span>
+        <app-countdown [endAt]="deal().endTime.toISOString()" [pending]="isPending()" />
+      </div>
+    </div>
+  </div>
+</article>

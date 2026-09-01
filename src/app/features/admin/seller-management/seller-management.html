@@ -1,0 +1,86 @@
+<main class="bg-background">
+  <div class="flex flex-col w-full px-rally-lg">
+    <div class="flex flex-col gap-rally-sm mb-rally-lg relative">
+      <div
+        class="absolute -top-12 -left-12 w-64 h-64 bg-primary-container/10 rounded-full blur-3xl pointer-events-none"
+      ></div>
+      <div class="relative z-10">
+        <app-page-header
+          title="Seller Accounts"
+          subtitle="Manage marketplace sellers, monitor their inventory pipelines, and review pending product submissions."
+        />
+      </div>
+    </div>
+
+    <app-seller-stats [totalSellers]="totalSellersCount()" [pendingReview]="pendingApprovalProductsCount()" [activeDeals]="activeDealsCount()" />
+
+    <app-seller-toolbar [search]="search()" (searchChange)="onSearchChange($event)" />
+
+    <div class="bg-surface rounded-2xl shadow-xl overflow-hidden relative group">
+      <div
+        class="absolute inset-0 bg-linear-to-b from-surface-container-low/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"
+      ></div>
+
+      @if (loadError(); as err) {
+        <app-error-state [error]="err" [showRetry]="true" (retry)="loadSellers()" />
+      } @else {
+        <div class="overflow-x-auto relative z-10">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="bg-surface-container-low/50">
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Seller Info</th>
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Joined Date</th>
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Products</th>
+                <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Pending Approvals</th>
+                <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="text-body-md font-body-md text-on-surface">
+              @if (loading()) {
+                @for (skeleton of [1, 2, 3]; track skeleton) {
+                  <tr class="animate-pulse">
+                    <td class="py-rally-sm px-rally-lg">
+                      <div class="flex items-center gap-rally-sm">
+                        <div class="w-10 h-10 rounded-full bg-surface-container-high shrink-0"></div>
+                        <div class="flex flex-col gap-1.5">
+                          <div class="h-4 w-32 bg-surface-container-high rounded"></div>
+                          <div class="h-3 w-40 bg-surface-container-high rounded"></div>
+                        </div>
+                      </div>
+                    </td>
+                    <td class="py-rally-sm px-rally-lg"><div class="h-4 w-20 bg-surface-container-high rounded"></div></td>
+                    <td class="py-rally-sm px-rally-lg"><div class="h-4 w-8 bg-surface-container-high rounded"></div></td>
+                    <td class="py-rally-sm px-rally-lg"><div class="h-8 w-8 bg-surface-container-high rounded-full"></div></td>
+                    <td class="py-rally-sm px-rally-lg text-right"><div class="h-6 w-6 bg-surface-container-high rounded-full ml-auto"></div></td>
+                  </tr>
+                }
+              } @else {
+                @for (seller of sellers(); track seller.id) {
+                  <tr
+                    app-seller-row
+                    [seller]="seller"
+                    class="hover:bg-surface-container-lowest/80 transition-colors group relative"
+                  ></tr>
+                } @empty {
+                  <tr>
+                    <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="5">No sellers yet.</td>
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+        <div
+          class="p-rally-sm bg-surface-container-low/50 flex items-center justify-between relative z-10 text-label-sm font-label-sm text-on-surface-variant"
+        >
+          <span>
+            Showing <span class="font-headline-md text-on-surface">{{ rangeStart() }}</span> to
+            <span class="font-headline-md text-on-surface">{{ rangeEnd() }}</span> of
+            <span class="font-headline-md text-on-surface">{{ total() }}</span> sellers
+          </span>
+          <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
+        </div>
+      }
+    </div>
+  </div>
+</main>

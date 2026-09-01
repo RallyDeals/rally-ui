@@ -1,0 +1,11 @@
+<div
+  class="px-5 py-3 bg-surface-container-lowest rounded-2xl border border-outline-variant shadow-sm flex items-center gap-4 flex-1 sm:flex-none"
+>
+  <span class="material-symbols-outlined p-2.5 rounded-xl" [class]="iconClass()">{{ symbol() }}</span>
+  <div>
+    <p class="text-[10px] uppercase font-bold text-on-surface-variant tracking-wider leading-none">
+      {{ label() }}
+    </p>
+    <p class="font-bold text-xl text-on-surface">{{ value() }}</p>
+  </div>
+</div>

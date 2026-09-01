@@ -1,0 +1,41 @@
+<section class="grid grid-cols-1 gap-rally-sm md:grid-cols-3">
+  <div
+    class="bg-surface-container-lowest p-rally-md rounded-2xl shadow-sm flex flex-col gap-rally-sm relative overflow-hidden group hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-center justify-between">
+      <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Total Products</span>
+      <div class="w-8 h-8 rounded-full bg-surface-container flex items-center justify-center">
+        <span class="material-symbols-outlined text-primary text-[18px]">inventory_2</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-rally-xs">
+      <span class="font-display-lg text-display-lg text-on-surface">{{ seller()?.totalProducts ?? '—' }}</span>
+    </div>
+  </div>
+  <div
+    class="bg-surface-container-lowest p-rally-md rounded-2xl shadow-sm flex flex-col gap-rally-sm relative overflow-hidden group hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-center justify-between">
+      <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Pending Approval</span>
+      <div class="w-8 h-8 rounded-full bg-tertiary-container/20 flex items-center justify-center">
+        <span class="material-symbols-outlined text-tertiary text-[18px]">pending_actions</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-rally-xs">
+      <span class="font-display-lg text-display-lg text-on-surface">{{ seller()?.totalPendingProducts ?? '—' }}</span>
+    </div>
+  </div>
+  <div
+    class="bg-surface-container-lowest p-rally-md rounded-2xl shadow-sm flex flex-col gap-rally-sm relative overflow-hidden group hover:shadow-md transition-shadow"
+  >
+    <div class="flex items-center justify-between">
+      <span class="font-label-sm text-label-sm text-on-surface-variant uppercase">Active Deals</span>
+      <div class="w-8 h-8 rounded-full bg-secondary-container/30 flex items-center justify-center">
+        <span class="material-symbols-outlined text-secondary text-[18px]">local_fire_department</span>
+      </div>
+    </div>
+    <div class="flex items-baseline gap-rally-xs">
+      <span class="font-display-lg text-display-lg text-on-surface">{{ seller()?.activeDeals ?? '—' }}</span>
+    </div>
+  </div>
+</section>

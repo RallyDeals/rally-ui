@@ -1,0 +1,116 @@
+<div
+  class="bg-pattern min-h-screen flex items-center justify-center p-gutter font-sans antialiased text-on-surface">
+  <main class="w-full max-w-110 relative z-10">
+    <!-- Logo -->
+    <div class="text-center mb-rally-lg">
+      <app-logo />
+      <p class="font-body-md text-body-md text-on-surface-variant mt-xs">
+        Shop Together, Save More
+      </p>
+    </div>
+    <!-- Login Card -->
+    <div
+      class="bg-surface-container-lowest rounded-xl shadow-[0_4px_20px_rgba(19,27,46,0.05)] border border-outline-variant/30 overflow-hidden relative">
+      <!-- Brand Accent Line -->
+      <div
+        class="absolute top-0 left-0 right-0 h-1 bg-linear-to-r from-primary-fixed-dim to-primary-container"></div>
+      <div class="p-rally-lg">
+        <h2 class="section-title-plain mb-rally-sm">Sign In</h2>
+        <p
+          class="font-body-md text-body-md text-on-surface-variant mb-rally-sm">
+          Welcome back! Please enter your details.
+        </p>
+        @if (error(); as err) {
+          <div
+            class="flex items-center gap-2 px-3 py-2 mb-3 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
+            role="alert">
+          <span class="material-symbols-outlined"
+                style="font-size: 18px">error</span>
+            <span>{{ err.message }}</span>
+          </div>
+        }
+
+        <!-- Primary CTA -->
+        <form class="space-y-md" [formGroup]="form" (ngSubmit)="onSubmit()">
+          <!-- Email Input -->
+          <div class="mb-3">
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="email">Email Address</label>
+            <div class="relative">
+              <span
+                class=" mx-78 material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none"
+                style="font-size: 20px">mail</span>
+              <input
+                pInputText
+                id="email"
+                formControlName="email"
+                type="email"
+                placeholder="jane@example.com"
+                autocomplete="email"
+                style="border-radius: 0.5rem"
+                class=" w-full pl-10 rounded-lg font-body-md text-body-md"
+                [class.ng-dirty]="form.controls.email.invalid && form.controls.email.touched" />
+            </div>
+            @if (form.controls.email.touched && form.controls.email.invalid) {
+              <small class="text-error">Enter a valid email address.</small>
+            }
+          </div>
+
+          <!-- Password Input -->
+          <div  class="mb-3">
+            <label
+              class="block font-label-sm text-label-sm text-on-surface mb-rally-xs"
+              for="password">Password</label>
+            <input
+              pInputPassword
+              id="password"
+              formControlName="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              [fluid]="true"
+              style="border-radius: 0.5rem"
+              class="rounded-lg font-body-md text-body-md" />
+            @if (form.controls.password.touched &&
+            form.controls.password.invalid) {
+              <small class="text-error">Password is required.</small>
+            }
+          </div>
+
+          <!-- Options Row -->
+          <div
+            class="flex items-center justify-between pt-rally-xs pb-rally-sm">
+            <label class="flex items-center gap-2 cursor-pointer group">
+              <input
+                class="w-4 h-4 rounded border-outline-variant text-primary-container focus:ring-primary-container/20"
+                type="checkbox"
+                [checked]="rememberMe()"
+                (change)="onChecked($event)" />
+              <span
+                class="font-label-sm text-label-sm text-on-surface-variant group-hover:text-on-surface transition-colors">Remember
+                me</span>
+            </label>
+            <a
+              class="font-label-sm text-label-sm text-primary hover:text-primary-container font-semibold transition-colors"
+              routerLink="/auth/forgot-password">Forgot Password?</a>
+          </div>
+          <!-- Primary CTA -->
+          <p-button
+            type="submit"
+            label="Sign In"
+            [loading]="submitting()"
+            [fluid]="true"
+            styleClass="rounded-lg font-label-md font-semibold" />
+        </form>
+      </div>
+      <!-- Card Footer -->
+      <div
+        class="bg-surface-container-low p-rally-md border-t border-outline-variant/30 text-center">
+        <app-auth-switch-link
+          prompt="Don't have an account?"
+          linkText="Sign up"
+          linkPath="/auth/register" />
+      </div>
+    </div>
+  </main>
+</div>

@@ -1,0 +1,44 @@
+<td class="p-rally-md">
+  <div class="flex items-center gap-rally-sm">
+    <img
+      class="w-12 h-12 rounded-lg object-cover shadow-sm group-hover:scale-105 transition-transform duration-300"
+      [src]="deal().productImageUrl"
+      [alt]="deal().productName" />
+    <div>
+      <p class="font-medium">{{ deal().productName }}</p>
+      @if(deal().sku){
+      <p class="text-[12px] text-on-surface-variant">SKU: {{ deal().sku }}</p>
+      }
+    </div>
+  </div>
+</td>
+<td class="p-rally-md text-right">
+  <p class="font-medium text-primary">{{ deal().dealPrice | currency:'USD' }}</p>
+  <p class="text-[12px] text-on-surface-variant line-through">{{ deal().originalPrice | currency:'USD' }}</p>
+</td>
+<td class="p-rally-md">{{ deal().sellerName }}</td>
+<td class="p-rally-md">
+  <span
+    [class]="'inline-flex items-center px-2 py-1 rounded-full font-label-sm text-[11px] font-medium tracking-wide ' + badge().bgClass + ' ' + badge().textClass">
+    @if (badge().dotClass) {
+      <span [class]="'w-1.5 h-1.5 rounded-full mr-1.5 animate-pulse ' + badge().dotClass"></span>
+    }
+    {{ badge().label }}
+  </span>
+</td>
+<td class="p-rally-md w-48">
+  <app-deal-progress
+    [joined]="deal().currentParticipants"
+    [required]="deal().dealStock"
+    [tone]="progressTone()"
+    [pulse]="deal().status === DealStatus.ACTIVE"
+  />
+  <p class="text-[11px] text-on-surface-variant mt-1">min {{ deal().minParticipants }} to succeed</p>
+</td>
+<td class="p-rally-md">
+  @if (deal().status === DealStatus.ACTIVE) {
+    <app-countdown [endAt]="deal().endTime.toISOString()" />
+  } @else {
+    <span class="text-on-surface-variant text-label-sm">{{ timeLabel() }}</span>
+  }
+</td>

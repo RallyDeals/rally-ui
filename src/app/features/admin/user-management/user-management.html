@@ -1,0 +1,95 @@
+<main class="bg-background">
+  <div class="flex flex-col w-full px-rally-lg gap-rally-lg">
+    <app-page-header
+      title="User Management"
+      subtitle="Oversee and manage your growing community of buyers and sellers. Monitor activity, adjust permissions, and review detailed profiles to ensure a healthy ecosystem."
+    />
+
+    <div class="flex flex-col gap-rally-md">
+      @if (loadError(); as err) {
+        <div class="bg-surface rounded-2xl shadow-xl overflow-hidden">
+          <app-error-state [error]="err" [showRetry]="true" (retry)="loadUsers()" />
+        </div>
+      } @else {
+        <app-user-toolbar
+          [search]="search()"
+          [selectedTypes]="selectedTypes()"
+          [selectedStatuses]="selectedStatuses()"
+          (searchChange)="onSearchChange($event)"
+          (typesChange)="onTypesChange($event)"
+          (statusesChange)="onStatusesChange($event)"
+        />
+
+        <div class="bg-surface rounded-2xl shadow-xl overflow-hidden relative group">
+          <div
+            class="absolute inset-0 bg-linear-to-b from-surface-container-low/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 pointer-events-none"
+          ></div>
+
+          <div class="w-full overflow-x-auto relative z-10">
+            <table class="w-full text-left border-collapse">
+              <thead>
+                <tr class="bg-surface-container-low/50">
+                  <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    User
+                  </th>
+                  <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    Type
+                  </th>
+                  <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    Status
+                  </th>
+                  <th class="py-rally-sm px-rally-lg text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    Joined
+                  </th>
+                  <th class="py-rally-sm px-rally-lg text-right text-label-sm font-label-sm text-on-surface-variant uppercase tracking-widest whitespace-nowrap">
+                    Action
+                  </th>
+                </tr>
+              </thead>
+              <tbody class="text-body-md font-body-md">
+                @if (loading()) {
+                  @for (skeleton of [1, 2, 3]; track skeleton) {
+                    <tr class="animate-pulse">
+                      <td class="py-rally-sm px-rally-lg">
+                        <div class="flex items-center gap-rally-md">
+                          <div class="w-12 h-12 rounded-full bg-surface-container-high shrink-0"></div>
+                          <div class="flex flex-col gap-1.5">
+                            <div class="h-4 w-32 bg-surface-container-high rounded"></div>
+                            <div class="h-3 w-40 bg-surface-container-high rounded"></div>
+                          </div>
+                        </div>
+                      </td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-6 w-16 bg-surface-container-high rounded-full"></div></td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-6 w-16 bg-surface-container-high rounded-full"></div></td>
+                      <td class="py-rally-sm px-rally-lg"><div class="h-4 w-20 bg-surface-container-high rounded"></div></td>
+                      <td class="py-rally-sm px-rally-lg text-right"><div class="h-6 w-6 bg-surface-container-high rounded-full ml-auto"></div></td>
+                    </tr>
+                  }
+                } @else {
+                  @for (user of users(); track user.id) {
+                    <tr app-user-row [user]="user" (toggleStatus)="onToggleUserStatus($event)" class="hover:bg-surface-container-lowest/80 transition-colors group relative"></tr>
+                  } @empty {
+                    <tr>
+                      <td class="py-rally-md px-rally-lg text-center text-on-surface-variant" colspan="5">No users found.</td>
+                    </tr>
+                  }
+                }
+              </tbody>
+            </table>
+          </div>
+
+          <div class="p-rally-sm bg-surface-container-low/50 flex items-center justify-between relative z-10">
+            <div class="text-label-sm font-label-sm text-on-surface-variant">
+              Showing <span class="font-headline-md text-on-surface">{{ rangeStart() }}</span> to
+              <span class="font-headline-md text-on-surface">{{ rangeEnd() }}</span> of
+              <span class="font-headline-md text-on-surface">{{ total() }}</span> users
+            </div>
+            <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+  <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
+</main>

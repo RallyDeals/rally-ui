@@ -1,0 +1,52 @@
+<div class="text-left mb-rally-md">
+  <h2 class="font-headline-md text-headline-md mb-rally-xs">{{ copy().title }}</h2>
+  <p class="font-body-md text-body-md text-on-surface-variant">{{ copy().subtitle }}</p>
+</div>
+
+<form class="space-y-rally-sm" (ngSubmit)="onSubmit()">
+  <div>
+    <label class="block font-label-sm text-label-sm text-on-surface mb-rally-xs" for="topic-email">
+      Email Address
+    </label>
+    <div class="relative">
+      <span
+        class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant z-10 pointer-events-none"
+        style="font-size: 20px">mail</span
+      >
+      <input
+        pInputText
+        id="topic-email"
+        type="email"
+        name="topic-email"
+        autocomplete="email"
+        placeholder="jane@example.com"
+        [ngModel]="email()"
+        (ngModelChange)="email.set($event)"
+        [disabled]="submitting()"
+        class="w-full pl-10 rounded-lg font-body-md text-body-md"
+      />
+    </div>
+    @if (emailInvalid()) {
+      <small class="text-error">Enter a valid email address.</small>
+    }
+  </div>
+
+  @if (errorMessage(); as err) {
+    <div
+      class="flex items-center gap-2 px-3 py-2 rounded-lg bg-error-container text-on-error-container font-label-md text-label-md"
+      role="alert"
+    >
+      <span class="material-symbols-outlined" style="font-size: 18px">error</span>
+      <span>{{ err.message }}</span>
+    </div>
+  }
+
+  <p-button
+    type="submit"
+    [label]="copy().cta"
+    icon="pi pi-send"
+    [loading]="submitting()"
+    [fluid]="true"
+    styleClass="rounded-lg font-semibold"
+  />
+</form>

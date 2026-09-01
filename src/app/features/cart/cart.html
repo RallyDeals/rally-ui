@@ -1,0 +1,72 @@
+<main class="grow max-w-rally-container-max mx-auto w-full px-rally-gutter pt-10 pb-rally-xl min-h-screen">
+  @if (items().length === 0) {
+    <div
+      class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl bg-surface-container-lowest rounded-lg border border-outline-variant"
+    >
+      <span class="material-symbols-outlined text-on-surface-variant text-[40px]">
+        remove_shopping_cart
+      </span>
+      <h2 class="section-title-plain">Your cart is empty</h2>
+      <p class="font-body-md text-body-md text-on-surface-variant max-w-md">
+        Looks like you haven't added anything yet. Start browsing to find something you like.
+      </p>
+      <a
+        routerLink="/products"
+        class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+      >
+        Browse Products
+      </a>
+    </div>
+  } @else {
+    <app-cart-header [itemsCount]="items().length" [onClearCart]="clearCart" />
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg relative items-start">
+      <!-- Cart Items List -->
+      <div class="lg:col-span-8 flex flex-col gap-rally-sm">
+        @for (item of items(); track item.id) {
+          <app-cart-item
+            [item]="item"
+            [onIncrement]="incrementQuantity"
+            [onDecrement]="decrementQuantity"
+            [onRemove]="removeItem"
+          />
+        }
+      </div>
+      <!-- Sidebar Summary -->
+      <aside class="lg:col-span-4 sticky top-24 w-full flex flex-col gap-rally-sm">
+        <app-checkout-address [address]="address()" (addressChange)="setAddress($event)" />
+        <app-payment-method-picker
+          #paymentMethodPicker
+          [selectedId]="selectedPaymentMethodId()"
+          (selectedIdChange)="selectPaymentMethod($event)"
+        />
+        <app-order-summary
+          [itemsCount]="totalUnits()"
+          [subtotal]="subtotal()"
+          [tax]="estimatedTax()"
+          [total]="total()"
+          [checkoutDisabled]="checkoutDisabled()"
+          [isProcessing]="isCheckingOut()"
+          (checkout)="checkout()"
+        />
+      </aside>
+    </div>
+
+    @if (paymentMethodPicker.isAddFormOpen()) {
+      <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+        <div class="bg-surface-container-lowest rounded-2xl p-rally-lg w-full max-w-md soft-shadow">
+          <div class="flex justify-between items-center mb-rally-md">
+            <h3 class="font-headline-md text-headline-md font-bold text-on-surface">Add Payment Method</h3>
+            <button (click)="paymentMethodPicker.closeAddForm()" class="text-on-surface-variant hover:text-on-surface">
+              <span class="material-symbols-outlined">close</span>
+            </button>
+          </div>
+          <app-stripe-card-form
+            (createdPaymentMethod)="paymentMethodPicker.onCreated($event)"
+            (formIsClosed)="paymentMethodPicker.closeAddForm()"
+          />
+        </div>
+      </div>
+    }
+  }
+</main>
+<app-error-modal [error]="checkoutError()" (closed)="checkoutError.set(null)" />

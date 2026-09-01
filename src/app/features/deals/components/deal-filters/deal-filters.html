@@ -1,0 +1,55 @@
+<aside class="filter-panel">
+  <h2 class="section-title mb-rally-md">Filters</h2>
+
+  <div class="filter-section">
+    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Category</h3>
+    <div class="flex flex-col gap-rally-xs">
+      @for (category of categories(); track category.id) {
+        <label class="flex items-center gap-rally-xs group hover:cursor-pointer">
+          <input
+            class="h-4 w-4 rounded border-outline text-primary focus:ring-primary"
+            type="checkbox"
+            [checked]="selectedCategoryIds().includes(category.id)"
+            (change)="categoryToggle.emit(category.id)"
+          />
+          <span
+            class="text-on-surface-variant group-hover:text-primary transition-colors font-body-md text-body-md"
+          >
+            {{ category.name }}
+          </span>
+        </label>
+      }
+    </div>
+  </div>
+
+  <div class="filter-section">
+    <h3 class="font-body-lg text-body-lg font-semibold text-on-surface mb-rally-sm">Price Range</h3>
+    <div class="flex items-center gap-rally-xs">
+      <input
+        class="filter-price-input"
+        type="number"
+        min="0"
+        placeholder="Min"
+        [value]="priceMin"
+        (input)="onPriceInput('min', $event)"
+        (keyup.enter)="onPriceApply()"
+      />
+      <span class="text-on-surface-variant">-</span>
+      <input
+        class="filter-price-input"
+        type="number"
+        min="0"
+        placeholder="Max"
+        [value]="priceMax"
+        (input)="onPriceInput('max', $event)"
+        (keyup.enter)="onPriceApply()"
+      />
+    </div>
+    <button class="filter-apply-btn" (click)="onPriceApply()">Apply</button>
+  </div>
+
+  <button class="filter-clear-btn" (click)="reset.emit()">
+    <span class="icon-md">filter_alt_off</span>
+    Clear all filters
+  </button>
+</aside>

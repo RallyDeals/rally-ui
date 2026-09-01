@@ -1,0 +1,28 @@
+<div class="mb-rally-md">
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-rally-md">
+    <div class="space-y-rally-sm">
+      <div class="flex items-center gap-rally-sm">
+        <div
+          class="bg-primary-fixed text-primary px-rally-sm py-rally-xs rounded label-caps-plain font-bold">
+          {{ info().deliveryType }}
+        </div>
+        <p class="body-subtle text-sm">Placed on {{ info().placedDate | date:'MMM dd, y' }}</p>
+      </div>
+      <div class="flex items-center gap-xs">
+        <h1 class="body-text font-medium">Order <span>#{{ info().orderNumber }}</span></h1>
+        @if(info().dealNumber){
+          <h1 class="ms-3 body-text font-medium">Deal <span>#{{ info().dealNumber }}</span></h1>
+        }
+        <span class="material-symbols-outlined text-secondary text-[20px] ms-rally-xs">verified</span>
+      </div>
+    </div>
+    @if (info().shippingStatus; as status) {
+      <app-shipping-status-badge [status]="status" />
+    } @else {
+      <app-order-status-badge [status]="info().orderStatus" />
+    }
+  </div>
+  @if (info().cancelReason; as reason) {
+    <app-cancel-reason-banner [reason]="reason" [paymentErrorMessage]="info().paymentErrorMessage" />
+  }
+</div>

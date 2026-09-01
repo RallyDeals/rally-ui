@@ -1,0 +1,498 @@
+<section class="flex-1 space-y-rally-md">
+  <!-- Page Heading + Actions -->
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+    <div>
+      <div class="mb-2">
+        <app-breadcrumbs [items]="breadcrumbs()" />
+      </div>
+      <h2 class="section-title-plain font-bold">
+        {{ isEdit() ? 'Edit Deal' : 'New Deal' }}
+      </h2>
+      <p class="text-on-surface-variant mt-1 font-body-md text-body-md">
+        {{ isEdit() ? 'Update your group deal campaign details.' : 'Configure a new group deal campaign.' }}
+      </p>
+    </div>
+    <div class="flex gap-rally-sm">
+      <button
+        type="button"
+        class="px-6 py-2.5 rounded-xl border border-outline-variant text-on-surface-variant hover:bg-surface-container-high transition-all font-semibold"
+        (click)="cancel()"
+      >
+        Cancel
+      </button>
+      <button
+        type="button"
+        class="px-6 py-2.5 rounded-xl bg-primary-container text-on-primary hover:shadow-lg hover:scale-[1.02] transition-all font-semibold disabled:opacity-60 disabled:hover:scale-100"
+        [disabled]="saving()"
+        (click)="save()"
+      >
+        @if (saving()) {
+          <span class="material-symbols-outlined text-base animate-spin align-middle mr-2">progress_activity</span>
+          Saving...
+        } @else {
+          Save Deal
+        }
+      </button>
+    </div>
+  </div>
+
+  @if (error()) {
+    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-error-container text-on-error-container font-semibold">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ error() }}</span>
+    </div>
+  }
+
+  @if (lockMessage()) {
+    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-surface-container-high text-on-surface font-semibold border border-outline-variant">
+      <span class="material-symbols-outlined">lock</span>
+      <span>{{ lockMessage() }}</span>
+    </div>
+  }
+
+  @if (submitted() && validationError()) {
+    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-error-container text-on-error-container font-semibold">
+      <span class="material-symbols-outlined">error</span>
+      <span>{{ validationError() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="grid grid-cols-12 gap-rally-gutter">
+      <div class="col-span-12 lg:col-span-8 space-y-rally-gutter">
+        @for (skeleton of [1, 2]; track skeleton) {
+          <div class="rounded-xl border border-outline-variant/30 p-rally-md space-y-4">
+            <div class="h-5 w-48 bg-surface-container rounded animate-pulse"></div>
+            <div class="h-12 bg-surface-container-low rounded-lg animate-pulse"></div>
+            <div class="h-24 bg-surface-container-low rounded-lg animate-pulse"></div>
+          </div>
+        }
+      </div>
+      <div class="col-span-12 lg:col-span-4 space-y-rally-gutter">
+        @for (skeleton of [1, 2]; track skeleton) {
+          <div class="rounded-xl border border-outline-variant/30 p-rally-md space-y-4">
+            <div class="h-5 w-32 bg-surface-container rounded animate-pulse"></div>
+            <div class="h-32 bg-surface-container-low rounded-lg animate-pulse"></div>
+          </div>
+        }
+      </div>
+    </div>
+  } @else {
+    <div class="grid grid-cols-12 gap-rally-gutter items-start">
+      <!-- Left Column -->
+      <div class="col-span-12 lg:col-span-8 space-y-rally-gutter">
+        <section class="product-form__section">
+          <div class="flex items-center gap-2 mb-rally-md">
+            <span class="material-symbols-outlined text-primary">campaign</span>
+            <h3 class="text-body-lg font-bold text-on-surface">Campaign</h3>
+          </div>
+          <button
+            type="button"
+            class="w-full flex items-center gap-rally-sm p-rally-sm rounded-xl border bg-surface-container-low mb-rally-md hover:border-primary/50 transition-colors text-left group"
+            [class.border-error!]="submitted() && !productId()"
+            (click)="openPicker()"
+            [disabled]="isFormDisabled()"
+          >
+            <div class="w-14 h-14 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
+              <img
+                class="w-full h-full object-cover"
+                [src]="resolveImageUrl(image(), placeholderImage)"
+                fallbackSrc="/assets/placeholder.svg"
+                alt="Deal product"
+              />
+            </div>
+            <div class="min-w-0 flex-1">
+              <p class="font-bold text-on-surface truncate">{{ productName() || 'Select an approved product' }}</p>
+              <p class="text-label-sm text-on-surface-variant truncate">
+                @if (productId()) {
+                  {{ sku() ? 'SKU: ' + sku() : 'Product selected' }} · Base price ${{ originalPrice() || '0.00' }}
+                } @else {
+                  Only approved products can be used in a deal.
+                }
+              </p>
+            </div>
+            <span class="material-symbols-outlined text-on-surface-variant group-hover:text-primary text-[20px]">chevron_right</span>
+          </button>
+          <div class="space-y-rally-md">
+            <div class="flex items-center gap-2">
+              <label class="field-label mb-0!">Status</label>
+              <app-deal-status-badge [status]="status()" />
+              <span class="text-xs text-on-surface-variant">{{ statusHint() }}</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="product-form__section">
+          <div class="flex items-center gap-2 mb-rally-md">
+            <span class="material-symbols-outlined text-primary">sell</span>
+            <h3 class="text-body-lg font-bold text-on-surface">Pricing</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-rally-md">
+            <div>
+              <label class="field-label" for="deal-price">Deal Price ($)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
+                <input
+                  id="deal-price"
+                  type="number"
+                  min="0"
+                  class="product-form__input pl-7!"
+                  placeholder="0.00"
+                  [class.border-error!]="submitted() && dealPriceError() !== null"
+                  [value]="dealPrice()"
+                  (input)="dealPrice.set($any($event.target).value)"
+                  [disabled]="isFormDisabled()"
+                />
+              </div>
+              @if (submitted() && dealPriceError()) {
+                <p class="text-xs text-error font-semibold mt-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">error</span>
+                  {{ dealPriceError() }}
+                </p>
+              }
+            </div>
+            <div>
+              <label class="field-label" for="deal-original">Original Price ($)</label>
+              <div class="relative">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">$</span>
+                <input
+                  id="deal-original"
+                  type="number"
+                  min="0"
+                  class="product-form__input pl-7! disabled:opacity-60"
+                  placeholder="0.00"
+                  [value]="originalPrice()"
+                  disabled
+                />
+              </div>
+            </div>
+            <div>
+              <label class="field-label">Buyer Discount</label>
+              <div
+                class="flex items-center justify-center h-[46px] rounded-lg font-bold text-primary bg-primary/10"
+              >
+                {{ discount() === null ? '—' : discount() + '% off' }}
+              </div>
+            </div>
+          </div>
+          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex items-start gap-3 border border-outline-variant/20">
+            <span class="material-symbols-outlined text-secondary text-[20px]">lightbulb</span>
+            <p class="text-sm text-on-surface-variant">
+              The deal price is what buyers pay during the campaign. The
+              <strong class="text-on-surface">buyer discount</strong> is computed automatically. The original price is
+              snapshotted from the product's base price at creation.
+            </p>
+          </div>
+        </section>
+
+        <section class="product-form__section">
+          <div class="flex items-center gap-2 mb-rally-md">
+            <span class="material-symbols-outlined text-primary">groups</span>
+            <h3 class="text-body-lg font-bold text-on-surface">Target & Schedule</h3>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-rally-md">
+            <div>
+              <label class="field-label" for="deal-stock">Deal Stock (capacity)</label>
+              <input
+                id="deal-stock"
+                type="number"
+                min="1"
+                class="product-form__input"
+                placeholder="e.g. 200"
+                [class.border-error!]="submitted() && dealStockError() !== null"
+                [value]="dealStock()"
+                (input)="dealStock.set($any($event.target).value)"
+                [disabled]="isFormDisabled()"
+              />
+              @if (submitted() && dealStockError()) {
+                <p class="text-xs text-error font-semibold mt-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">error</span>
+                  {{ dealStockError() }}
+                </p>
+              } @else {
+                <p class="text-xs text-on-surface-variant mt-1">Max number of units available at the deal price.</p>
+              }
+            </div>
+            <div>
+              <label class="field-label" for="deal-min">Min Participants</label>
+              <input
+                id="deal-min"
+                type="number"
+                min="1"
+                class="product-form__input"
+                placeholder="e.g. 40"
+                [class.border-error!]="submitted() && minParticipantsError() !== null"
+                [value]="minParticipants()"
+                (input)="minParticipants.set($any($event.target).value)"
+                [disabled]="isFormDisabled()"
+              />
+              @if (submitted() && minParticipantsError()) {
+                <p class="text-xs text-error font-semibold mt-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">error</span>
+                  {{ minParticipantsError() }}
+                </p>
+              } @else {
+                <p class="text-xs text-on-surface-variant mt-1">The deal succeeds once this many buyers join.</p>
+              }
+            </div>
+            <div>
+              <label class="field-label">Duration</label>
+              <div class="flex items-center gap-2">
+                <div class="relative flex-1">
+                  <input
+                    id="deal-duration-days"
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="product-form__input pr-14!"
+                    placeholder="1"
+                    [class.border-error!]="submitted() && durationError() !== null"
+                    [value]="durationDays()"
+                    (input)="durationDays.set($any($event.target).value)"
+                    [disabled]="isFormDisabled()"
+                  />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">days</span>
+                </div>
+                <div class="relative flex-1">
+                  <input
+                    id="deal-duration-hours"
+                    type="number"
+                    min="0"
+                    step="1"
+                    class="product-form__input pr-16!"
+                    placeholder="0"
+                    [class.border-error!]="submitted() && durationError() !== null"
+                    [value]="durationHours()"
+                    (input)="durationHours.set($any($event.target).value)"
+                    [disabled]="isFormDisabled()"
+                  />
+                  <span class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-on-surface-variant">hours</span>
+                </div>
+              </div>
+              @if (submitted() && durationError()) {
+                <p class="text-xs text-error font-semibold mt-1 flex items-center gap-1">
+                  <span class="material-symbols-outlined text-[14px]">error</span>
+                  {{ durationError() }}
+                </p>
+              } @else {
+                <p class="text-xs text-on-surface-variant mt-1">
+                  The countdown starts when the first buyer joins, not when you save this deal.
+                </p>
+              }
+            </div>
+            <div>
+              <label class="field-label" for="deal-joined">Joined Participants</label>
+              <input
+                id="deal-joined"
+                type="number"
+                min="0"
+                class="product-form__input disabled:opacity-60"
+                placeholder="0"
+                [value]="currentParticipants()"
+                [disabled]="!isEdit() || isFormDisabled()"
+                (input)="currentParticipants.set(+$any($event.target).value || 0)"
+              />
+              <p class="text-xs text-on-surface-variant mt-1">Updated live as buyers join.</p>
+            </div>
+          </div>
+          <div class="mt-rally-md p-rally-sm bg-surface-container-low rounded-lg flex items-center gap-3 border border-outline-variant/20">
+            <span class="material-symbols-outlined text-secondary text-[20px]">schedule</span>
+            <p class="text-sm text-on-surface flex flex-wrap items-baseline gap-x-2">
+              <span class="font-bold">Duration:</span>
+              <span class="font-semibold">
+                {{
+                  durationMinutes() === null
+                    ? 'Set a duration'
+                    : formatDuration(durationMinutes() ?? 0)
+                }}
+              </span>
+              <span class="text-xs text-on-surface-variant">
+                Runs once the timer starts, on the first buyer join.
+              </span>
+            </p>
+          </div>
+        </section>
+      </div>
+
+      <!-- Right Column -->
+      <div class="col-span-12 lg:col-span-4 space-y-rally-gutter">
+        <section class="product-form__section">
+          <div class="flex items-center gap-2 mb-rally-md">
+            <span class="material-symbols-outlined text-primary">visibility</span>
+            <h3 class="text-body-lg font-bold text-on-surface">Live Preview</h3>
+          </div>
+          <div class="flex items-center justify-between mb-rally-sm">
+            <span class="text-sm font-semibold text-on-surface">{{ productName() || 'Unnamed campaign' }}</span>
+            <app-deal-status-badge [status]="status()" />
+          </div>
+          <app-deal-progress
+            [joined]="currentParticipants()"
+            [required]="+dealStock() || 0"
+            [tone]="progressToneFor(status())"
+            [pulse]="status() === DealStatus.ACTIVE"
+          />
+          <div class="flex items-center justify-between mt-rally-sm text-sm">
+            <span class="text-on-surface-variant">Buyers joined</span>
+            <span class="font-bold text-on-surface">{{ currentParticipants() }} / {{ dealStock() || 0 }}</span>
+          </div>
+          <p class="text-xs text-on-surface-variant mt-1">
+            {{ +minParticipants() || 0 }} participants needed for this deal to succeed.
+          </p>
+        </section>
+
+        <section class="product-form__section">
+          <div class="flex items-center gap-2 mb-rally-md">
+            <span class="material-symbols-outlined text-primary">receipt_long</span>
+            <h3 class="text-body-lg font-bold text-on-surface">Campaign Summary</h3>
+          </div>
+          <div class="divide-y divide-outline-variant/20">
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Deal Price</span>
+              <span class="font-semibold text-on-surface">${{ dealPrice() || '0.00' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Original Price</span>
+              <span class="font-semibold text-on-surface-variant line-through">${{ originalPrice() || '0.00' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Buyer Discount</span>
+              <span class="font-bold text-primary">{{ discount() === null ? '—' : discount() + '%' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Deal Stock</span>
+              <span class="font-semibold text-on-surface">{{ dealStock() || '0' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Min Participants</span>
+              <span class="font-semibold text-on-surface">{{ minParticipants() || '0' }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Joined</span>
+              <span class="font-semibold text-on-surface">{{ currentParticipants() }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Duration</span>
+              <span class="font-semibold text-on-surface">{{ durationMinutes() === null ? '—' : formatDuration(durationMinutes() ?? 0) }}</span>
+            </div>
+            <div class="flex items-center justify-between py-2 text-sm">
+              <span class="text-on-surface-variant">Status</span>
+              <app-deal-status-badge [status]="status()" />
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+  }
+
+  @if (pickerOpen()) {
+    <div class="fixed inset-0 z-50 flex items-start sm:items-center justify-center p-4">
+      <div class="absolute inset-0 bg-black/50" (click)="closePicker()"></div>
+      <div class="relative w-full max-w-2xl rounded-2xl bg-surface border border-outline-variant shadow-xl flex flex-col max-h-[85vh]">
+        <div class="flex items-center justify-between p-rally-md border-b border-outline-variant/20">
+          <div>
+            <h3 class="text-body-lg font-bold text-on-surface">Select an approved product</h3>
+            <p class="text-label-sm text-on-surface-variant mt-0.5">Only approved products can be used in a deal.</p>
+          </div>
+          <app-icon-button symbol="close" label="Close" (click)="closePicker()" />
+        </div>
+        <div class="p-rally-md border-b border-outline-variant/20">
+          <div class="relative">
+            <span class="material-symbols-outlined text-on-surface-variant absolute left-3 top-1/2 -translate-y-1/2 text-[18px]">search</span>
+            <input
+              type="text"
+              class="product-form__input pl-10!"
+              placeholder="Search by name or SKU..."
+              [value]="pickerSearch()"
+              (input)="pickerSearch.set($any($event.target).value)"
+            />
+          </div>
+        </div>
+        <div class="flex-1 overflow-y-auto p-rally-md">
+          @if (pickerLoading()) {
+            <div class="space-y-3">
+              @for (skeleton of [1, 2, 3, 4]; track skeleton) {
+                <div class="flex items-center gap-rally-sm p-3 rounded-xl border border-outline-variant/20">
+                  <div class="w-12 h-12 rounded-lg bg-surface-container animate-pulse"></div>
+                  <div class="flex-1 space-y-2">
+                    <div class="h-4 w-2/3 bg-surface-container rounded animate-pulse"></div>
+                    <div class="h-3 w-1/3 bg-surface-container rounded animate-pulse"></div>
+                  </div>
+                </div>
+              }
+            </div>
+          } @else if (pickerError()) {
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+              <span class="material-symbols-outlined text-on-surface-variant text-[32px] mb-3">cloud_off</span>
+              <p class="text-sm text-on-surface-variant mb-4">{{ pickerError() }}</p>
+              <button
+                type="button"
+                class="px-4 py-2 rounded-lg bg-primary-container text-on-primary text-sm font-semibold"
+                (click)="loadPickerProducts()"
+              >
+                Retry
+              </button>
+            </div>
+          } @else if (visiblePickerProducts().length === 0) {
+            <div class="flex flex-col items-center justify-center py-10 text-center">
+              <span class="material-symbols-outlined text-on-surface-variant text-[32px] mb-3">inventory_2</span>
+              <p class="text-sm font-semibold text-on-surface">No approved products found</p>
+              <p class="text-xs text-on-surface-variant mt-1">Approved products will appear here for your deals.</p>
+            </div>
+          } @else {
+            <div class="space-y-2">
+              @for (product of visiblePickerProducts(); track product.id) {
+                <button
+                  type="button"
+                  class="w-full flex items-center gap-rally-sm p-3 rounded-xl border border-outline-variant/20 hover:border-primary/50 bg-surface-container-low transition-colors text-left"
+                  (click)="selectProduct(product)"
+                >
+                  <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 flex-shrink-0">
+                    <img
+                      class="w-full h-full object-cover"
+                      [src]="resolveImageUrl(product.imageUrl, placeholderImage)"
+                      fallbackSrc="/assets/placeholder.svg"
+                      alt="Product"
+                    />
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <p class="font-bold text-on-surface truncate">{{ product.name }}</p>
+                    <p class="text-label-sm text-on-surface-variant truncate">
+                      {{ product.sku ? 'SKU: ' + product.sku : 'No SKU' }} · Base price ${{ product.basePrice.toFixed(2) }}
+                    </p>
+                  </div>
+                  <span class="material-symbols-outlined text-on-surface-variant text-[20px]">chevron_right</span>
+                </button>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- Sticky Mobile Bottom Bar -->
+  <div
+    class="fixed bottom-0 left-0 right-0 lg:hidden p-4 bg-surface/80 backdrop-blur-md border-t border-outline-variant flex gap-rally-sm z-50"
+  >
+    <button
+      type="button"
+      class="flex-1 px-6 py-3 rounded-xl border border-outline-variant text-on-surface-variant font-semibold"
+      (click)="cancel()"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="flex-1 px-6 py-3 rounded-xl bg-primary-container text-on-primary font-semibold disabled:opacity-60"
+      [disabled]="saving() || isFormDisabled()"
+      (click)="save()"
+    >
+      @if (saving()) {
+        <span class="material-symbols-outlined text-base animate-spin align-middle mr-2">progress_activity</span>
+        Saving...
+      } @else {
+        Save Deal
+      }
+    </button>
+  </div>
+</section>

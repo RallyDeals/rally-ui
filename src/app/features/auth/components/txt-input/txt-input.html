@@ -1,0 +1,20 @@
+<div class="mb-3">
+  <label class="block font-label-sm text-label-sm text-on-surface mb-rally-xs" [for]="id()"
+    >{{label()}}</label
+  >
+  <div class="relative">
+    <span
+      class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-on-surface-variant"
+      style="font-size: 20px"
+      >{{symbol()}}</span
+    >
+    <input
+      class="input-field w-full pl-10 pr-3 py-3 rounded-lg font-body-md text-body-md bg-surface-container-lowest text-on-surface placeholder-on-surface-variant/50"
+      [id]="id()"
+      [name]="name()"
+      [placeholder]="placeholder()"
+      [type]="type()"
+      required
+    />
+  </div>
+</div>

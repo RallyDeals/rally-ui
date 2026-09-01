@@ -1,0 +1,357 @@
+<section class="bg-surface py-rally-xl md:pb-24 min-h-screen">
+  <div class="max-w-rally-container-max mx-auto px-rally-gutter">
+    @if (loading()) {
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-rally-lg">
+        <div class="animate-pulse aspect-4/5 bg-surface-container rounded-xl"></div>
+        <div class="space-y-4">
+          <div class="animate-pulse bg-surface-container rounded-lg h-5 w-24"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-8 w-3/4"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-6 w-32"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-4 w-full"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-4 w-5/6"></div>
+          <div class="animate-pulse bg-surface-container rounded-lg h-12 w-full mt-8"></div>
+        </div>
+      </div>
+    } @else if (error(); as error) {
+      <div class="product-details__error py-24">
+        <app-error-state [error]="error" [showRetry]="true" (retry)="retry()" />
+      </div>
+    } @else if (product(); as product) {
+      <app-breadcrumbs [items]="breadcrumbs()" />
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-lg items-start mt-6">
+        <div class="lg:col-span-7">
+          <div
+            class="product-details__image group relative aspect-4/3 overflow-hidden rounded-xl bg-surface-container-low"
+          >
+            <img
+              class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+              [src]="imageSrc"
+              [alt]="product.name"
+            />
+          </div>
+          @if (galleryImages().length > 1) {
+            <div class="flex gap-rally-sm mt-rally-sm">
+              @for (image of galleryImages(); track image; let i = $index) {
+                <button
+                  type="button"
+                  class="w-16 h-16 rounded-lg overflow-hidden border-2 transition-all shrink-0"
+                  [class.border-primary]="resolveImageUrl(image) === imageSrc"
+                  [class.border-outline-variant]="resolveImageUrl(image) !== imageSrc"
+                  (click)="selectImage(image)"
+                  [attr.aria-label]="'View image ' + (i + 1)"
+                >
+                  <img
+                    class="w-full h-full object-cover"
+                    [src]="resolveImageUrl(image)"
+                    [alt]="product.name + ' image ' + (i + 1)"
+                  />
+                </button>
+              }
+            </div>
+          }
+        </div>
+
+        <div class="lg:col-span-5 flex flex-col gap-rally-md">
+          <div class="flex flex-col gap-rally-xs">
+            <p
+              class="product-details__category font-label-sm text-label-sm uppercase tracking-wider"
+            >
+              {{ product.category?.name ?? 'Uncategorized' }}
+            </p>
+            <h1
+              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mt-5"
+            >
+              {{ product.name }}
+            </h1>
+            <div class="flex items-center gap-3 mt-1">
+              <p class="product-details__price font-body-lg text-3xl font-bold">
+                ${{ product.basePrice }}
+              </p>
+              @if (primaryDeal(); as deal) {
+                <span
+                  class="font-label-sm text-label-sm font-bold text-tertiary bg-tertiary/10 rounded-md px-2 py-1"
+                >
+                  Save {{ dealDiscount(deal) }}% with deal
+                </span>
+              }
+            </div>
+          </div>
+
+          <div>
+            <p class="body-subtle leading-relaxed line-clamp-2">
+              {{ product.description }}
+            </p>
+            <button
+              type="button"
+              class="mt-1 font-label-sm text-label-sm text-primary font-bold hover:underline hover:cursor-pointer"
+              (click)="scrollToDescription()"
+            >
+              Read more
+            </button>
+          </div>
+
+          @if (product.sellerName) {
+            <a
+              class="font-label-sm text-label-sm"
+              [routerLink]="['/products']"
+              [queryParams]="{ sellerId: product.sellerId }"
+            >
+              Sold by
+              <span class="font-label-sm text-label-sm text-primary hover:underline">
+                {{ product.sellerName }}</span>
+            </a>
+          }
+
+          <div class="flex items-center gap-rally-md">
+            @if (outOfStock()) {
+              <div class="flex-1 flex items-center justify-center gap-2 py-3 px-6 rounded-xl bg-error-container text-on-error-container font-semibold">
+                <span class="material-symbols-outlined">block</span>
+                Out of Stock
+              </div>
+            } @else {
+              <div class="flex items-center bg-surface-container rounded-lg px-rally-xs py-1 shrink-0">
+                <button
+                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                  (click)="decrementQuantity()"
+                  aria-label="Decrease quantity"
+                >
+                  <span class="material-symbols-outlined">remove</span>
+                </button>
+                <span class="px-rally-md font-body-md font-bold">{{ quantity() }}</span>
+                <button
+                  class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
+                  (click)="incrementQuantity()"
+                  [disabled]="quantity() >= availableStock()"
+                  [class.opacity-30]="quantity() >= availableStock()"
+                  [class.pointer-events-none]="quantity() >= availableStock()"
+                  aria-label="Increase quantity"
+                >
+                  <span class="material-symbols-outlined">add</span>
+                </button>
+              </div>
+
+              <button
+                class="product-details__add-to-cart flex-1"
+                [class.product-details__add-to-cart-added]="added()"
+                [disabled]="outOfStock()"
+                (click)="addToCart()"
+              >
+                <span class="material-symbols-outlined">
+                  {{ added() ? 'check' : 'shopping_cart' }}
+                </span>
+                {{ added() ? 'Added to Cart' : 'Add to Cart' }}
+              </button>
+            }
+          </div>
+
+          @if (!outOfStock() && availableStock() <= 10) {
+            <p class="font-label-sm text-label-sm text-error font-medium">
+              Only {{ availableStock() }} left in stock
+            </p>
+          }
+
+          @if (displayDeals().length > 1) {
+            <button
+              type="button"
+              class="w-full rounded-xl border border-tertiary/30 bg-tertiary/10 px-3 py-2 flex items-center justify-between gap-2 hover:cursor-pointer hover:bg-tertiary/20 transition-colors"
+              (click)="scrollToDeals()"
+            >
+              <p class="flex items-center gap-2 text-sm font-semibold text-on-surface">
+                <span class="material-symbols-outlined text-tertiary text-[18px]">groups</span>
+                {{ displayDeals().length }} active group deals
+              </p>
+              <p class="font-label-sm text-label-sm text-primary font-bold flex items-center gap-rally-xs">
+                from ${{ minDealPrice() }} · save up to {{ maxDealDiscount() }}%
+                <span class="material-symbols-outlined text-[16px]">arrow_forward</span>
+              </p>
+            </button>
+          } @else if (primaryDeal(); as deal) {
+            <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-3 flex flex-col gap-2">
+              <div class="flex items-center justify-between gap-2">
+                <p
+                  class="font-label-sm text-label-sm uppercase tracking-wider text-tertiary font-bold flex items-center gap-rally-xs"
+                >
+                  <span class="material-symbols-outlined text-[16px]">groups</span>
+                  Active Group Deal
+                </p>
+                <span class="font-label-sm text-label-sm text-on-surface-variant">
+                  @if (deal.endTime) {
+                    <app-countdown [endAt]="deal.endTime" [pending]="isDealPending(deal)" />
+                  }
+                </span>
+              </div>
+              <div class="flex items-center justify-between gap-2">
+                <p class="flex items-baseline gap-2">
+                  <span class="font-display-lg text-2xl font-bold text-primary">
+                    ${{ deal.dealPrice }}
+                  </span>
+                  <span class="font-body-md text-sm text-on-surface-variant line-through">
+                    ${{ deal.originalPrice }}
+                  </span>
+                </p>
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal px-4! py-2!">
+                  <span class="material-symbols-outlined">groups</span>
+                  Join Deal
+                </a>
+              </div>
+              <div class="flex justify-between font-label-sm text-xs">
+                <span class="text-on-surface-variant font-medium">
+                  {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
+                </span>
+                <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
+              </div>
+              <div class="progress-track">
+                <div
+                  class="h-full progress-gradient rounded-full"
+                  [style.width.%]="deal.progressPercent"
+                ></div>
+              </div>
+            </div>
+          }
+
+          <div class="grid grid-cols-3 gap-rally-md">
+            <div class="flex flex-col items-center text-center gap-rally-xs">
+              <span class="material-symbols-outlined text-primary">local_shipping</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">
+                Free Express Shipping
+              </span>
+            </div>
+            <div class="flex flex-col items-center text-center gap-rally-xs">
+              <span class="material-symbols-outlined text-primary">verified_user</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">
+                Secure Checkout
+              </span>
+            </div>
+            <div class="flex flex-col items-center text-center gap-rally-xs">
+              <span class="material-symbols-outlined text-primary">sync</span>
+              <span class="font-label-sm text-label-sm text-on-surface-variant">
+                30-Day Returns
+              </span>
+            </div>
+          </div>
+
+          <div class="flex flex-col gap-rally-xs">
+            @if (product.sku) {
+              <p class="font-label-sm text-label-sm text-on-surface-variant">
+                SKU: <span class="font-semibold text-on-surface">{{ product.sku }}</span>
+              </p>
+            }
+            @if (product.tags?.length) {
+              <div class="flex flex-wrap gap-rally-xs">
+                @for (tag of product.tags; track tag) {
+                  <span
+                    class="bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+                  >
+                    {{ tag }}
+                  </span>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div id="product-description" class="mt-rally-xl py-rally-xl border-t border-outline-variant/20">
+        <div class="max-w-3xl mx-auto flex flex-col">
+          <app-accordion title="Product Description" [open]="true">
+            <p class="body-subtle leading-relaxed">
+              {{ product.description }}
+            </p>
+          </app-accordion>
+          <app-accordion title="Shipping &amp; Returns">
+            <p class="body-subtle leading-relaxed">
+              We provide complimentary express shipping on all orders. Your item will be processed
+              within 24 hours and typically arrives in 2-3 business days. If you're not completely
+              satisfied, we offer a hassle-free 30-day return policy for a full refund or exchange.
+            </p>
+          </app-accordion>
+        </div>
+      </div>
+
+      @if (displayDeals().length > 1) {
+        <section id="product-group-deals" class="mt-rally-xl border-t border-outline-variant/20 pt-rally-xl">
+          <div class="flex items-center justify-between mb-rally-lg">
+            <h2
+              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface"
+            >
+              Active Group Deals
+            </h2>
+            <span class="font-label-sm text-label-sm text-on-surface-variant font-medium">
+              {{ displayDeals().length }} active
+            </span>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-rally-md">
+            @for (deal of displayDeals(); track deal.id) {
+              <div class="rounded-xl border border-tertiary/30 bg-surface-container-low p-4 flex flex-col gap-3">
+                <div class="flex items-start justify-between gap-2">
+                  <p class="font-body-md font-semibold text-on-surface leading-snug">
+                    {{ deal.productName }}
+                  </p>
+                  <span class="font-label-sm text-label-sm text-on-surface-variant shrink-0">
+                    @if (deal.endTime) {
+                      <app-countdown [endAt]="deal.endTime" [pending]="isDealPending(deal)" />
+                    }
+                  </span>
+                </div>
+                <div class="flex items-end justify-between">
+                  <div>
+                    <p class="text-[11px] text-on-surface-variant uppercase tracking-wider font-medium">
+                      Deal price
+                    </p>
+                    <p class="font-display-lg text-2xl font-bold text-primary">
+                      ${{ deal.dealPrice }}
+                    </p>
+                  </div>
+                  <p class="font-body-md text-sm text-on-surface-variant line-through">
+                    ${{ deal.originalPrice }}
+                  </p>
+                </div>
+                <div class="flex justify-between font-label-sm text-xs mb-1">
+                  <span class="text-on-surface-variant font-medium">
+                    {{ deal.currentParticipants }}/{{ deal.dealStock }} joined
+                  </span>
+                  <span class="text-primary font-bold">{{ deal.neededCount }} needed</span>
+                </div>
+                <div class="progress-track">
+                  <div
+                    class="h-full progress-gradient rounded-full"
+                    [style.width.%]="deal.progressPercent"
+                  ></div>
+                </div>
+                <a [routerLink]="['/deals', deal.id]" class="product-details__join-deal">
+                  <span class="material-symbols-outlined">groups</span>
+                  Join Group Deal
+                </a>
+              </div>
+            }
+          </div>
+        </section>
+      }
+
+      @if (relatedProducts().length > 0) {
+        <section class="pb-rally-xl">
+          <div class="flex items-center justify-between mb-rally-lg">
+            <h2
+              class="font-display-lg text-display-lg-mobile md:text-display-lg font-bold text-on-surface mt-10"
+            >
+              Recommended for You
+            </h2>
+            <a
+              class="font-label-sm text-label-sm text-primary font-bold hover:translate-x-1 transition-transform flex items-center gap-rally-xs"
+              routerLink="/products"
+            >
+              View All
+              <span class="icon-md">arrow_forward</span>
+            </a>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-md">
+            @for (related of relatedProducts(); track related.id) {
+              <app-product-card [product]="related" />
+            }
+          </div>
+        </section>
+      }
+    }
+  </div>
+</section>

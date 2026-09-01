@@ -1,0 +1,44 @@
+<td class="table-cell">
+  <div
+    class="flex items-center gap-rally-sm"
+    [class.opacity-70]="order().status === 'CANCELLED'"
+  >
+    <div class="w-12 h-12 rounded-lg bg-surface-container overflow-hidden border border-outline-variant/20 shrink-0">
+      <img
+        class="w-full h-full object-cover"
+        [class.grayscale]="order().status === 'CANCELLED'"
+        [src]="resolveImageUrl(order().items[0].productImageUrl, placeholderImage)"
+        fallbackSrc="/assets/placeholder.svg"
+        [alt]="order().items[0].productName"
+      />
+    </div>
+    <div class="min-w-0">
+      <p class="font-bold text-on-surface truncate">{{ order().items[0].productName }}</p>
+      <p class="text-label-sm text-on-surface-variant truncate">
+        ID: {{ productNumber(order().items[0].productId) }}{{ extraItemsLabel(order()) }}
+      </p>
+    </div>
+  </div>
+</td>
+<td class="table-cell text-center">
+  <p class="font-medium text-primary">{{ orderNumber(order().orderId) }}</p>
+</td>
+<td class="table-cell text-center">
+  <p class="font-bold text-on-surface">{{ order().totalPrice | currency }}</p>
+  <p class="text-label-sm text-on-surface-variant">Qty: {{ totalQuantity(order()) }}</p>
+</td>
+<td class="table-cell text-center">
+  <app-order-phase-badge
+    [phase]="order().status"
+  />
+</td>
+<td class="table-cell text-center text-on-surface-variant">{{ order().createdAt | date: ('MMM d, y'):'—' }}</td>
+<td class="table-cell text-right">
+  <app-icon-button
+    symbol="visibility"
+    label="View order"
+    tone="primary"
+    [routerLink]="[order().orderId]"
+  />
+</td>
+

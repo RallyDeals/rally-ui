@@ -1,0 +1,8 @@
+<p class="font-body-md text-body-md text-on-surface-variant text-center" [ngClass]="wrapperClass()">
+  {{ prompt() }}
+  <a
+    class="text-primary hover:text-primary-container font-semibold transition-colors"
+    [routerLink]="linkPath()"
+    >{{ linkText() }}</a
+  >
+</p>

@@ -1,0 +1,7 @@
+export enum CompactedOrderStatus {
+  PENDING = 'PENDING',
+  CANCELLED = 'CANCELLED',
+  PROCESSING = 'PROCESSING',
+  SHIPPING = 'SHIPPING',
+  DELIVERED = 'DELIVERED',
+}
