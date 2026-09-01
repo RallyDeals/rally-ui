@@ -1,7 +1,16 @@
 <section class="flex-1 space-y-rally-sm">
-  <!-- Page Header -->
-  <app-page-header title="Orders" subtitle="Manage and track customer orders.">
-    <div class="flex items-center gap-2 px-4 py-2 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest">
+  <header
+    class="sticky top-0 z-40 h-16 -mx-rally-md lg:-mx-rally-xl -mt-rally-md lg:-mt-rally-xl px-rally-md lg:px-rally-xl flex items-center justify-between gap-4 border-b border-outline-variant/50 bg-surface/70 backdrop-blur-md"
+  >
+    <div class="w-full max-w-xs">
+      <app-search-input
+        placeholder="Search orders..."
+        [value]="searchQuery()"
+        (valueChange)="onSearchInput($event)"
+        (clear)="clearSearch()"
+      />
+    </div>
+    <div class="flex items-center gap-2 px-4 border border-outline-variant rounded-lg font-label-sm text-on-surface bg-surface-container-lowest">
       <span class="material-symbols-outlined text-sm text-primary-container">calendar_month</span>
       <select
         [value]="dateRangeOptions.find(opt => opt.label === dateLabel())?.value || '30'"
@@ -13,8 +22,7 @@
         }
       </select>
     </div>
-  </app-page-header>
-
+  </header>
   <!-- Quick Stats -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
     <app-metric-card
@@ -47,7 +55,7 @@
   <div
     class="bg-surface-container-lowest p-rally-sm rounded-2xl border border-outline-variant shadow-sm flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 sm:gap-rally-sm"
   >
-    <div class="flex items-center justify-between gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
+    <div class="flex items-center gap-rally-sm overflow-x-auto w-full sm:w-auto pb-2 sm:pb-0">
       <div
         class="flex-shrink-0 flex items-center gap-2 px-4 py-2 bg-surface-container-low border border-outline-variant rounded-xl text-on-surface-variant"
       >
@@ -61,12 +69,15 @@
         (selectedChange)="onPhaseChange($event)"
       />
     </div>
-    <div class="w-full max-w-xs">
-      <app-search-input
-        placeholder="Search orders..."
-        [value]="searchQuery()"
-        (valueChange)="onSearchInput($event)"
-        (clear)="clearSearch()"
+    <div class="flex items-center gap-rally-sm self-end sm:self-auto">
+      <p class="text-xs text-on-surface-variant hidden md:block">
+        Showing {{ rangeStart() }}-{{ rangeEnd() }} of {{ total() }}
+      </p>
+      <app-pagination
+        [page]="page()"
+        [totalPages]="totalPages()"
+        (pageChange)="onPageChange($event)"
+        [compact]="true"
       />
     </div>
   </div>
@@ -99,14 +110,6 @@
           </tbody>
         </table>
       }
-    </div>
-
-    <!-- Table Footer / Pagination -->
-    <div class="p-rally-sm bg-surface-container-low/50 flex items-center justify-between relative z-10">
-      <p class="text-label-sm font-label-sm text-on-surface-variant">
-        Showing {{ rangeStart() }} to {{ rangeEnd() }} of {{ total() }} entries
-      </p>
-      <app-pagination [page]="page()" [totalPages]="totalPages()" (pageChange)="onPageChange($event)" />
     </div>
   </div>
 </section>
