@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
 import { UserService } from '../../../auth/admin-user.service';
 import { Seller } from '../../interfaces/seller';
@@ -26,6 +27,7 @@ export class SellerDetails implements OnInit {
   private readonly productsService = inject(ProductsService);
   private readonly dealService = inject(DealsService);
   private readonly activatedRoute = inject(ActivatedRoute);
+  private readonly titleService = inject(Title);
   private sellerId = '';
 
   seller = signal<Seller | null>(null);
@@ -55,6 +57,7 @@ export class SellerDetails implements OnInit {
     this.userService.getSellerById(this.sellerId).subscribe({
       next: (seller) => {
         this.seller.set(seller);
+        this.titleService.setTitle(seller.name);
         this.loadActiveDealsCount();
         this.loading.set(false);
       },

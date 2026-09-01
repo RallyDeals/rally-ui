@@ -37,28 +37,34 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        component: Home
+        component: Home,
+        title: 'Home',
       },
       {
         path: 'about-us',
-        component: About
+        component: About,
+        title: 'About Us',
       },
       {
         path: 'contact-us',
-        component: Contact
+        component: Contact,
+        title: 'Contact Us',
       },
       {
         path: 'categories',
-        component: Categories
+        component: Categories,
+        title: 'Categories',
       },
       {
         path: 'cart',
-        component: Cart
+        component: Cart,
+        title: 'Cart',
       },
       {
         path: 'orders/:orderId',
         component: OrderDetails,
         canActivate: [authGuard],
+        title: 'Order Details',
       },
       {
         path: 'profile',

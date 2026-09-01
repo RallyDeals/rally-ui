@@ -15,33 +15,41 @@ export const SELLER_ROUTES: Routes = [
   {
     path: 'deals',
     component: SellerDeals,
+    title: 'Deals',
   },
   {
     path: 'deals/new',
     component: SellerDealForm,
+    title: 'New Deal',
   },
   {
     path: 'deals/:id/edit',
     component: SellerDealForm,
+    title: 'Edit Deal',
   },
   {
     path: 'orders',
     component: SellerOrders,
+    title: 'Orders',
   },
   {
     path: 'orders/:id',
     component: SellerOrderDetail,
+    title: 'Order Details',
   },
   {
     path: 'products',
     component: SellerProducts,
+    title: 'Products',
   },
   {
     path: 'products/new',
     component: SellerProductForm,
+    title: 'New Product',
   },
   {
     path: 'products/:id/edit',
     component: SellerProductForm,
+    title: 'Edit Product',
   },
 ];

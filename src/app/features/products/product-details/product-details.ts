@@ -1,4 +1,5 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
+import { Title } from '@angular/platform-browser';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
 import { Accordion } from './accordion/accordion';
@@ -116,6 +117,7 @@ export class ProductDetails implements OnInit, OnDestroy {
     private readonly productsService: ProductsService,
     private readonly cartService: CartService,
     private readonly inventoryService: InventoryService,
+    private readonly titleService: Title,
   ) {}
 
   get imageSrc(): string {
@@ -144,6 +146,7 @@ export class ProductDetails implements OnInit, OnDestroy {
         this.product.set(product);
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
         this.loading.set(false);
+        this.titleService.setTitle(product.name);
         this.loadRelatedProducts(product);
         this.loadInventory(product.id);
       },

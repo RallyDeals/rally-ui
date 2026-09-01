@@ -6,9 +6,11 @@ export const DEALS_ROUTES: Routes = [
   {
     path: '',
     component: BrowseDeals,
+    title: 'Deals',
   },
   {
     path: ':id',
     component: DealDetails,
+    title: 'Deal Details',
   },
 ];

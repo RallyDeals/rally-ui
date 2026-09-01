@@ -12,11 +12,11 @@ export const USER_PROFILE_ROUTES: Routes = [
     component: UserProfile,
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'info' },
-      { path: 'info', component: PersonalInfo },
-      { path: 'orders', component: MyOrders },
-      { path: 'deals', component: MyDeals },
-       {path: 'cards' , component:PaymentMethods},
-      { path: 'security', component: Security },
+      { path: 'info', component: PersonalInfo, title: 'Personal Info' },
+      { path: 'orders', component: MyOrders, title: 'My Orders' },
+      { path: 'deals', component: MyDeals, title: 'My Deals' },
+       {path: 'cards' , component:PaymentMethods, title: 'Payment Methods'},
+      { path: 'security', component: Security, title: 'Security' },
     ],
   },
 ];
