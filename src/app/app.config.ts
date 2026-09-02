@@ -1,5 +1,5 @@
 import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
-import { provideRouter, withComponentInputBinding } from '@angular/router';
+import { provideRouter, withComponentInputBinding, withInMemoryScrolling } from '@angular/router';
 import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { providePrimeNG } from 'primeng/config';
 import { definePreset } from '@primeuix/themes';
@@ -45,7 +45,11 @@ export const appConfig: ApplicationConfig = {
         'eyJpZCI6IjFkYWYxODE1LTJlMDgtNGQ4YS1hNjk0LWRhZTc5NzUzOTI1OCIsInByb2R1Y3QiOiJwcmltZXVpIiwidGllciI6ImNvbW11bml0eSIsInR5cGUiOiJkZXYiLCJpYXQiOjE3ODc0ODY0ODEsImV4cCI6MTgxOTAyMjQ4MX0.ghF1TfHmIngFt1OO9vkcltmM6jKS_z7hEh-g2DxUQrk9R1GlriRehPwxjCVv4jorxkPkfUhQd6ggKH1jCJ5TCQ',
       ripple: true,
     }),
-    provideRouter(routes, withComponentInputBinding()),
+    provideRouter(
+      routes,
+      withComponentInputBinding(),
+      withInMemoryScrolling({ scrollPositionRestoration: 'enabled', anchorScrolling: 'enabled' }),
+    ),
     provideHttpClient(withInterceptors([httpRequestInterceptor, authRefreshInterceptor])),
   ],
 };
