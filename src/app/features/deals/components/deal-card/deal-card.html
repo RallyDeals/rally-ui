@@ -57,6 +57,17 @@
         </span>
         <app-countdown [endAt]="deal().endTime.toISOString()" [pending]="isPending()" />
       </div>
+      <div class="flex items-center gap-1 mt-2 pt-2 border-t border-outline-variant/20">
+        @if (minReached()) {
+          <span class="material-symbols-outlined icon-sm text-primary">check_circle</span>
+          <span class="font-label-sm text-label-sm text-primary font-semibold">Minimum reached</span>
+        } @else {
+          <span class="material-symbols-outlined icon-sm text-on-surface-variant">group_add</span>
+          <span class="font-label-sm text-label-sm text-on-surface-variant">
+            <strong class="text-on-surface">{{ deal().neededCount }}</strong> more to unlock deal
+          </span>
+        }
+      </div>
     </div>
   </div>
 </article>

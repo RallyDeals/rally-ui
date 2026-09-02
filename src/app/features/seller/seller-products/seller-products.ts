@@ -16,7 +16,6 @@ import { StatCard } from '../../../shared/components/stat-card/stat-card';
 import { FilterPills, FilterPillOption } from '../../../shared/components/filter-pills/filter-pills';
 import { SearchInput } from '../../../shared/components/search-input/search-input';
 import { IconButton } from '../../../shared/components/icon-button/icon-button';
-import { InsightCard } from '../../../shared/components/insight-card/insight-card';
 import { ImageFallbackDirective } from '../../../shared/directives/image-fallback.directive';
 import { ConfirmDialog, ConfirmDialogRequest } from '../../../shared/components/confirm-dialog/confirm-dialog';
 import { PLACEHOLDER_IMAGE } from '../../../shared/constants/placeholder';
@@ -41,7 +40,6 @@ const INVENTORY_POLL_INTERVAL_MS = 30_000;
     FilterPills,
     SearchInput,
     IconButton,
-    InsightCard,
     ImageFallbackDirective,
     ConfirmDialog,
     ErrorModal,

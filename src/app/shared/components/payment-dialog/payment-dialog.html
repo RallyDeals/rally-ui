@@ -56,26 +56,29 @@
         }
       </div>
       <div class="card-element-box">
-        <div #cardElementContainer></div>
+        <div #cardElementContainerNew></div>
       </div>
     </div>
     }
 
       <!-- No saved cards and not adding new -->
       @if (!savedCards() || savedCards()!.length === 0) {
+        @if (!addingNewCard()) {
         <div style="margin-bottom: 16px;">
           <p class="text-muted" style="margin-bottom: 12px;">No saved payment methods. Add a card to continue.</p>
           <div class="card-element-box">
-            <div #cardElementContainer></div>
+            <div #cardElementContainerNoSaved></div>
           </div>
         </div>
+        }
       }
 
       <!-- Address Input -->
       <div style="margin-bottom: 20px;margin-top: 20px">
         <span class="label">Shipping Address</span>
         <textarea
-          [(ngModel)]="address"
+          [ngModel]="address()"
+          (ngModelChange)="address.set($event)"
           rows="3"
           maxlength="500"
           placeholder="Enter your full shipping address..."
@@ -87,18 +90,18 @@
         <div class="error-text">{{ err }}</div>
       }
 
-      <!-- Actions -->
-      <button
-        class="btn-primary"
-        [disabled]="processing() || (!selectedCardId() && !addingNewCard())"
-        (click)="confirm()"
-      >
-        @if (processing()) {
-          Processing...
-        } @else {
-          Confirm &amp; Join Rally
-        }
-      </button>
+       <!-- Actions -->
+       <button
+         class="btn-primary"
+         [disabled]="!isSubmitEnabled()"
+         (click)="confirm()"
+       >
+         @if (processing()) {
+           Processing...
+         } @else {
+           Confirm &amp; Join Rally
+         }
+       </button>
     }
   </div>
 </div>

@@ -9,6 +9,7 @@ import {
   inject,
   signal,
   viewChild,
+  computed,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { PaymentMethodService } from '../../services/payment-method.service';
@@ -31,7 +32,8 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
   private readonly stripeService = inject(StripeService);
   private readonly destroyRef = inject(DestroyRef);
 
-  cardContainer = viewChild<ElementRef<HTMLDivElement>>('cardElementContainer');
+  cardContainerNew = viewChild<ElementRef<HTMLDivElement>>('cardElementContainerNew');
+  cardContainerNoSaved = viewChild<ElementRef<HTMLDivElement>>('cardElementContainerNoSaved');
 
   savedCards = signal<PaymentMethod[]|null>(null);
   selectedCardId = signal<string | null>(null);
@@ -39,8 +41,17 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
   loading = signal(true);
   processing = signal(false);
   error = signal<string | null>(null);
+  cardComplete = signal(false);
+  isCardElementActive = computed(() => {
+    return this.addingNewCard() || !this.savedCards() || this.savedCards()!.length === 0;
+  });
+  isSubmitEnabled = computed(() => {
+    if (this.processing() || !this.address().trim()) return false;
+    if (this.isCardElementActive()) return this.cardComplete();
+    return !!this.selectedCardId();
+  });
 
-  address = '';
+  address = signal('');
 
   ngAfterViewInit(): void {
     this.loadSavedCards();
@@ -62,47 +73,69 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
           } else {
             this.selectedCardId.set(cards.items[0].id);
           }
+          this.loading.set(false);
+        } else {
+          // No saved cards, initialize card element
+          this.savedCards.set([]);
+          this.loading.set(false);
+          this.initializeCardElement();
         }
-        this.loading.set(false);
       },
       error: (e) => {
         console.log(e);
         this.loading.set(false);
+        this.initializeCardElement();
       },
     });
+  }
+
+  private initializeCardElement(): void {
+    this.cardComplete.set(false);
+    setTimeout(() => this.mountCardElement(this.cardContainerNoSaved()?.nativeElement), 100);
+  }
+
+  private mountCardElement(container: HTMLDivElement | undefined): void {
+    if (!container || container.children.length > 0) return;
+    this.stripeService
+      .createCardElement(container)
+      .then((cardElement) => {
+        cardElement.on('change', (event) => this.cardComplete.set(event.complete));
+      })
+      .catch((err: any) => {
+        this.error.set(err.message || 'Failed to load card form');
+      });
   }
 
   selectCard(id: string): void {
     this.selectedCardId.set(id);
     this.addingNewCard.set(false);
     this.stripeService.destroyCardElement();
+    this.cardComplete.set(false);
     this.error.set(null);
   }
 
   showAddCard(): void {
     this.addingNewCard.set(true);
     this.selectedCardId.set(null);
+    this.cardComplete.set(false);
     this.error.set(null);
-    setTimeout(() => {
-      const container = this.cardContainer()?.nativeElement;
-      if (container) {
-        this.stripeService.createCardElement(container).catch((err: any) => {
-          this.error.set(err.message || 'Failed to load card form');
-        });
-      }
-    }, 100);
+    setTimeout(() => this.mountCardElement(this.cardContainerNew()?.nativeElement), 100);
   }
 
   cancelAddCard(): void {
     this.addingNewCard.set(false);
     this.stripeService.destroyCardElement();
+    this.cardComplete.set(false);
     if (this.savedCards() && this.savedCards()!.length > 0) {
       this.selectedCardId.set(this.savedCards()![0].id);
+    } else {
+      // Re-initialize card element for no saved cards case
+      this.initializeCardElement();
     }
   }
 
   async confirm(): Promise<void> {
-    if (!this.address.trim()) {
+    if (!this.address().trim()) {
       this.error.set('Please enter a shipping address');
       return;
     }
@@ -111,7 +144,7 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
     this.error.set(null);
 
     try {
-      if (this.addingNewCard()) {
+      if (this.isCardElementActive()) {
         const setupIntent = await firstValueFrom(this.paymentMethodService.createSetupIntent());
         if (!setupIntent) throw new Error('Failed to start card setup');
 
@@ -119,7 +152,7 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
         const saved = await firstValueFrom(this.paymentMethodService.createPaymentMethod({paymentMethodId:result.paymentMethodId,isDefault:true}));
         if (!saved) throw new Error('Failed to save card');
 
-        this.confirmed.emit({ paymentMethodId: saved.id, address: this.address.trim() });
+        this.confirmed.emit({ paymentMethodId: saved.id, address: this.address().trim() });
       } else {
         const cardId = this.selectedCardId();
         if (!cardId) {
@@ -127,7 +160,7 @@ export class PaymentDialog implements AfterViewInit, OnDestroy {
           this.processing.set(false);
           return;
         }
-        this.confirmed.emit({ paymentMethodId: cardId, address: this.address.trim() });
+        this.confirmed.emit({ paymentMethodId: cardId, address: this.address().trim() });
       }
     } catch (err: any) {
       this.error.set(err.message || 'Payment setup failed');
