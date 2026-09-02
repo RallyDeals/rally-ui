@@ -29,5 +29,7 @@ export class ActiveDealCard {
 
   progress = computed(() => this.deal().progressPercent);
 
+  minReached = computed(() => this.deal().currentParticipants >= this.deal().minParticipants);
+
   isPending = computed(() => this.deal().status === DealStatus.PENDING);
 }

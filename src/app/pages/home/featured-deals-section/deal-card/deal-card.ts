@@ -13,4 +13,5 @@ export class DealCard {
   deal = input.required<DealOverview>();
   extraClasses = input('');
   badge = computed(() => dealBadge(this.deal()));
+  minReached = computed(() => this.deal().currentParticipants >= this.deal().minParticipants);
 }

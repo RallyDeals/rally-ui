@@ -194,6 +194,19 @@ export class DealDetails implements OnInit {
     return !!deal && deal.currentParticipants >= deal.dealStock;
   });
 
+  minReached = computed(() => {
+    const deal = this.deal();
+    return !!deal && deal.currentParticipants >= deal.minParticipants;
+  });
+
+  minMarkerPercent = computed(() => {
+    const deal = this.deal();
+    if (!deal || deal.dealStock <= 0) {
+      return 0;
+    }
+    return Math.min(100, Math.max(0, (deal.minParticipants / deal.dealStock) * 100));
+  });
+
   isClosed = computed(() => {
     const deal = this.deal();
     return !!deal && deal.status !== DealStatus.ACTIVE && deal.status !== DealStatus.PENDING;
