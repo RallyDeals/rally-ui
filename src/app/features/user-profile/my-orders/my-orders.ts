@@ -136,6 +136,7 @@ export class MyOrders {
     } else {
       next.add(status);
     }
+    this.orders.set([]);
     this.orderStatusFilter.set(next);
     this.page.set(1);
     this.loadPage();
@@ -182,7 +183,7 @@ export class MyOrders {
           }
         },
         next: (response) => {
-          this.orders.set(response.orders);
+          this.orders.update(()=>[...this.orders(), ...response.orders]);
           this.total.set(response.total);
           if (!hasActiveFiltersAtRequestTime) {
             this.allOrdersTotal.set(response.total);
