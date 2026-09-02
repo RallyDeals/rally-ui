@@ -210,32 +210,6 @@
     </div>
   </div>
 
-  <!-- Insights Bento -->
-  <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-rally-gutter">
-    <app-insight-card
-      symbol="trending_up"
-      title="Sales Velocity"
-      body="Track how fast your listings convert into group deals."
-      cta="View Insights"
-      tone="primary"
-    />
-    <app-insight-card
-      symbol="groups"
-      title="Active Deals"
-      body="See which of your listings are part of live RALLY events."
-      cta="Manage Deals"
-      tone="secondary"
-      (ctaClick)="goToDeals()"
-    />
-    <app-insight-card
-      symbol="rocket_launch"
-      title="Promote Inventory"
-      body="Feature your approved products in the next flash sale event."
-      cta="Get Started"
-      tone="inverse"
-    />
-  </div>
-
   <app-confirm-dialog
     [confirm]="deleteRequest()"
     (confirmed)="onDeleteConfirmed()"
