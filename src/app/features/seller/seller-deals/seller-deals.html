@@ -104,9 +104,8 @@
             @for (deal of deals(); track deal.id) {
               @let isPending = deal.status === DealStatus.PENDING;
               <tr
-                [class.product-row-hover]="isPending"
-                [class.cursor-pointer]="isPending"
-                [routerLink]="isPending ? ['/seller/deals', deal.id, 'edit'] : null"
+                class="product-row-hover cursor-pointer"
+                [routerLink]="['/seller/deals', deal.id]"
               >
                 <td class="table-cell">
                   <div class="flex items-center gap-rally-sm" [class.opacity-70]="deal.status === DealStatus.FAILED || deal.status === DealStatus.CANCELLED">
