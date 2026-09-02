@@ -3,6 +3,7 @@ import { ProgressTone } from '../components/deal-progress/deal-progress';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { timeRemainingInSeconds } from '../../../shared/utils/deal-time.util';
+import { dealCode } from '../../../shared/utils/order-code.util';
 
 export interface DealRow {
   id: string;
@@ -82,7 +83,7 @@ function urgentLabel(deal: DealOverview): boolean {
 export function toDealRow(deal: DealOverview): DealRow {
   return {
     id: deal.id,
-    code: `GD-${deal.id.slice(-4).toUpperCase()}`,
+    code: dealCode(deal.id),
     name: deal.productName,
     image: deal.productImageUrl,
     status: deal.status,

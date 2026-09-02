@@ -1,6 +1,6 @@
-<section class="flex-1 space-y-rally-md">
+<section class="flex-1 mt-rally-md">
   <!-- Page Heading + Actions -->
-  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
+  <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-4 mb-4">
     <div>
       <div class="mb-2">
         <app-breadcrumbs [items]="breadcrumbs()" />
@@ -37,21 +37,21 @@
   </div>
 
   @if (error()) {
-    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-error-container text-on-error-container font-semibold">
+    <div class="flex items-center gap-3 px-5 py-4 mb-3 rounded-xl bg-error-container text-on-error-container font-semibold">
       <span class="material-symbols-outlined">error</span>
       <span>{{ error() }}</span>
     </div>
   }
 
   @if (lockMessage()) {
-    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-surface-container-high text-on-surface font-semibold border border-outline-variant">
+    <div class="flex items-center gap-3 px-5 py-4 mb-3 rounded-xl bg-surface-container-high text-on-surface font-semibold border border-outline-variant">
       <span class="material-symbols-outlined">lock</span>
       <span>{{ lockMessage() }}</span>
     </div>
   }
 
   @if (submitted() && validationError()) {
-    <div class="flex items-center gap-3 px-5 py-4 rounded-xl bg-error-container text-on-error-container font-semibold">
+    <div class="flex items-center gap-3 px-5 py-4 mb-3 rounded-xl bg-error-container text-on-error-container font-semibold">
       <span class="material-symbols-outlined">error</span>
       <span>{{ validationError() }}</span>
     </div>
