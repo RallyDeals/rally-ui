@@ -28,17 +28,14 @@
   <div
     class="w-full md:w-1/2 flex items-center justify-center p-gutter bg-surface">
     <div
-      class="w-full max-w-md bg-white rounded-xl shadow-sm p-rally-md glass-panel relative">
+      class="w-full max-w-md bg-white rounded-xl shadow-sm p-rally-sm glass-panel relative">
       <!-- Brand Logo Anchor -->
-      <div class="mb-rally-sm">
+      <div class="mb-rally-xs">
         <app-logo />
       </div>
-      <div class="mb-rally-sm">
-        <h2 class="font-headline-md text-headline-md mb-rally-xs">Create your
+      <div class="mb-rally-xs">
+        <h2 class="font-headline-md text-headline-md">Create your
           account</h2>
-        <p class="font-body-md text-body-md text-on-surface-variant">
-          Start unlocking community deals today.
-        </p>
       </div>
 
       @if (error(); as err) {
@@ -215,7 +212,7 @@
           }
         </div>
 
-        <div class="pt-rally-sm">
+        <div class="pt-rally-xs">
           <p-button
             type="submit"
             label="Create Account"
@@ -229,7 +226,7 @@
         prompt="Already have an account?"
         linkText="Sign in"
         linkPath="/auth/login"
-        wrapperClass="mt-rally-sm" />
+        wrapperClass="mt-rally-xs" />
     </div>
   </div>
 </main>
