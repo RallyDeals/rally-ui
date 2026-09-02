@@ -66,6 +66,21 @@
         @if (activeFilterCount() > 0) {
           <div class="flex flex-wrap items-center gap-rally-xs mb-rally-md">
             <span class="font-body-md text-body-md text-on-surface-variant">Active filters:</span>
+            @if (sellerName(); as sellerName) {
+              <span
+                class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"
+              >
+                Seller: {{ sellerName }}
+                <button
+                  type="button"
+                  class="hover:text-error transition-colors hover:cursor-pointer"
+                  aria-label="Remove seller filter"
+                  (click)="clearSellerFilter()"
+                >
+                  <span class="icon-md">close</span>
+                </button>
+              </span>
+            }
             @for (categoryId of selectedCategoryIds(); track categoryId) {
               <span
                 class="inline-flex items-center gap-rally-xs bg-surface-container text-on-surface-variant px-2 py-1 rounded-md text-[11px] font-medium"

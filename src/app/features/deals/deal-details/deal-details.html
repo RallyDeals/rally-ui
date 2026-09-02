@@ -88,7 +88,7 @@
             <a
               class="font-label-sm text-label-sm"
               [routerLink]="['/deals']"
-              [queryParams]="{ sellerId: deal.sellerId }"
+              [queryParams]="{ sellerId: deal.sellerId, sellerName: deal.sellerName }"
             >
               Sold by
               <span class="font-label-sm text-label-sm text-primary hover:underline">
@@ -215,7 +215,11 @@
                     </span>
                   }
                   @if (extraParticipants() > 0) {
-                    <span class="extra-count">+{{ extraParticipants() }}</span>
+                    <span
+                      class="w-8 h-8 rounded-full border-2 border-white bg-surface-container-high flex items-center justify-center font-label-sm text-[10px] font-bold text-on-surface-variant"
+                    >
+                      +{{ extraParticipants() }}
+                    </span>
                   }
                 </div>
                 @if (participants().length > 0) {

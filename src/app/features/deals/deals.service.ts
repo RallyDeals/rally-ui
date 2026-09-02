@@ -85,30 +85,35 @@ export class DealsService {
     const page = (params.page ?? 1) - 1;
     const limit = params.limit ?? 10;
 
-    return this.http.get<SpringPage<DealResponse>>(this.baseUrl, {
-      params: {
-        page,
-        size: limit,
-        ...(search && { search }),
-        ...(status && { status }),
-        ...(categories && { categories }),
-        ...(sellerId && { sellerId }),
-        ...(productId && { productId }),
-        ...(minPrice !== undefined && { minPrice }),
-        ...(maxPrice !== undefined && { maxPrice }),
-        ...(sort && sort !== 'relevance' && { sort }),
-      },
-    }).pipe(
-      map((spring): PageResponse<DealOverview> => ({
-        items: spring.content.map(toDealOverview),
-        page: spring.number + 1,
-        limit: spring.size,
-        total: spring.totalElements,
-      })),
-    );
+    return this.http
+      .get<SpringPage<DealResponse>>(this.baseUrl, {
+        params: {
+          page,
+          size: limit,
+          ...(search && { search }),
+          ...(status && { status }),
+          ...(categories && { categories }),
+          ...(sellerId && { sellerId }),
+          ...(productId && { productId }),
+          ...(minPrice !== undefined && { minPrice }),
+          ...(maxPrice !== undefined && { maxPrice }),
+          ...(sort && sort !== 'relevance' && { sort }),
+        },
+      })
+      .pipe(
+        map((spring): PageResponse<DealOverview> => ({
+          items: spring.content.map(toDealOverview),
+          page: spring.number + 1,
+          limit: spring.size,
+          total: spring.totalElements,
+        })),
+      );
   }
 
-  getSellerDeals(sellerId: string, params: Omit<DealsQueryParams, 'sellerId'> = {}): Observable<PageResponse<DealOverview>> {
+  getSellerDeals(
+    sellerId: string,
+    params: Omit<DealsQueryParams, 'sellerId'> = {},
+  ): Observable<PageResponse<DealOverview>> {
     return this.getDealsOverview({ ...params, sellerId });
   }
 
@@ -126,8 +131,17 @@ export class DealsService {
     return this.getDealsDetails(id);
   }
 
-  joinDeal(id: string, paymentMethodId: string, address: string, referralCode?: string): Observable<ParticipationResponse> {
-    return this.http.post<ParticipationResponse>(`${this.baseUrl}/${id}/join`, { paymentMethodId, address, ...(referralCode && { referralCode }) });
+  joinDeal(
+    id: string,
+    paymentMethodId: string,
+    address: string,
+    referralCode?: string,
+  ): Observable<ParticipationResponse> {
+    return this.http.post<ParticipationResponse>(`${this.baseUrl}/${id}/join`, {
+      paymentMethodId,
+      address,
+      ...(referralCode && { referralCode }),
+    });
   }
 
   leaveDeal(id: string): Observable<unknown> {
@@ -136,7 +150,9 @@ export class DealsService {
 
   getParticipationStatus(dealId: string, participationId: string): Observable<ParticipationStatus> {
     return this.http
-      .get<ParticipantStatusResponse>(`${environment.apiUrl}/deals/${dealId}/participants/${participationId}`)
+      .get<ParticipantStatusResponse>(
+        `${environment.apiUrl}/deals/${dealId}/participants/${participationId}`,
+      )
       .pipe(map((res) => res.status.toLowerCase() as ParticipationStatus));
   }
 
@@ -145,29 +161,32 @@ export class DealsService {
   }
 
   createInviteLink(dealId: string): Observable<InviteLinkResponse> {
-    return this.http.post<InviteLinkResponse>(`${environment.apiUrl}/deals/${dealId}/invite-link`, {});
+    return this.http.post<InviteLinkResponse>(
+      `${environment.apiUrl}/deals/${dealId}/invite-link`,
+      {},
+    );
   }
 
   getDealParticipants(dealId: string): Observable<ParticipantsPageResponse> {
-    return this.http.get<ParticipantsPageResponse>(`${environment.apiUrl}/deals/${dealId}/participants`);
+    return this.http.get<ParticipantsPageResponse>(
+      `${environment.apiUrl}/deals/${dealId}/participants`,
+    );
   }
 
   createDeal(request: CreateDealRequest): Observable<DealOverview> {
-    return this.http.post<DealResponse>(this.baseUrl, request).pipe(
-      map(toDealOverview),
-    );
+    return this.http.post<DealResponse>(this.baseUrl, request).pipe(map(toDealOverview));
   }
 
   updateDeal(id: string, request: CreateDealRequest): Observable<DealOverview> {
     const { productId, ...patchBody } = request;
-    return this.http.patch<DealResponse>(`${this.baseUrl}/${id}`, patchBody).pipe(
-      map(toDealOverview),
-    );
+    return this.http
+      .patch<DealResponse>(`${this.baseUrl}/${id}`, patchBody)
+      .pipe(map(toDealOverview));
   }
 
   cancelDeal(id: string): Observable<DealOverview | null> {
-    return this.http.post<DealResponse>(`${this.baseUrl}/${id}/cancel`, {}).pipe(
-      map(toDealOverview),
-    );
+    return this.http
+      .post<DealResponse>(`${this.baseUrl}/${id}/cancel`, {})
+      .pipe(map(toDealOverview));
   }
 }

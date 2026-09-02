@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, signal } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -34,6 +35,8 @@ export class BrowseDeals implements OnInit {
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal<DealSortKey>(DEFAULT_SORT);
+  sellerId = signal<string | null>(null);
+  sellerName = signal<string | null>(null);
   page = signal(1);
   readonly limit = DEALS_PER_PAGE;
 
@@ -61,6 +64,9 @@ export class BrowseDeals implements OnInit {
     if (this.sortBy() !== DEFAULT_SORT) {
       count += 1;
     }
+    if (this.sellerId() !== null) {
+      count += 1;
+    }
     return count;
   });
 
@@ -82,9 +88,30 @@ export class BrowseDeals implements OnInit {
   constructor(
     private readonly dealsService: DealsService,
     private readonly categoriesService: CategoriesService,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
   ) {}
 
   ngOnInit(): void {
+    // Get initial sellerId and sellerName from route params
+    const initialSellerId = this.route.snapshot.queryParams['sellerId'] ?? null;
+    const initialSellerName = this.route.snapshot.queryParams['sellerName'] ?? null;
+    this.sellerId.set(initialSellerId);
+    this.sellerName.set(initialSellerName);
+
+    // Subscribe to query params changes for subsequent navigations
+    this.route.queryParams.subscribe((params) => {
+      const newSellerId = params['sellerId'] ?? null;
+      const newSellerName = params['sellerName'] ?? null;
+      // Only reset pagination if sellerId changes
+      if (newSellerId !== this.sellerId()) {
+        this.sellerId.set(newSellerId);
+        this.sellerName.set(newSellerName);
+        this.page.set(1);
+        this.loadDeals();
+      }
+    });
+
     this.loadDeals();
     this.categoriesService.getCategories().subscribe({
       next: (categories) => this.categories.set(categories),
@@ -103,6 +130,7 @@ export class BrowseDeals implements OnInit {
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
         sort: this.sortBy(),
+        sellerId: this.sellerId() ?? undefined,
         page: this.page(),
         limit: this.limit,
       })
@@ -178,13 +206,32 @@ export class BrowseDeals implements OnInit {
     this.maxPrice.set(null);
     this.sortBy.set(DEFAULT_SORT);
     this.searchQuery.set('');
+    this.sellerId.set(null);
+    this.sellerName.set(null);
     this.page.set(1);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { sellerId: null, sellerName: null },
+      queryParamsHandling: 'merge',
+    });
     this.loadDeals();
   };
 
   resetSort = () => {
     this.sortBy.set(DEFAULT_SORT);
     this.page.set(1);
+    this.loadDeals();
+  };
+
+  clearSellerFilter = () => {
+    this.sellerId.set(null);
+    this.sellerName.set(null);
+    this.page.set(1);
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { sellerId: null, sellerName: null },
+      queryParamsHandling: 'merge',
+    });
     this.loadDeals();
   };
 
