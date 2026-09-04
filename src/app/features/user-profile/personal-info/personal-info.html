@@ -72,13 +72,12 @@
               <h2 class="font-headline-md text-on-surface text-xl">Basic Information</h2>
             </div>
             @if (!isEditing()) {
-              <button
-                pButton
+              <p-button
                 label="Edit"
                 icon="pi pi-pencil"
                 size="small"
                 variant="text"
-                (click)="startEdit()"></button>
+                (onClick)="startEdit()" />
             }
           </div>
 
@@ -161,20 +160,18 @@
               </div>
 
               <div class="flex items-center gap-rally-sm justify-end">
-                <button
-                  pButton
+                <p-button
                   label="Cancel"
                   severity="secondary"
                   size="small"
                   variant="text"
-                  (click)="cancelEdit()"></button>
-                <button
-                  pButton
+                  (onClick)="cancelEdit()" />
+                <p-button
                   label="Save"
                   icon="pi pi-check"
                   size="small"
                   type="submit"
-                  [loading]="submitting()"></button>
+                  [loading]="submitting()" />
               </div>
             </form>
           }
