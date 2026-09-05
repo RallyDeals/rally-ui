@@ -16,7 +16,6 @@ export interface DealResponse {
   startTime: string | null;
   durationMinutes: number;
   endTime: string | null;
-  timeRemainingSeconds: number | null;
   createdAt: string;
   productName: string | null;
   productImageUrl: string | null;
