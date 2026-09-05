@@ -118,6 +118,7 @@ export class DealDetails implements OnInit {
 
   participants = signal<ParticipantSummary[]>([]);
   extraParticipants = signal(0);
+  isActive = computed(() => this.deal()?.status === DealStatus.PENDING || this.deal()?.status === DealStatus.ACTIVE);
 
   specs = computed(() => {
     const deal = this.deal();
