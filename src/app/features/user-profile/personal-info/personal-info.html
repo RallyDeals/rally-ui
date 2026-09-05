@@ -73,12 +73,13 @@
             </div>
             @if (!isEditing()) {
               <button
-                pButton
-                label="Edit"
-                icon="pi pi-pencil"
-                size="small"
-                variant="text"
-                (click)="startEdit()"></button>
+                type="button"
+                (click)="startEdit()"
+                class="px-rally-md py-rally-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors flex items-center gap-xs"
+              >
+                <span class="material-symbols-outlined text-[16px] me-2">edit</span>
+                Edit
+              </button>
             }
           </div>
 
@@ -102,7 +103,6 @@
                     <span class="icon-sm">badge</span> First Name *
                   </label>
                   <input
-                    pInputText
                     id="firstName"
                     formControlName="firstName"
                     [maxlength]="100"
@@ -126,7 +126,6 @@
                     <span class="icon-sm">badge</span> Last Name
                   </label>
                   <input
-                    pInputText
                     id="lastName"
                     formControlName="lastName"
                     [maxlength]="100"
@@ -139,14 +138,25 @@
                   }
                 </div>
 
-                <app-info-field [field]="{ label: 'Email Address', value: profile()?.email ?? 'Undefined' }" />
-
                 <div class="flex flex-col gap-rally-xs">
+                  <label class="label-caps flex items-center gap-1" for="email">
+                    <span class="icon-sm">mail</span> Email Address
+                  </label>
+                  <input
+                    id="email"
+                    type="email"
+                    [value]="profile()?.email ?? 'Undefined'"
+                    disabled
+                    style="border-radius: 0.5rem;"
+                    class="w-full rounded-lg border border-outline-variant bg-surface-container-high px-rally-sm py-rally-xs text-on-surface/60 cursor-not-allowed" />
+                </div>
+
+                <!-- Phone field: bottom margin added so it doesn't crowd the action row -->
+                <div class="flex flex-col gap-rally-xs mb-rally-sm md:mb-0">
                   <label class="label-caps flex items-center gap-1" for="phoneNumber">
                     <span class="icon-sm">call</span> Phone Number
                   </label>
                   <input
-                    pInputText
                     id="phoneNumber"
                     formControlName="phoneNumber"
                     [maxlength]="30"
@@ -160,21 +170,23 @@
                 </div>
               </div>
 
+              <!-- Action row -->
               <div class="flex items-center gap-rally-sm justify-end">
                 <button
-                  pButton
-                  label="Cancel"
-                  severity="secondary"
-                  size="small"
-                  variant="text"
-                  (click)="cancelEdit()"></button>
+                  type="button"
+                  (click)="cancelEdit()"
+                  [disabled]="submitting()"
+                  class="px-rally-md py-rally-xs rounded-lg border border-outline-variant text-on-surface hover:bg-surface-container transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  Cancel
+                </button>
                 <button
-                  pButton
-                  label="Save"
-                  icon="pi pi-check"
-                  size="small"
                   type="submit"
-                  [loading]="submitting()"></button>
+                  [disabled]="form.invalid || submitting()"
+                  class="px-rally-md py-rally-xs rounded-lg bg-primary text-on-primary font-bold disabled:opacity-40 disabled:cursor-not-allowed hover:bg-primary/90 transition-colors"
+                >
+                  {{ submitting() ? 'Saving...' : 'Save' }}
+                </button>
               </div>
             </form>
           }
