@@ -5,12 +5,13 @@ import { Observable, map } from 'rxjs';
 import { PageResponse } from '../products/page-response';
 import { DealOverview } from './interfaces/deal-overview';
 import { DealDetails } from './interfaces/deal-details';
-import { DealsAnalyticsResponse } from './interfaces/deals-analytics-response';
+import { SellerDealsAnalyticsResponse } from './interfaces/seller-deals-analytics-response';
 import { DealsQueryParams, DealSortKey } from './interfaces/deals-query-params';
 import { CreateDealRequest } from './interfaces/create-deal-request';
 import { ActivityEvent } from './interfaces/activity-event';
 import { resolveImageUrl } from '../../shared/utils/image-url';
 import { DealResponse, toDealOverview } from './deal-overview.mapper';
+import { AdminDealsAnalyticsResponse } from './interfaces/admin-deals-analytics-response';
 
 export interface InviteLinkResponse {
   code: string;
@@ -69,8 +70,12 @@ export class DealsService {
 
   constructor(private readonly http: HttpClient) {}
 
-  getDealsAnalytics(): Observable<DealsAnalyticsResponse> {
-    return this.http.get<DealsAnalyticsResponse>(`${this.baseUrl}/analytics`);
+  getSellerDealsAnalytics(): Observable<SellerDealsAnalyticsResponse> {
+    return this.http.get<SellerDealsAnalyticsResponse>(`${this.baseUrl}/seller-stats`);
+  }
+
+  getAdminDealsAnalytics(): Observable<AdminDealsAnalyticsResponse> {
+    return this.http.get<AdminDealsAnalyticsResponse>(`${this.baseUrl}/analytics`);
   }
 
   getDealsOverview(params: DealsQueryParams = {}): Observable<PageResponse<DealOverview>> {

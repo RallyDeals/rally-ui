@@ -1,0 +1,102 @@
+<div class="animate-pulse" aria-busy="true" aria-live="polite" role="status">
+  <span class="sr-only">Loading order details…</span>
+
+  <!-- Header skeleton -->
+  <div class="mb-rally-md">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-rally-md">
+      <div class="space-y-rally-sm">
+        <div class="flex items-center gap-rally-sm">
+          <div class="h-6 w-36 rounded bg-surface-container"></div>
+          <div class="h-4 w-28 rounded bg-surface-container"></div>
+        </div>
+        <div class="flex items-center gap-xs">
+          <div class="h-5 w-32 rounded bg-surface-container"></div>
+        </div>
+      </div>
+      <div class="h-7 w-28 rounded-full bg-surface-container"></div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-rally-md">
+    <div class="lg:col-span-8 space-y-rally-md">
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-rally-md">
+        <!-- Shipping address skeleton -->
+        <section class="bg-surface-container-low rounded-xl p-rally-md h-full">
+          <div class="flex items-center gap-rally-xs mb-rally-sm">
+            <div class="h-5 w-5 rounded-full bg-surface-container"></div>
+            <div class="h-4 w-32 rounded bg-surface-container"></div>
+          </div>
+          <div class="space-y-2">
+            <div class="h-3 w-full rounded bg-surface-container"></div>
+            <div class="h-3 w-5/6 rounded bg-surface-container"></div>
+            <div class="h-3 w-2/3 rounded bg-surface-container"></div>
+          </div>
+        </section>
+
+        <!-- Payment method skeleton -->
+        <section class="bg-surface-container-low rounded-xl p-rally-md h-full">
+          <div class="flex items-center gap-rally-xs mb-rally-sm">
+            <div class="h-5 w-5 rounded-full bg-surface-container"></div>
+            <div class="h-4 w-32 rounded bg-surface-container"></div>
+          </div>
+          <div class="flex items-center gap-rally-sm">
+            <div class="h-6 w-14 rounded bg-surface-container"></div>
+            <div class="space-y-2">
+              <div class="h-3 w-24 rounded bg-surface-container"></div>
+              <div class="h-3 w-20 rounded bg-surface-container"></div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Order items list skeleton -->
+      <section class="bg-surface-container-lowest rounded-xl overflow-hidden shadow-sm">
+        <div class="px-rally-md py-rally-sm bg-[#f4f5f8] border-b border-surface-container">
+          <div class="h-4 w-32 rounded bg-surface-container"></div>
+        </div>
+        <div class="flex flex-col">
+          @for (row of skeletonRows; track row) {
+            <div class="p-rally-md flex items-start gap-rally-md border-b border-surface-container last:border-b-0">
+              <div class="w-20 h-20 rounded bg-surface-container shrink-0"></div>
+              <div class="flex-1 min-w-0 pt-1 space-y-2">
+                <div class="h-4 w-3/5 rounded bg-surface-container"></div>
+                <div class="h-3 w-16 rounded bg-surface-container"></div>
+              </div>
+              <div class="pt-1">
+                <div class="h-4 w-14 rounded bg-surface-container"></div>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    </div>
+
+    <div class="lg:col-span-4">
+      <!-- Order summary skeleton -->
+      <section class="bg-inverse-surface/70 rounded-xl p-rally-md md:p-rally-xl shadow-md">
+        <div class="h-5 w-32 rounded bg-inverse-on-surface/20 mb-rally-lg"></div>
+        <div class="space-y-rally-sm mb-rally-md">
+          <div class="flex justify-between items-center">
+            <div class="h-3 w-16 rounded bg-inverse-on-surface/20"></div>
+            <div class="h-3 w-12 rounded bg-inverse-on-surface/20"></div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="h-3 w-28 rounded bg-inverse-on-surface/20"></div>
+            <div class="h-3 w-12 rounded bg-inverse-on-surface/20"></div>
+          </div>
+          <div class="flex justify-between items-center">
+            <div class="h-3 w-24 rounded bg-inverse-on-surface/20"></div>
+            <div class="h-3 w-12 rounded bg-inverse-on-surface/20"></div>
+          </div>
+        </div>
+        <div class="pt-rally-sm mt-rally-sm relative">
+          <div class="absolute top-0 left-0 right-0 h-px bg-inverse-on-surface/20"></div>
+          <div class="flex justify-between items-center pt-rally-sm">
+            <div class="h-5 w-16 rounded bg-inverse-on-surface/20"></div>
+            <div class="h-6 w-20 rounded bg-inverse-on-surface/20"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>

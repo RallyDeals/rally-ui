@@ -21,7 +21,7 @@ export interface DealsQueryParams {
 
   // dashboards + buyer profile
   sellerId?: string;
-  status?: DealStatus | string;
+  status?: string;
 
   // product details
   productId?: string;

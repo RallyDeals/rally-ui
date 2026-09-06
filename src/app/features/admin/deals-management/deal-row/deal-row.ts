@@ -4,6 +4,7 @@ import { DealStatus } from '../../../../shared/models/deal';
 import { DealOverview } from '../../../deals/interfaces/deal-overview';
 import { DealProgress, ProgressTone } from '../../../seller/components/deal-progress/deal-progress';
 import { Countdown } from '../../../../shared/components/countdown/countdown';
+import { formatDuration } from '../../../../shared/utils/date-format.util';
 
 interface StatusBadge {
   label: string;
@@ -58,4 +59,5 @@ export class DealRow {
   readonly badge = computed(() => STATUS_BADGES[this.deal().status]);
   readonly progressTone = computed(() => PROGRESS_TONES[this.deal().status]);
   readonly timeLabel = computed(() => TIME_LABELS[this.deal().status]);
+  protected readonly formatDuration = formatDuration;
 }

@@ -1,5 +1,13 @@
-import { Component, DestroyRef, NgZone, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import {
+  Component,
+  DestroyRef,
+  NgZone,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription, interval, switchMap, startWith } from 'rxjs';
 import { Pagination } from '../../../shared/components/pagination/pagination';
@@ -17,11 +25,19 @@ import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { PageResponse } from '../../products/page-response';
 import { DealOverview } from '../../deals/interfaces/deal-overview';
 import { DealRowActions } from './deal-row-actions/deal-row-actions';
-import { DEAL_STATUS_OPTIONS, DealRow, PROGRESS_TONES, StatusFilter, formatCountdown, toDealRow } from './seller-deals.model';
+import {
+  DEAL_STATUS_OPTIONS,
+  DealRow,
+  PROGRESS_TONES,
+  formatCountdown,
+  formatDuration,
+  toDealRow,
+} from './seller-deals.model';
 import { AuthService } from '../../../core/auth/auth.service';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { DealsService } from '../../deals/deals.service';
+import { SellerDealsAnalyticsResponse } from '../../deals/interfaces/seller-deals-analytics-response';
 
 const COUNTDOWN_TICK_MS = 1_000;
 
@@ -31,7 +47,6 @@ const PAGE_SIZE = 5;
 @Component({
   selector: 'app-seller-deals',
   imports: [
-    DatePipe,
     RouterLink,
     Pagination,
     FilterPills,
@@ -61,16 +76,41 @@ export class SellerDeals implements OnInit, OnDestroy {
   readonly progressToneFor = (status: DealStatus): ProgressTone => PROGRESS_TONES[status];
   readonly DealStatus = DealStatus;
   readonly resolveImageUrl = resolveImageUrl;
+  readonly formatDuration = formatDuration;
+  readonly dealAnalytics = signal<SellerDealsAnalyticsResponse | null>(null);
+  statsLoading = signal(false);
 
-  statusFilter = signal<StatusFilter>('ALL');
+  statusFilter = signal<DealStatus | null>(null);
   searchQuery = signal('');
   page = signal(1);
   limit = PAGE_SIZE;
   total = signal(0);
+  allDealsTotal = signal(0);
   deals = signal<DealRow[]>([]);
   loading = signal(true);
-  loadingError = signal<ApiError|null>(null);
+  loadingError = signal<ApiError | null>(null);
   deleteTarget = signal<DealRow | null>(null);
+
+  readonly hasActiveFilters = computed(
+    () => this.statusFilter() !== null || this.searchQuery().trim().length > 0,
+  );
+
+  readonly emptyState = computed(() => {
+    if (this.hasActiveFilters() && this.allDealsTotal() > 0) {
+      return {
+        title: 'No deals found',
+        message: 'Try adjusting your filters to see matching deals.',
+        icon: 'search_off',
+        actionLabel: null,
+      };
+    }
+    return {
+      title: 'No deals yet',
+      message: 'When you create a deal, it will show up here.',
+      icon: 'group_off',
+      actionLabel: 'New Deal',
+    };
+  });
 
   readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
     const deal = this.deleteTarget();
@@ -79,7 +119,8 @@ export class SellerDeals implements OnInit, OnDestroy {
     }
     return {
       title: `Delete "${deal.name}"?`,
-      message: "This deal hasn't started yet and has no participants — it will be permanently cancelled.",
+      message:
+        "This deal hasn't started yet and has no participants — it will be permanently cancelled.",
       icon: 'delete',
       confirmLabel: 'Delete',
     };
@@ -92,18 +133,22 @@ export class SellerDeals implements OnInit, OnDestroy {
     if (total === 0) {
       return { from: 0, to: 0 };
     }
-    return { from: (this.page() - 1) * this.limit + 1, to: Math.min(this.page() * this.limit, total) };
+    return {
+      from: (this.page() - 1) * this.limit + 1,
+      to: Math.min(this.page() * this.limit, total),
+    };
   });
 
   ngOnInit() {
     this.route.queryParams.subscribe((params) => {
-      const status = params['status'] as string | undefined;
+      const status = params['status'] as DealStatus | undefined;
       if (status && this.isValidStatus(status)) {
         this.statusFilter.set(status);
         this.page.set(1);
       }
     });
     this.loadDeals();
+    this.loadDealsAnalytics();
     this.countdownTimer = setInterval(() => this.now.set(Date.now()), COUNTDOWN_TICK_MS);
     this.destroyRef.onDestroy(() => this.stopDealsPoll());
   }
@@ -123,8 +168,8 @@ export class SellerDeals implements OnInit, OnDestroy {
     return formatCountdown(secondsLeft);
   }
 
-  private isValidStatus(value: string): value is StatusFilter {
-    return value === 'ALL' || Object.values(DealStatus).includes(value as DealStatus);
+  private isValidStatus(value: string): value is DealStatus {
+    return Object.values(DealStatus).includes(value as DealStatus);
   }
 
   loadDeals() {
@@ -132,7 +177,9 @@ export class SellerDeals implements OnInit, OnDestroy {
     const sellerId = this.authService.currentUser()?.id;
     if (!sellerId) {
       this.loading.set(false);
-      this.loadingError.set(toApiError(new Error('Unauthorized: no seller ID found for current user')));
+      this.loadingError.set(
+        toApiError(new Error('Unauthorized: no seller ID found for current user')),
+      );
       return;
     }
 
@@ -150,16 +197,34 @@ export class SellerDeals implements OnInit, OnDestroy {
     });
   }
 
+  loadDealsAnalytics() {
+    this.statsLoading.set(true);
+    this.dealsService.getSellerDealsAnalytics().subscribe({
+      next: (res) => {
+        this.dealAnalytics.set(res);
+        this.statsLoading.set(false);
+      },
+      error: (e) => {
+        this.loadingError.set(toApiError(e));
+        this.statsLoading.set(false);
+      },
+    });
+  }
+
   private applyResponse(response: PageResponse<DealOverview>) {
     this.deals.set(response.items.map(toDealRow));
+    this.deals().map((d) => console.log(d.time));
     this.total.set(response.total);
+    if (!this.hasActiveFilters()) {
+      this.allDealsTotal.set(response.total);
+    }
   }
 
   private currentParams() {
     const status = this.statusFilter();
     const search = this.searchQuery().trim();
     return {
-      status: status === 'ALL' ? undefined : status,
+      status: status ?? 'ALL',
       search: search || undefined,
       page: this.page(),
       limit: this.limit,
@@ -187,8 +252,8 @@ export class SellerDeals implements OnInit, OnDestroy {
     this.dealsPollSub = null;
   }
 
-  onStatusChange = (status: string) => {
-    this.statusFilter.set(this.isValidStatus(status) ? status : 'ALL');
+  onStatusChange = (value: string) => {
+    this.statusFilter.set(this.isValidStatus(value) ? value : null);
     this.page.set(1);
     this.loadDeals();
   };

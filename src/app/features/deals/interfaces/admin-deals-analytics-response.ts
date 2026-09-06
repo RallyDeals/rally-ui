@@ -1,4 +1,4 @@
-export interface DealsAnalyticsResponse {
+export interface AdminDealsAnalyticsResponse {
   totalDeals: number;
   dealsCreatedThisMonth: number;
   activeDeals: number;

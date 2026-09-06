@@ -5,7 +5,7 @@
   <div class="h-48 relative bg-surface-container-low overflow-hidden">
     <img
       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-      [src]="resolveImageUrl(deal().productImageUrl)"
+      [src]="resolveImageUrl(deal().productImageUrl, PLACEHOLDER_IMAGE)"
       [alt]="deal().productName"
     />
     <div

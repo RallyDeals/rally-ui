@@ -46,7 +46,7 @@ export function toDealOverview(res: DealResponse): DealOverview {
     neededCount,
     progressPercent,
     minParticipants: res.minParticipants,
-    status: res.status.toLowerCase() as DealStatus,
+    status: res.status as DealStatus,
     durationMinutes: res.durationMinutes,
     endTime: res.endTime ? new Date(res.endTime) : new Date(),
   };
