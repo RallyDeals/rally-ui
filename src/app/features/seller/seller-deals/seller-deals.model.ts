@@ -17,11 +17,10 @@ export interface DealRow {
   endTime: string | null;
   dealPrice: number;
   originalPrice: number;
+  durationMinutes: number;
   time: string;
   urgent: boolean;
 }
-
-export type StatusFilter = 'ALL' | DealStatus;
 
 export const DEAL_STATUS_OPTIONS: FilterPillOption[] = [
   { value: 'ALL', label: 'All' },
@@ -59,6 +58,21 @@ export function formatCountdown(timeRemainingInSeconds: number): string {
   return `${pad(h)}:${pad(m)}:${pad(s)}`;
 }
 
+export function formatDuration(minutes: number): string {
+  if (!minutes || minutes <= 0) {
+    return '—';
+  }
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h > 99) {
+    return `${Math.floor(h / 24)}d ${h % 24}h`;
+  }
+  if (h === 0) {
+    return `${m}m`;
+  }
+  return `${h}h ${m}m`;
+}
+
 function timeLabel(deal: DealOverview): string {
   switch (deal.status) {
     case DealStatus.ACTIVE:
@@ -93,6 +107,7 @@ export function toDealRow(deal: DealOverview): DealRow {
     endTime: STATUSES_WITH_END_TIME.has(deal.status) ? deal.endTime.toISOString() : null,
     dealPrice: deal.dealPrice,
     originalPrice: deal.originalPrice,
+    durationMinutes: deal.durationMinutes,
     time: timeLabel(deal),
     urgent: urgentLabel(deal),
   };

@@ -14,6 +14,7 @@ import { SellerDetailsStats } from './seller-details-stats/seller-details-stats'
 import { SellerProductRow } from './seller-product-row/seller-product-row';
 import { Pagination } from '../../../../shared/components/pagination/pagination';
 import { DealsService } from '../../../deals/deals.service';
+import { DealStatus } from '../../../../shared/models/deal';
 
 const PAGE_SIZE = 10;
 
@@ -84,7 +85,7 @@ export class SellerDetails implements OnInit {
   }
 
   loadActiveDealsCount(){
-    this.dealService.getSellerDeals(this.sellerId, { status: 'active', limit: 1 }).subscribe({
+    this.dealService.getSellerDeals(this.sellerId, { status: DealStatus.ACTIVE, limit: 1 }).subscribe({
       next: (deals) => {
         this.seller.update((seller) => {
           if (seller) {

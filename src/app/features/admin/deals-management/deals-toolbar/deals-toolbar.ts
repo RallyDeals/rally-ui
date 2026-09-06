@@ -2,7 +2,7 @@ import { Component, input, output } from '@angular/core';
 import { DealStatus } from '../../../../shared/models/deal';
 import { SearchableSelect, SelectOption } from '../../../../shared/components/searchable-select/searchable-select';
 
-export type DealStatusFilter = DealStatus | '';
+export type DealStatusFilter = DealStatus | 'ALL';
 
 const STATUS_OPTIONS: SelectOption[] = [
   { value: DealStatus.ACTIVE, label: 'Active' },
@@ -17,14 +17,14 @@ const STATUS_OPTIONS: SelectOption[] = [
 })
 export class DealsToolbar {
   search = input('');
-  status = input<DealStatusFilter>('');
+  status = input<string>('ALL');
 
   searchChange = output<string>();
-  statusChange = output<DealStatusFilter>();
+  statusChange = output<string>();
 
   readonly statusOptions = STATUS_OPTIONS;
 
   onStatusChange(value: string) {
-    this.statusChange.emit(value as DealStatusFilter);
+    this.statusChange.emit(value);
   }
 }

@@ -15,7 +15,7 @@
     <div class="w-full lg:w-48">
       <app-searchable-select
         [options]="statusOptions"
-        [selected]="status()"
+        [selected]="status()[0] ?? 'ALL'"
         (selectedChange)="onStatusChange($event)"
         placeholder="All Statuses"
         searchPlaceholder="Search status..." />
