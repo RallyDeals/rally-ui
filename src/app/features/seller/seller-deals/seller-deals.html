@@ -83,10 +83,18 @@
           }
         </div>
       } @else if (deals().length === 0) {
-        <div class="text-center py-16">
-          <span class="material-symbols-outlined text-5xl text-primary mb-4 block">group_off</span>
-          <h3 class="section-title mb-1">No deals found</h3>
-          <p class="body-subtle">Try adjusting your search or status filter.</p>
+        <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
+          <span class="material-symbols-outlined text-on-surface-variant text-[40px]">{{ emptyState().icon }}</span>
+          <h2 class="section-title-plain">{{ emptyState().title }}</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant max-w-md">{{ emptyState().message }}</p>
+          @if (emptyState().actionLabel) {
+            <a
+              routerLink="/seller/deals/new"
+              class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+            >
+              {{ emptyState().actionLabel }}
+            </a>
+          }
         </div>
       } @else {
         <table class="w-full text-left border-collapse">

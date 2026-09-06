@@ -67,10 +67,32 @@ export class SellerDeals implements OnInit, OnDestroy {
   page = signal(1);
   limit = PAGE_SIZE;
   total = signal(0);
+  allDealsTotal = signal(0);
   deals = signal<DealRow[]>([]);
   loading = signal(true);
   loadingError = signal<ApiError|null>(null);
   deleteTarget = signal<DealRow | null>(null);
+
+  readonly hasActiveFilters = computed(
+    () => this.statusFilter() !== null || this.searchQuery().trim().length > 0,
+  );
+
+  readonly emptyState = computed(() => {
+    if (this.hasActiveFilters() && this.allDealsTotal() > 0) {
+      return {
+        title: 'No deals found',
+        message: 'Try adjusting your filters to see matching deals.',
+        icon: 'search_off',
+        actionLabel: null,
+      };
+    }
+    return {
+      title: 'No deals yet',
+      message: 'When you create a deal, it will show up here.',
+      icon: 'group_off',
+      actionLabel: 'New Deal',
+    };
+  });
 
   readonly deleteRequest = computed<ConfirmDialogRequest | null>(() => {
     const deal = this.deleteTarget();
@@ -153,6 +175,9 @@ export class SellerDeals implements OnInit, OnDestroy {
   private applyResponse(response: PageResponse<DealOverview>) {
     this.deals.set(response.items.map(toDealRow));
     this.total.set(response.total);
+    if (!this.hasActiveFilters()) {
+      this.allDealsTotal.set(response.total);
+    }
   }
 
   private currentParams() {

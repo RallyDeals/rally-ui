@@ -105,10 +105,10 @@ export class SellerProducts implements OnInit, OnDestroy {
     }
 
     return {
-      title: 'No orders yet',
-      message: 'When you place an order, it will show up here.',
-      icon: 'shopping_bag',
-      actionLabel: 'Browse Products',
+      title: 'No products yet',
+      message: 'When you create a product, it will show up here.',
+      icon: 'inventory_2',
+      actionLabel: 'Create Product',
     };
   });
 
