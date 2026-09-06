@@ -160,8 +160,6 @@
                     <span class="material-symbols-outlined text-[20px]">check_circle</span>
                     You joined this rally!
                   </div>
-                }
-                @if (isActive()) {
                   <button
                     class="w-full bg-transparent border border-outline-variant hover:border-primary-container hover:text-primary-container text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                     (click)="inviteFriends()"
@@ -172,7 +170,7 @@
                     {{ copied() ? 'Invite link copied!' : 'Invite Friends' }}
                   </button>
                 }
-                @if ((joined() === 'active' || joined() === 'pending') && !isClosed()) {
+                @if ((joined() === 'active') && !isClosed()) {
                   <button
                     class="w-full bg-transparent border border-error/40 hover:border-error hover:text-error text-on-surface-variant font-body-md text-body-md py-3 rounded-lg transition-colors flex justify-center items-center gap-2 cursor-pointer"
                     (click)="leaveDeal()"
@@ -207,7 +205,7 @@
                   } @else {
                     <span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
                       <span class="material-symbols-outlined text-[16px]">group_add</span>
-                      {{ deal.minParticipants - deal.currentParticipants }} more needed to reach the minimum of {{ deal.minParticipants }}
+                      {{ deal.minParticipants - deal.authorizedCount }} more needed to reach the minimum of {{ deal.minParticipants }}
                     </span>
                   }
                   <p class="font-label-sm text-label-sm text-on-surface-variant text-right whitespace-nowrap">
