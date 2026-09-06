@@ -91,7 +91,7 @@ export class SellerManagement implements OnInit {
         console.error('Error loading pending approval products:', err);
       },
     });
-    this.dealService.getDealsAnalytics().subscribe({
+    this.dealService.getAdminDealsAnalytics().subscribe({
       next: (response) => {
         this.activeDealsCount.set(response.activeDeals);
       },
