@@ -19,48 +19,23 @@
       </aside>
 
       <div class="min-w-0 md:w-full">
-        <div class="filter-toolbar">
-          <div class="search-box">
-            <button
-              class="search-icon hover:cursor-pointer"
-              (mousedown)="$event.preventDefault()"
-              (click)="search()"
-              aria-label="Search"
+        <div class="flex justify-end">
+          <div class="filter-toolbar w-fit">
+            <p class="result-count font-body-md text-body-md ">
+              Showing {{ fromIndex() }}–{{ toIndex() }} of {{ total() }}
+            </p>
+
+            <select
+              class="filter-select"
+              [value]="sortBy()"
+              (change)="onSortChange($any($event.target).value)"
+              aria-label="Sort deals"
             >
-              <span class="material-symbols-outlined">search</span>
-            </button>
-            <input
-              class="search-input"
-              placeholder="Search deals..."
-              [value]="searchQuery()"
-              (input)="onSearchInput($any($event.target).value)"
-              (keyup.enter)="search()"
-            />
-            @if (searchQuery()) {
-              <button
-                class="search-clear hover:cursor-pointer"
-                (mousedown)="$event.preventDefault()"
-                (click)="clearSearch()"
-              >
-                <span class="icon-lg">close</span>
-              </button>
-            }
+              @for (option of sortOptions; track option.key) {
+                <option [value]="option.key">{{ option.label }}</option>
+              }
+            </select>
           </div>
-
-          <p class="result-count font-body-md text-body-md">
-            Showing {{ fromIndex() }}–{{ toIndex() }} of {{ total() }}
-          </p>
-
-          <select
-            class="filter-select"
-            [value]="sortBy()"
-            (change)="onSortChange($any($event.target).value)"
-            aria-label="Sort deals"
-          >
-            @for (option of sortOptions; track option.key) {
-              <option [value]="option.key">{{ option.label }}</option>
-            }
-          </select>
         </div>
 
         @if (activeFilterCount() > 0) {
@@ -142,7 +117,8 @@
         } @else if (loading()) {
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
             @for (skeleton of [1, 2, 3, 4, 5, 6]; track skeleton) {
-              <div class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant soft-shadow animate-pulse">
+              <div
+                class="bg-surface-container-lowest rounded-2xl overflow-hidden border border-outline-variant soft-shadow animate-pulse">
                 <div class="h-48 bg-surface-container-low"></div>
                 <div class="p-rally-md">
                   <div class="h-3 bg-surface-container-low rounded mb-2 w-3/4"></div>
