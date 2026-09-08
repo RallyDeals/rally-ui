@@ -1,16 +1,5 @@
 <div
-  class=" bg-surface-container-low/15 rounded-xl flex flex-col lg:flex-row items-start lg:items-center justify-between gap-rally-md relative">
-  <div class="flex items-center gap-rally-sm w-full lg:w-auto">
-    <div class="relative w-full max-w-md">
-      <span class="material-symbols-outlined absolute left-rally-sm top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
-      <input
-        class="w-full bg-surface-container-lowest text-on-surface text-body-md font-body-md rounded-full py-2 pl-12 pr-4 border-none outline-none shadow-sm transition-shadow focus:outline-none focus:ring-0 focus:border-none focus:shadow-sm"
-        placeholder="Search deals..."
-        type="text"
-        [value]="search()"
-        (input)="searchChange.emit($any($event.target).value)" />
-    </div>
-  </div>
+  class=" bg-surface-container-low/15 rounded-xl flex flex-col lg:flex-row items-start lg:items-center justify-end gap-rally-md relative">
   <div class="flex items-center gap-rally-sm flex-wrap w-full lg:w-auto">
     <div class="w-full lg:w-48">
       <app-searchable-select

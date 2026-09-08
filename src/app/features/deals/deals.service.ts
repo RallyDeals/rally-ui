@@ -94,7 +94,7 @@ export class DealsService {
       .get<SpringPage<DealResponse>>(this.baseUrl, {
         params: {
           page,
-          size: limit,
+          limit: limit,
           ...(search && { search }),
           ...(status && { status }),
           ...(categories && { categories }),
