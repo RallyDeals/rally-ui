@@ -19,8 +19,20 @@
       </aside>
 
       <div class="min-w-0 md:w-full">
-        <div class="flex justify-end">
-          <div class="filter-toolbar w-fit">
+        <div class="filter-toolbar flex justify-between">
+          <div>
+            <select
+              class="filter-select"
+              [value]="filterBy()"
+              (change)="onFilterChange($any($event.target).value)"
+              aria-label="Filter deals"
+            >
+              @for (option of statusOptions; track option.key) {
+                <option [value]="option.key">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+          <div class="flex items-center gap-rally-md">
             <p class="result-count font-body-md text-body-md ">
               Showing {{ fromIndex() }}–{{ toIndex() }} of {{ total() }}
             </p>

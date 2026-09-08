@@ -79,8 +79,7 @@ export class DealsService {
   }
 
   getDealsOverview(params: DealsQueryParams = {}): Observable<PageResponse<DealOverview>> {
-    const search = params.search?.trim().toLowerCase();
-    const status = params.status;
+    const status = params.status?.trim().toUpperCase();
     const categories = params.categories?.length ? params.categories : undefined;
     const sellerId = params.sellerId;
     const productId = params.productId;
@@ -95,7 +94,6 @@ export class DealsService {
         params: {
           page,
           limit: limit,
-          ...(search && { search }),
           ...(status && { status }),
           ...(categories && { categories }),
           ...(sellerId && { sellerId }),
