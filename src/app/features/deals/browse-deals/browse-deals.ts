@@ -12,8 +12,9 @@ import { CategoriesService } from '../../categories/categories.service';
 import { DealsService } from '../deals.service';
 import { DealStatus } from '../../../shared/models/deal';
 import { DealOverview } from '../interfaces/deal-overview';
-import { DealSortKey } from '../interfaces/deals-query-params';
+import { BuyerFilterDeals, DealSortKey } from '../interfaces/deals-query-params';
 
+const DEFAULT_FILTER: BuyerFilterDeals = '';
 const DEFAULT_SORT: DealSortKey = 'relevance';
 const DEALS_PER_PAGE = 6;
 
@@ -35,6 +36,7 @@ export class BrowseDeals implements OnInit {
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal<DealSortKey>(DEFAULT_SORT);
+  filterBy = signal<BuyerFilterDeals>(DEFAULT_FILTER);
   sellerId = signal<string | null>(null);
   sellerName = signal<string | null>(null);
   page = signal(1);
@@ -48,6 +50,12 @@ export class BrowseDeals implements OnInit {
     { key: 'price-asc', label: 'Price: Low to High' },
     { key: 'price-desc', label: 'Price: High to Low' },
     { key: 'discount', label: 'Discount %' },
+  ];
+
+  statusOptions: { key: BuyerFilterDeals; label: string }[] = [
+    { key: '', label: 'All' },
+    { key: 'active', label: 'Active' },
+    { key: 'pending', label: 'Pending' },
   ];
 
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / this.limit)));
@@ -124,7 +132,7 @@ export class BrowseDeals implements OnInit {
     this.loadError.set(null);
     this.dealsService
       .getDealsOverview({
-        status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`,
+        status: this.filterBy(),
         search: this.searchQuery().trim() || undefined,
         categories: Array.from(this.selectedCategoryIds()),
         minPrice: this.minPrice() ?? undefined,
@@ -168,23 +176,14 @@ export class BrowseDeals implements OnInit {
     this.loadDeals();
   };
 
-  onSearchInput = (value: string) => {
-    this.searchQuery.set(value);
-  };
-
-  search = () => {
-    this.page.set(1);
-    this.loadDeals();
-  };
-
-  clearSearch = () => {
-    this.searchQuery.set('');
-    this.page.set(1);
-    this.loadDeals();
-  };
-
   onSortChange = (value: string) => {
     this.sortBy.set(value as DealSortKey);
+    this.page.set(1);
+    this.loadDeals();
+  };
+
+  onFilterChange = (value: string) => {
+    this.filterBy.set(value as BuyerFilterDeals);
     this.page.set(1);
     this.loadDeals();
   };

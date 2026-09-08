@@ -1,5 +1,3 @@
-import { DealStatus } from '../../../shared/models/deal';
-
 export type DealSortKey =
   | 'relevance'
   | 'price-asc'
@@ -8,6 +6,12 @@ export type DealSortKey =
   | 'ending-soon'
   | 'most-joined'
   | 'newest';
+
+export type BuyerFilterDeals =
+  | 'pending'
+  | 'active'
+  | '';
+
 
 export interface DealsQueryParams {
   // buyer browse + dashboards
