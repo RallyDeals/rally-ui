@@ -12,7 +12,7 @@ export interface DealPriceRange {
   templateUrl: './deal-filters.html',
 })
 export class DealFilters {
-  categories = input.required<Category[]>();
+  categories = input<Category[]>([]);
   selectedCategoryIds = input<string[]>([]);
   minPrice = input<number | null>(null);
   maxPrice = input<number | null>(null);
