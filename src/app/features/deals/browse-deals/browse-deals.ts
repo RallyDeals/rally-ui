@@ -126,7 +126,7 @@ export class BrowseDeals implements OnInit {
       .getDealsOverview({
         status: `${DealStatus.PENDING},${DealStatus.ACTIVE}`,
         search: this.searchQuery().trim() || undefined,
-        categories: this.selectedCategoryNames(),
+        categories: Array.from(this.selectedCategoryIds()),
         minPrice: this.minPrice() ?? undefined,
         maxPrice: this.maxPrice() ?? undefined,
         sort: this.sortBy(),
@@ -145,17 +145,6 @@ export class BrowseDeals implements OnInit {
           this.loadError.set(toApiError(err));
         },
       });
-  }
-
-  private selectedCategoryNames(): string[] | undefined {
-    const categoryIds = this.selectedCategoryIds();
-    if (categoryIds.size === 0) {
-      return undefined;
-    }
-    const names = this.categories()
-      .filter((category) => categoryIds.has(category.id))
-      .map((category) => category.name);
-    return names.length ? names : undefined;
   }
 
   onCategoryToggle = (categoryId: string) => {

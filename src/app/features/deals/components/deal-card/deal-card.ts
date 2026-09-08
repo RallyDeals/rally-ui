@@ -5,6 +5,7 @@ import { resolveImageUrl } from '../../../../shared/utils/image-url';
 import { DealOverview } from '../../interfaces/deal-overview';
 import { dealBadge } from '../../deal-badge';
 import { DealStatus } from '../../../../shared/models/deal';
+import { PLACEHOLDER_IMAGE } from '../../../../shared/constants/placeholder';
 
 @Component({
   selector: 'app-active-deal-card',
@@ -32,4 +33,5 @@ export class ActiveDealCard {
   minReached = computed(() => this.deal().currentParticipants >= this.deal().minParticipants);
 
   isPending = computed(() => this.deal().status === DealStatus.PENDING);
+  protected readonly PLACEHOLDER_IMAGE = PLACEHOLDER_IMAGE;
 }

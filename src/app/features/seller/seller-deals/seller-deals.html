@@ -25,12 +25,27 @@
   </header>
 
   <!-- Quick Stats Bento Grid -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
-    <app-metric-card label="Active Deals" value="12" symbol="bolt" trend="positive" trendLabel="+2 this week" />
-    <app-metric-card label="Total Revenue" value="$42,890.00" symbol="payments" trend="positive" trendLabel="14% growth" />
-    <app-metric-card label="Participants" value="1,402" symbol="groups" trendLabel="Across all campaigns" />
-    <app-metric-card label="Avg. Completion" value="88.4%" symbol="verified" trend="positive" trendLabel="Success rate" />
-  </div>
+  @if (statsLoading()) {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
+      @for (s of [1, 2, 3, 4]; track s) {
+        <div
+          class="relative flex flex-col h-28 bg-surface-container-lowest p-rally-md rounded-xl border border-outline-variant shadow-sm"
+        >
+          <div class="absolute top-rally-md right-rally-md w-6 h-6 rounded bg-surface-container animate-pulse"></div>
+          <div class="h-3 w-20 bg-surface-container rounded animate-pulse"></div>
+          <div class="h-6 w-24 bg-surface-container rounded mt-rally-sm animate-pulse"></div>
+          <div class="h-3 w-16 bg-surface-container rounded mt-2 animate-pulse"></div>
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-rally-gutter">
+      <app-metric-card label="Active Deals" value="{{ dealAnalytics()?.activeDealCnt }}" symbol="bolt" />
+      <app-metric-card label="Total Revenue" value="${{ dealAnalytics()?.totalRevenue }}" symbol="payments" />
+      <app-metric-card label="Participants" value="{{ dealAnalytics()?.participantsJoined }}" symbol="groups" />
+      <app-metric-card label="Avg. Completion" value="%{{ (dealAnalytics()?.avgCompletionRate ?? 0)*100 }}" symbol="verified" />
+    </div>
+  }
 
   <!-- Filter Bar -->
   <div
@@ -46,7 +61,7 @@
       <div class="h-6 w-px bg-outline-variant/30 flex-shrink-0"></div>
       <app-filter-pills
         [options]="statusOptions"
-        [selected]="statusFilter()"
+        [selected]="statusFilter() ?? 'ALL'"
         (selectedChange)="onStatusChange($event)"
       />
     </div>
@@ -83,10 +98,18 @@
           }
         </div>
       } @else if (deals().length === 0) {
-        <div class="text-center py-16">
-          <span class="material-symbols-outlined text-5xl text-primary mb-4 block">group_off</span>
-          <h3 class="section-title mb-1">No deals found</h3>
-          <p class="body-subtle">Try adjusting your search or status filter.</p>
+        <div class="flex flex-col items-center justify-center text-center gap-rally-sm py-rally-xl">
+          <span class="material-symbols-outlined text-on-surface-variant text-[40px]">{{ emptyState().icon }}</span>
+          <h2 class="section-title-plain">{{ emptyState().title }}</h2>
+          <p class="font-body-md text-body-md text-on-surface-variant max-w-md">{{ emptyState().message }}</p>
+          @if (emptyState().actionLabel) {
+            <a
+              routerLink="/seller/deals/new"
+              class="btn-primary bg-primary mt-rally-xs px-rally-lg py-3 rounded-lg font-label-sm text-[14px]"
+            >
+              {{ emptyState().actionLabel }}
+            </a>
+          }
         </div>
       } @else {
         <table class="w-full text-left border-collapse">
@@ -96,7 +119,7 @@
               <th class="table-head-cell">Status</th>
               <th class="table-head-cell">Participants</th>
               <th class="table-head-cell">Deal Price</th>
-              <th class="table-head-cell">Time Remaining</th>
+              <th class="table-head-cell">Time</th>
               <th class="table-head-cell text-right">Actions</th>
             </tr>
           </thead>
@@ -142,25 +165,22 @@
                   <p class="text-label-sm text-on-surface-variant line-through">${{ deal.originalPrice }}</p>
                 </td>
                 <td class="table-cell">
-                  <div
-                    class="flex items-center gap-1"
-                    [class]="
-                      deal.urgent
-                        ? 'font-semibold text-tertiary'
-                        : 'text-on-surface-variant text-label-sm font-medium'
-                    "
-                  >
-                    @if (deal.status === DealStatus.ACTIVE) {
+                  @if (deal.status === DealStatus.ACTIVE) {
+                    <div
+                      class="flex items-center gap-1"
+                      [class]="
+                        deal.urgent
+                          ? 'font-semibold text-tertiary'
+                          : 'text-on-surface-variant text-label-sm font-medium'
+                      "
+                    >
                       <span class="material-symbols-outlined text-[18px]">timer</span>
                       <span class="tabular-nums">{{ countdownLabel(deal.endTime) }}</span>
-                    } @else {
-                      {{ deal.time }}
-                    }
-                  </div>
-                  @if (deal.endTime) {
-                    <div class="flex flex-col items-start gap-0.5 mt-1">
-                      <span class="text-label-sm text-on-surface-variant">Ends {{ deal.endTime | date: 'MMM d' }}</span>
-                      <span class="text-label-sm text-on-surface">{{ deal.endTime | date: 'HH:mm' }}</span>
+                    </div>
+                  } @else {
+                    <div class="flex items-center gap-1 text-on-surface-variant text-label-sm font-medium">
+                      <span class="material-symbols-outlined text-[18px]">schedule</span>
+                      <span class="tabular-nums">{{ deal.time }} &middot; {{ formatDuration(deal.durationMinutes) }}</span>
                     </div>
                   }
                 </td>

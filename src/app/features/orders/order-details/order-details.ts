@@ -1,4 +1,4 @@
-import { Component, effect, inject, input, signal } from '@angular/core';
+import { Component, computed, effect, inject, input, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { OrderHeader } from './order-header/order-header';
 import { ShippingAddressCard } from './shipping-address-card/shipping-address-card';
@@ -16,6 +16,7 @@ import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { resolveImageUrl } from '../../../shared/utils/image-url';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
+import { OrderDetailsSkeleton } from './order-details-skeleton/order-details-skeleton';
 
 const SHIPPING_COST = 20;
 const TAX_RATE = 0.08;
@@ -29,6 +30,7 @@ const TAX_RATE = 0.08;
     OrderItemsList,
     OrderSummaryComponent,
     ErrorState,
+    OrderDetailsSkeleton,
   ],
   templateUrl: './order-details.html',
   styleUrl: './order-details.css',
@@ -45,6 +47,7 @@ export class OrderDetails {
   orderItems = signal<OrderItem[]>([]);
   orderSummary = signal<OrderSummary | null>(null);
   error = signal<ApiError | null>(null);
+  loading = computed(() => !this.order() && !this.error());
 
   constructor() {
     effect(() => {

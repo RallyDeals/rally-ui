@@ -1,9 +1,9 @@
 export enum DealStatus {
-  PENDING= 'pending',
-  ACTIVE= 'active',
-  SUCCEEDED= 'succeeded',
-  FAILED= 'failed',
-  CANCELLED= 'cancelled'
+  PENDING= 'PENDING',
+  ACTIVE= 'ACTIVE',
+  SUCCEEDED= 'SUCCEEDED',
+  FAILED= 'FAILED',
+  CANCELLED= 'CANCELLED'
 }
 export interface Deal {
   id: string;

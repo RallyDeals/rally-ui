@@ -36,6 +36,7 @@ export class SellerOrders {
   private readonly orderService = inject(OrderService);
 
   orders = signal<BriefSellerOrdersResponse[]>([]);
+  allOrdersTotal = signal(0);
   analytics = signal<SellerOrdersStatistics>({
     pendingOrders: 0,
     deliveredOrders: 0,
@@ -55,6 +56,27 @@ export class SellerOrders {
   totalPages = computed(() => Math.max(1, Math.ceil(this.total() / PAGE_SIZE)));
   rangeStart = computed(() => (this.total() === 0 ? 0 : (this.page() - 1) * PAGE_SIZE + 1));
   rangeEnd = computed(() => Math.min(this.page() * PAGE_SIZE, this.total()));
+
+  readonly hasActiveFilters = computed(
+    () => this.phaseFilter() !== 'ALL' || this.searchQuery().trim().length > 0,
+  );
+
+  readonly emptyState = computed(() => {
+    if (this.hasActiveFilters() && this.allOrdersTotal() > 0) {
+      return {
+        title: 'No orders found',
+        message: 'Try adjusting your search or status filter to see matching orders.',
+        icon: 'search_off',
+        actionLabel: null,
+      };
+    }
+    return {
+      title: 'No orders yet',
+      message: 'When a buyer places an order, it will show up here.',
+      icon: 'receipt_long',
+      actionLabel: null,
+    };
+  });
 
   phaseOptions: FilterPillOption[] = [
     { label: 'All', value: 'ALL' },
@@ -123,6 +145,9 @@ export class SellerOrders {
       next: (response) => {
         this.orders.set(response.orders);
         this.total.set(response.total);
+        if (!this.hasActiveFilters()) {
+          this.allOrdersTotal.set(response.total);
+        }
         this.isLoading.set(false);
       },
       error: (err) => {

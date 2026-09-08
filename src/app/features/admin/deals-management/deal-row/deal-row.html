@@ -40,5 +40,6 @@
     <app-countdown [endAt]="deal().endTime.toISOString()" />
   } @else {
     <span class="text-on-surface-variant text-label-sm">{{ timeLabel() }}</span>
+    <span class="text-on-surface-variant text-label-sm block">{{ formatDuration(deal().durationMinutes) }}</span>
   }
 </td>

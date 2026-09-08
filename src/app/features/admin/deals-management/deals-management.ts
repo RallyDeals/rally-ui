@@ -5,7 +5,7 @@ import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { DealsStats } from './deals-stats/deals-stats';
-import { DealsToolbar, DealStatusFilter } from './deals-toolbar/deals-toolbar';
+import { DealsToolbar } from './deals-toolbar/deals-toolbar';
 import { DealRow } from './deal-row/deal-row';
 import { DealsService } from '../../deals/deals.service';
 import { DealOverview } from '../../deals/interfaces/deal-overview';
@@ -25,7 +25,7 @@ export class DealsManagement implements OnInit {
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
   search = signal('');
-  status = signal<DealStatusFilter>('');
+  status = signal<string>('ALL');
   page = signal(1);
 
   totalDeals = signal(0);
@@ -50,7 +50,7 @@ export class DealsManagement implements OnInit {
     this.dealsService
       .getDealsOverview({
         search: this.search(),
-        status: this.status() || undefined,
+        status: this.status() || 'ALL',
         page: this.page(),
         limit: PAGE_SIZE,
       })
@@ -68,7 +68,7 @@ export class DealsManagement implements OnInit {
   }
 
   loadAnalytics() {
-    this.dealsService.getDealsAnalytics().subscribe({
+    this.dealsService.getAdminDealsAnalytics().subscribe({
       next: (response) => {
         this.totalDeals.set(response.totalDeals);
         this.dealsCreatedThisMonth.set(response.dealsCreatedThisMonth);
@@ -89,7 +89,7 @@ export class DealsManagement implements OnInit {
     this.loadDeals();
   };
 
-  onStatusChange = (status: DealStatusFilter) => {
+  onStatusChange = (status: string) => {
     this.status.set(status);
     this.page.set(1);
     this.loadDeals();

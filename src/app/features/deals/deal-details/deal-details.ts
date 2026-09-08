@@ -35,7 +35,6 @@ const NOT_FOUND_ERROR: ApiError = {
   title: 'Not found',
 };
 
-// Deals carry no createdAt; the window a deal opened in is derived from when it ends minus how long it ran.
 function dealStartTime(deal: DealDetailsModel): number {
   return deal.endTime.getTime() - deal.durationMinutes * 60000;
 }
@@ -56,7 +55,7 @@ const FAQS = [
   },
 ];
 
-const DEAL_POLL_INTERVAL_MS = 15_000;
+const DEAL_POLL_INTERVAL_MS = 5_000;
 const JOIN_POLL_INTERVAL_MS = 3_000;
 const JOIN_POLL_TIMEOUT_MS = 30_000;
 
