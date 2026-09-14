@@ -71,9 +71,9 @@ export class DealsManagement implements OnInit {
     this.dealsService.getAdminDealsAnalytics().subscribe({
       next: (response) => {
         this.totalDeals.set(response.totalDeals);
-        this.dealsCreatedThisMonth.set(response.dealsCreatedThisMonth);
+        this.dealsCreatedThisMonth.set(response.dealsThisMonth);
         this.activeDeals.set(response.activeDeals);
-        this.dealsCreatedToday.set(response.dealsCreatedToday);
+        this.dealsCreatedToday.set(response.dealsToday);
         this.completedDeals.set(response.completedDeals);
         this.successRate.set(response.successRate);
       },
