@@ -114,8 +114,14 @@
                     <span class="font-body-lg text-body-lg text-on-surface-variant line-through opacity-60">
                       {{ deal.originalPrice | currency }}
                     </span>
+                    @if (savingsPercent() > 0) {
+                      <span class="save-badge mb-2">
+                        Save {{ savingsPercent() }}%
+                      </span>
+                    }
                   </div>
                 </div>
+                @if(deal.status === 'ACTIVE'){
                 <div class="text-right">
                   <div
                     class="text-error font-label-sm text-label-sm mb-1 uppercase tracking-wider font-bold animate-pulse">
@@ -125,6 +131,7 @@
                     <app-countdown [endAt]="deal.endTime.toISOString()" [pending]="isPending()" />
                   </div>
                 </div>
+                }
               </div>
 
               <div class="flex flex-col gap-rally-sm">
@@ -153,7 +160,7 @@
                   @if (joinError(); as joinErr) {
                     <p class="font-label-sm text-label-sm text-error">{{ joinErr }}</p>
                   }
-                } @else if (joined() === 'active') {
+                } @else if (joined() === 'active' && deal?.status === 'ACTIVE') {
                   <div
                     class="w-full bg-surface-container text-on-surface-variant font-body-md text-body-md py-4 rounded-lg text-center font-semibold flex items-center justify-center gap-2"
                   >
@@ -205,7 +212,8 @@
                   } @else {
                     <span class="font-label-sm text-label-sm text-on-surface-variant flex items-center gap-1">
                       <span class="material-symbols-outlined text-[16px]">group_add</span>
-                      {{ deal.minParticipants - deal.authorizedCount }} more needed to reach the minimum of {{ deal.minParticipants }}
+                      {{ deal.minParticipants - deal.authorizedCount }}
+                      more needed to reach the minimum of {{ deal.minParticipants }}
                     </span>
                   }
                   <p class="font-label-sm text-label-sm text-on-surface-variant text-right whitespace-nowrap">

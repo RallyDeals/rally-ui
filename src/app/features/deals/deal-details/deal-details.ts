@@ -97,6 +97,7 @@ export class DealDetails implements OnInit {
   showPaymentDialog = signal(false);
   selectedTab = signal<DealTab>('description');
   selectedImage = signal<string | null>(null);
+  inviteCode = signal<string | null>(null);
   private copyTimer: ReturnType<typeof setTimeout> | undefined;
 
   faqs = FAQS;
@@ -233,6 +234,9 @@ export class DealDetails implements OnInit {
 
   ngOnInit(): void {
     window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    this.route.queryParamMap.subscribe((params) => {
+      this.inviteCode.set(params.get('invite'));
+    });
     this.route.paramMap.subscribe((params) => {
       const id = params.get('id');
       if (id) {
@@ -420,7 +424,7 @@ export class DealDetails implements OnInit {
   joinDeal = () => {
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login'], {
-        queryParams: { returnUrl: `/deals/${this.route.snapshot.paramMap.get('id')}` },
+        queryParams: { returnUrl: this.router.url },
       });
       return;
     }
@@ -433,7 +437,9 @@ export class DealDetails implements OnInit {
     this.showPaymentDialog.set(false);
     this.joinError.set(null);
     this.joinPending.set(true);
-    this.dealsService.joinDeal(deal.id, data.paymentMethodId, data.address).subscribe({
+    this.dealsService
+      .joinDeal(deal.id, data.paymentMethodId, data.address, this.inviteCode() ?? undefined)
+      .subscribe({
       next: (participation) => this.startJoinStatusPoll(deal.id, participation.id),
       error: () => {
         this.joinPending.set(false);
