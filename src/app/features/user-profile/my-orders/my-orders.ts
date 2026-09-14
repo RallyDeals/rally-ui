@@ -183,7 +183,11 @@ export class MyOrders {
           }
         },
         next: (response) => {
-          this.orders.update(()=>[...this.orders(), ...response.orders]);
+          if (isFirstPage) {
+            this.orders.set(response.orders);
+          } else {
+            this.orders.update(() => [...this.orders(), ...response.orders]);
+          }
           this.total.set(response.total);
           if (!hasActiveFiltersAtRequestTime) {
             this.allOrdersTotal.set(response.total);
