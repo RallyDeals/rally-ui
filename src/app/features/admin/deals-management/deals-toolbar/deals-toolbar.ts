@@ -2,12 +2,11 @@ import { Component, input, output } from '@angular/core';
 import { DealStatus } from '../../../../shared/models/deal';
 import { SearchableSelect, SelectOption } from '../../../../shared/components/searchable-select/searchable-select';
 
-export type DealStatusFilter = DealStatus | 'ALL';
-
 const STATUS_OPTIONS: SelectOption[] = [
   { value: DealStatus.ACTIVE, label: 'Active' },
   { value: DealStatus.SUCCEEDED, label: 'Succeeded' },
   { value: DealStatus.FAILED, label: 'Failed' },
+  { value: DealStatus.PENDING, label: 'Pending' },
 ];
 
 @Component({

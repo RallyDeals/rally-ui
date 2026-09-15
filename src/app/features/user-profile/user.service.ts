@@ -42,7 +42,7 @@ export class UserService {
     return this.http
       .get<MyDealsResponse>(`${this.apiUrl}/my-deals`, {
         params: {
-          page: params.page ?? 0,
+          page: params.page ?? 1,
           size: params.size ?? 20,
           ...(params.participationStatus && {
             participationStatus: params.participationStatus,

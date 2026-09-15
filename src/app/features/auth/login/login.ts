@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { ButtonModule } from 'primeng/button';
 import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
@@ -30,6 +30,7 @@ export class Login {
   private readonly fb = inject(FormBuilder);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
+  private readonly route = inject(ActivatedRoute);
 
   readonly rememberMe = signal<boolean>(false);
   readonly submitting = signal(false);
@@ -42,6 +43,20 @@ export class Login {
 
   onChecked($event: Event): void {
     this.rememberMe.update((value) => !value);
+  }
+
+  private resolveRedirect(role: string): string {
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl && returnUrl.startsWith('/')) {
+      return returnUrl;
+    }
+    if (role === 'ADMIN') {
+      return 'admin';
+    }
+    if (role === 'SELLER') {
+      return 'seller';
+    }
+    return '/';
   }
 
   onSubmit(): void {
@@ -57,13 +72,7 @@ export class Login {
 
     this.authService.login({ email, password }, this.rememberMe()).subscribe({
       next: (response) => {
-        if (response.user.role === 'ADMIN') {
-          this.router.navigateByUrl('admin');
-        } else if (response.user.role === 'SELLER') {
-          this.router.navigateByUrl('seller');
-        } else {
-          this.router.navigateByUrl('/');
-        }
+        this.router.navigateByUrl(this.resolveRedirect(response.user.role));
       },
       error: (err) => {
         this.submitting.set(false);

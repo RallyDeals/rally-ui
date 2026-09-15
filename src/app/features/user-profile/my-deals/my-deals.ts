@@ -1,4 +1,5 @@
 import { Component, computed, inject, signal } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { NgClass } from '@angular/common';
 import { StatCard } from './stat-card/stat-card';
 import { toMyDeal } from './my-deal.mapper';
@@ -23,7 +24,6 @@ const PARTICIPATION_STATUS_OPTIONS: SelectOption[] = [
 ];
 
 const DEAL_STATUS_OPTIONS: { value: DealStatus; label: string }[] = [
-  { value: DealStatus.PENDING, label: 'Gathering' },
   { value: DealStatus.ACTIVE, label: 'Active' },
   { value: DealStatus.SUCCEEDED, label: 'Succeeded' },
   { value: DealStatus.FAILED, label: 'Failed' }
@@ -37,6 +37,7 @@ const DEAL_STATUS_OPTIONS: { value: DealStatus; label: string }[] = [
 export class MyDeals {
   private readonly userService = inject(UserService);
   private readonly router = inject(Router);
+  private pageRequest: Subscription | null = null;
 
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
@@ -116,6 +117,7 @@ export class MyDeals {
     } else {
       next.add(status);
     }
+    this.myDeals.set([]);
     this.dealStatusFilter.set(next);
     this.page.set(1);
     this.loadPage();
@@ -124,9 +126,10 @@ export class MyDeals {
   loadPage() {
     const isFirstPage = this.page() === 1;
     const hasActiveFiltersAtRequestTime = this.hasActiveFilters();
+    this.pageRequest?.unsubscribe();
     this.loading.set(true);
     this.loadError.set(null);
-    this.userService
+    this.pageRequest = this.userService
       .getMyDeals({
         page: this.page(),
         size: MAX_DEALS,
@@ -135,7 +138,11 @@ export class MyDeals {
       })
       .subscribe({
         next: (response) => {
-          this.myDeals.set(response.items);
+          if (isFirstPage) {
+            this.myDeals.set(response.items);
+          } else {
+            this.myDeals.update(() => [...this.myDeals(), ...response.items]);
+          }
           this.total.set(response.total);
           if (!hasActiveFiltersAtRequestTime) {
             this.allDealsTotal.set(response.total);
