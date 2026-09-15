@@ -1,8 +1,8 @@
 export interface AdminDealsAnalyticsResponse {
   totalDeals: number;
-  dealsCreatedThisMonth: number;
+  dealsThisMonth: number;
   activeDeals: number;
-  dealsCreatedToday: number;
+  dealsToday: number;
   completedDeals: number;
   successRate: number;
 }
