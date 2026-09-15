@@ -5,9 +5,9 @@
       <p class="text-on-surface-variant font-body-md">The premier destination for group-buying and social e-commerce.</p>
     </div>
     <app-footer-col [title]="'Shop'" [items]="[
-      { text: 'New Arrivals', route: '/shop/new-arrivals' },
-      { text: 'Top Deals', route: '/shop/top-deals' },
-      { text: 'Categories', route: '/shop/categories' }
+      { text: 'New Arrivals', route: '/products?sort=createdAt:desc' },
+      { text: 'Top Deals', route: '/deals?sort=most-joined' },
+      { text: 'Categories', route: '/categories' }
     ]" />
     <app-footer-col [title]="'Legal'" [items]="[
       { text: 'Privacy Policy', route: '/legal/privacy-policy' },
