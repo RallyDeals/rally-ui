@@ -1,3 +1,11 @@
+.pagination__nav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: var(--spacing-rally-xs);
+  max-width: 100%;
+}
 .pagination__btn {
   min-width: 2.5rem;
   height: 2.5rem;
@@ -31,4 +39,20 @@
 .pagination__ellipsis {
   padding: 0 0.25rem;
   color: var(--color-on-surface-variant);
+}
+
+@media (max-width: 31.25rem) {
+  .pagination__nav {
+    gap: 0.25rem;
+  }
+  .pagination__btn {
+    min-width: 2rem;
+    height: 2rem;
+    padding: 0 0.375rem;
+    border-radius: 0.375rem;
+    font-size: 0.875rem;
+  }
+  .pagination__ellipsis {
+    padding: 0 0.125rem;
+  }
 }
