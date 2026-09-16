@@ -33,5 +33,6 @@ export interface Product {
   deleted: boolean;
   deletedAt: string | null;
   availableStock?: number;
+  stockDescription?: string;
   deals?: ActiveDeal[];
 }

@@ -29,7 +29,7 @@
     title="Product Inventory"
     subtitle="Manage your storefront listings and stock levels in real-time."
   >
-    <app-stat-card label="Total Items" [value]="total().toString()" symbol="inventory" tone="primary" />
+    <app-stat-card label="Total Items" [value]="allProductsTotal().toString()" symbol="inventory" tone="primary" />
     <app-stat-card label="Pending" [value]="pendingCount().toString()" symbol="pending_actions" tone="neutral" />
     <app-stat-card label="Low Stock" [value]="lowStockCount().toString()" symbol="warning" tone="error" />
   </app-page-header>

@@ -122,9 +122,9 @@
                 <button
                   class="p-rally-xs text-on-surface-variant hover:text-primary transition-colors hover:cursor-pointer"
                   (click)="incrementQuantity()"
-                  [disabled]="quantity() >= availableStock()"
-                  [class.opacity-30]="quantity() >= availableStock()"
-                  [class.pointer-events-none]="quantity() >= availableStock()"
+                  [disabled]="inventoryKnown() && quantity() >= availableStock()"
+                  [class.opacity-30]="inventoryKnown() && quantity() >= availableStock()"
+                  [class.pointer-events-none]="inventoryKnown() && quantity() >= availableStock()"
                   aria-label="Increase quantity"
                 >
                   <span class="material-symbols-outlined">add</span>
@@ -145,7 +145,7 @@
             }
           </div>
 
-          @if (!outOfStock() && availableStock() <= 10) {
+          @if (inventoryKnown() && !outOfStock() && availableStock() <= 10) {
             <p class="font-label-sm text-label-sm text-error font-medium">
               Only {{ availableStock() }} left in stock
             </p>

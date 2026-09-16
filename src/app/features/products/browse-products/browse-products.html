@@ -56,27 +56,29 @@
               </button>
             }
           </div>
+          <div class="flex items-center gap-rally-md flex-wrap-reverse">
 
-          <p class="result-count font-body-md text-body-md">
-            Showing {{ fromIndex }}–{{ toIndex }} of {{ total() }}
-          </p>
+            <p class="result-count font-body-md text-body-md">
+              Showing {{ fromIndex }}–{{ toIndex }} of {{ total() }}
+            </p>
 
-          <select
-            class="filter-select"
-            [value]="sortBy()"
-            (change)="onSortChange($any($event.target).value)"
-          >
-            <option value="createdAt:desc">Newest</option>
-            <option value="basePrice:asc">Price: Low to High</option>
-            <option value="basePrice:desc">Price: High to Low</option>
-            <option value="name:asc">Name A-Z</option>
-          </select>
+            <select
+              class="filter-select"
+              [value]="sortBy()"
+              (change)="onSortChange($any($event.target).value)"
+            >
+              <option value="createdAt:desc">Newest</option>
+              <option value="basePrice:asc">Price: Low to High</option>
+              <option value="basePrice:desc">Price: High to Low</option>
+              <option value="name:asc">Name A-Z</option>
+            </select>
+          </div>
         </div>
 
         @if (activeFilterCount() > 0) {
           <div class="flex flex-wrap items-center gap-rally-xs mb-rally-md">
             <span class="font-body-md text-body-md text-on-surface-variant"
-              >Active filters:</span
+            >Active filters:</span
             >
             @if (selectedCategory(); as category) {
               <span
@@ -167,7 +169,7 @@
         } @else if (products().length === 0) {
           <div class="text-center py-16">
             <span class="material-symbols-outlined text-5xl text-primary mb-4 block"
-              >search_off</span
+            >search_off</span
             >
             <h2 class="section-title mb-1">
               No products found
@@ -180,7 +182,7 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-rally-md">
             @for (product of products(); track product.id) {
               @if (product.category) {
-                <app-product-card [product]="product" [outOfStock]="(product.availableStock ?? 0) <= 0" (addedToCart)="onAddedToCart($event)" />
+                <app-product-card [product]="product" />
               }
             }
           </div>

@@ -67,6 +67,7 @@ export class SellerDeals implements OnInit, OnDestroy {
   private readonly destroyRef = inject(DestroyRef);
   private readonly ngZone = inject(NgZone);
 
+  private dealsRequest: Subscription | null = null;
   private dealsPollSub: Subscription | null = null;
   private countdownTimer: ReturnType<typeof setInterval> | null = null;
 
@@ -154,6 +155,7 @@ export class SellerDeals implements OnInit, OnDestroy {
   }
 
   ngOnDestroy() {
+    this.dealsRequest?.unsubscribe();
     this.stopDealsPoll();
     if (this.countdownTimer) {
       clearInterval(this.countdownTimer);
@@ -183,7 +185,8 @@ export class SellerDeals implements OnInit, OnDestroy {
       return;
     }
 
-    this.dealsService.getSellerDeals(sellerId, this.currentParams()).subscribe({
+    this.dealsRequest?.unsubscribe();
+    this.dealsRequest = this.dealsService.getSellerDeals(sellerId, this.currentParams()).subscribe({
       next: (response) => {
         this.applyResponse(response);
         this.loading.set(false);

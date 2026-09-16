@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -9,6 +9,7 @@ import { UserToolbar } from './user-toolbar/user-toolbar';
 import { UserRow } from './user-row/user-row';
 import { UserService } from '../../auth/admin-user.service';
 import { BuyerStatus, User, UserType } from '../../../shared/models/user';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 3;
 
@@ -17,8 +18,9 @@ const PAGE_SIZE = 3;
   imports: [PageHeader, UserToolbar, UserRow, Pagination, ErrorState, ErrorModal],
   templateUrl: './user-management.html',
 })
-export class UserManagement implements OnInit {
+export class UserManagement implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
+  private usersRequest: Subscription | null = null;
 
   users = signal<User[]>([]);
   total = signal(0);
@@ -38,10 +40,15 @@ export class UserManagement implements OnInit {
     this.loadUsers();
   }
 
+  ngOnDestroy() {
+    this.usersRequest?.unsubscribe();
+  }
+
   loadUsers() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.userService
+    this.usersRequest?.unsubscribe();
+    this.usersRequest = this.userService
       .getUsers({
         search: this.search(),
         types: Array.from(this.selectedTypes()),

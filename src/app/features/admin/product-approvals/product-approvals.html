@@ -87,5 +87,11 @@
     </div>
   </div>
 
+  <app-reject-product-dialog
+    [open]="rejectionTarget() !== null"
+    [product]="rejectionTarget()"
+    (rejected)="rejectProductWithReason()"
+    (closed)="rejectionTarget.set(null)"
+  />
   <app-error-modal [error]="actionError()" (closed)="closeActionError()" />
 </main>
