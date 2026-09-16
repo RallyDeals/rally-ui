@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import {
   FilterPills,
   FilterPillOption,
@@ -16,6 +16,7 @@ import { BriefSellerOrdersResponse } from '../../orders/interfaces/brief-seller-
 import { SellerOrdersParams } from '../../orders/interfaces/seller-orders-params';
 import { SellerOrdersStatistics } from '../../orders/interfaces/seller-orders-statistics';
 import { SellerOrderRow } from './seller-order-row/seller-order-row';
+import { Subscription } from 'rxjs';
 
 
 const PAGE_SIZE = 5;
@@ -32,8 +33,9 @@ const PAGE_SIZE = 5;
   templateUrl: './seller-orders.html',
   styleUrl: './seller-orders.css',
 })
-export class SellerOrders {
+export class SellerOrders implements OnDestroy {
   private readonly orderService = inject(OrderService);
+  private ordersRequest: Subscription | null = null;
 
   orders = signal<BriefSellerOrdersResponse[]>([]);
   allOrdersTotal = signal(0);
@@ -98,6 +100,10 @@ export class SellerOrders {
     this.loadAnalytics();
   }
 
+  ngOnDestroy() {
+    this.ordersRequest?.unsubscribe();
+  }
+
   onPhaseChange = (phase: string) => {
     this.phaseFilter.set(phase as 'ALL' | CompactedOrderStatus);
     this.page.set(1);
@@ -133,6 +139,7 @@ export class SellerOrders {
 
   loadPage() {
     const isFirstPage = this.page() === 1;
+    this.ordersRequest?.unsubscribe();
     this.isLoading.set(true);
     const queryParams: SellerOrdersParams = {
       page: this.page(),
@@ -141,7 +148,7 @@ export class SellerOrders {
       search: this.searchQuery(),
       startDate: this.startDate(),
     };
-    this.orderService.listSellerOrders(queryParams).subscribe({
+    this.ordersRequest = this.orderService.listSellerOrders(queryParams).subscribe({
       next: (response) => {
         this.orders.set(response.orders);
         this.total.set(response.total);

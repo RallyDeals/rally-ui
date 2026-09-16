@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -14,6 +14,7 @@ import { UserService } from '../../auth/admin-user.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
 import { Seller } from '../interfaces/seller';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 4;
 
@@ -22,10 +23,11 @@ const PAGE_SIZE = 4;
   imports: [PageHeader, Pagination, ErrorState, ErrorModal, ProductApprovalFilters, PendingProductRow, RejectProductDialog],
   templateUrl: './product-approvals.html',
 })
-export class ProductApprovals implements OnInit {
+export class ProductApprovals implements OnInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
   private readonly userService = inject(UserService);
   private readonly categoriesService = inject(CategoriesService);
+  private productsRequest: Subscription | null = null;
 
   pendingProducts = signal<Product[]>([]);
   total = signal(0);
@@ -57,10 +59,15 @@ export class ProductApprovals implements OnInit {
     this.loadSellers();
   }
 
+  ngOnDestroy() {
+    this.productsRequest?.unsubscribe();
+  }
+
   loadPendingProducts() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.productsService
+    this.productsRequest?.unsubscribe();
+    this.productsRequest = this.productsService
       .getPendingApprovalProducts({
         categoryId: this.selectedCategoryId() || undefined,
         sellerId: this.selectedSellerId() || undefined,

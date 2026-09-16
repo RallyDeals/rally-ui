@@ -1,6 +1,7 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, signal } from '@angular/core';
 import { CurrencyPipe, DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { BriefOrderResponse } from '../../orders/interfaces/brief-order-response';
 import { MyOrdersStatistics, OrderService } from '../../orders/order.service';
 import { ApiError } from '../../../shared/models/api-error';
@@ -42,8 +43,9 @@ const ORDER_TYPE_OPTIONS: { value: OrderType; label: string }[] = [
   ],
   templateUrl: './my-orders.html',
 })
-export class MyOrders {
+export class MyOrders implements OnDestroy {
   private orderService = inject(OrderService);
+  private pageRequest: Subscription | null = null;
 
   orderStatusOptions = ORDER_STATUS_OPTIONS;
   orderTypeOptions = ORDER_TYPE_OPTIONS;
@@ -120,6 +122,10 @@ export class MyOrders {
     this.loadStatistics();
   }
 
+  ngOnDestroy() {
+    this.pageRequest?.unsubscribe();
+  }
+
   loadMore(): void {
     this.page.update((page) => page + 1);
     this.loadPage();
@@ -163,8 +169,9 @@ export class MyOrders {
   private loadPage(): void {
     const isFirstPage = this.page() === 1;
     const hasActiveFiltersAtRequestTime = this.hasActiveFilters();
+    this.pageRequest?.unsubscribe();
     this.isLoading.set(true);
-    this.orderService
+    this.pageRequest = this.orderService
       .getMyOrders({
         page: this.page(),
         limit: PAGE_SIZE,

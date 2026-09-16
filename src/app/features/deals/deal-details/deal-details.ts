@@ -261,13 +261,12 @@ export class DealDetails implements OnInit {
           this.deal.set(deal);
           this.titleService.setTitle(deal.productName);
           this.startDealPoll(id);
-          this.loadActivity(id);
-          this.loadParticipants(id);
+          this.loadSecondaryData(id);
         } else {
           this.error.set(NOT_FOUND_ERROR);
           this.stopDealPoll();
+          this.loading.set(false);
         }
-        this.loading.set(false);
       },
       error: (err) => {
         this.loading.set(false);
@@ -277,22 +276,38 @@ export class DealDetails implements OnInit {
     });
   }
 
-  private loadActivity(dealId: string) {
+  private loadSecondaryData(dealId: string) {
+    let remaining = 2;
+    const complete = () => {
+      remaining -= 1;
+      if (remaining === 0) {
+        this.loading.set(false);
+      }
+    };
+    this.loadActivity(dealId, complete);
+    this.loadParticipants(dealId, complete);
+  }
+
+  private loadActivity(dealId: string, complete?: () => void) {
     this.dealsService.getDealActivity(dealId).subscribe({
       next: (events) => {
         this.activity.set(events);
         this.checkJoinedFromActivity(events);
+        complete?.();
       },
+      error: () => complete?.(),
     });
   }
 
-  private loadParticipants(dealId: string) {
+  private loadParticipants(dealId: string, complete?: () => void) {
     this.dealsService.getDealParticipants(dealId).subscribe({
       next: (page) => {
         const shown = page.participants.slice(0, 3);
         this.participants.set(shown);
         this.extraParticipants.set(Math.max(0, page.activeCount - shown.length));
+        complete?.();
       },
+      error: () => complete?.(),
     });
   }
 

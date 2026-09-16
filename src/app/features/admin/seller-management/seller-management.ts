@@ -1,4 +1,4 @@
-import { Component, computed, inject, OnInit, signal } from '@angular/core';
+import { Component, OnDestroy, computed, inject, OnInit, signal } from '@angular/core';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -11,6 +11,7 @@ import { Seller } from '../interfaces/seller';
 import { UserService } from '../../auth/admin-user.service';
 import { ProductsService } from '../../products/products.service';
 import { DealsService } from '../../deals/deals.service';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 3;
 
@@ -19,10 +20,11 @@ const PAGE_SIZE = 3;
   imports: [PageHeader, SellerStats, SellerToolbar, SellerRow, Pagination, ErrorState],
   templateUrl: './seller-management.html',
 })
-export class SellerManagement implements OnInit {
+export class SellerManagement implements OnInit, OnDestroy {
   userService = inject(UserService);
   productsService = inject(ProductsService);
   dealService = inject(DealsService);
+  private sellersRequest: Subscription | null = null;
   pendingApprovalProductsCount = signal<number>(0);
   activeDealsCount = signal<number>(0);
   totalSellersCount = signal<number>(0);
@@ -54,10 +56,15 @@ export class SellerManagement implements OnInit {
     this.loadStats();
   }
 
+  ngOnDestroy() {
+    this.sellersRequest?.unsubscribe();
+  }
+
   loadSellers() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.userService
+    this.sellersRequest?.unsubscribe();
+    this.sellersRequest = this.userService
       .getSellers({ search: this.search(), page: this.page(), limit: PAGE_SIZE })
       .subscribe({
         next: (sellers) => {

@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
 import { ProductCard } from '../components/product-card/product-card';
@@ -29,7 +30,7 @@ function parseOptionalNumber(value: unknown): number | null {
   templateUrl: './browse-products.html',
   styleUrl: './browse-products.css',
 })
-export class BrowseProducts implements OnInit {
+export class BrowseProducts implements OnInit, OnDestroy {
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
   total = signal(0);
@@ -47,6 +48,9 @@ export class BrowseProducts implements OnInit {
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal(DEFAULT_SORT);
+
+  private pageRequest: Subscription | null = null;
+  private inventoryRequest: Subscription | null = null;
 
   selectedCategory = computed(
     () => this.categories().find((c) => c.id === this.selectedCategoryId()) ?? null,
@@ -105,10 +109,17 @@ export class BrowseProducts implements OnInit {
     this.loadCategories();
   }
 
+  ngOnDestroy() {
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
+  }
+
   loadProducts() {
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
     this.loading.set(true);
     this.loadError.set(null);
-    this.productsService
+    this.pageRequest = this.productsService
       .getProducts({
         q: this.searchQuery().trim() || undefined,
         tag: this.selectedTag() ?? undefined,
@@ -124,7 +135,6 @@ export class BrowseProducts implements OnInit {
         next: (response) => {
           this.products.set(response.items);
           this.total.set(response.total);
-          this.loading.set(false);
           this.hasLoadedOnce = true;
           this.lastSuccessfulPage = this.page();
           this.loadInventoryForProducts(response.items);
@@ -159,17 +169,20 @@ export class BrowseProducts implements OnInit {
   loadInventoryForProducts(products: Product[]) {
     const ids = products.map((p) => p.id);
     if (ids.length === 0) return;
-    this.inventoryService.getInventoryBulk(ids).subscribe({
+    this.inventoryRequest?.unsubscribe();
+    this.inventoryRequest = this.inventoryService.getPublicInventoryBulk(ids).subscribe({
       next: (map) => {
         const updated = products.map((p) => ({
           ...p,
-          availableStock: map[p.id]?.availableStock ?? 0,
+          stockDescription: map[p.id].status,
         }));
         this.products.set(updated);
+        this.loading.set(false);
       },
       error: () => {
         const updated = products.map((p) => ({ ...p, availableStock: 0 }));
         this.products.set(updated);
+        this.loading.set(false);
       },
     });
   }

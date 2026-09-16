@@ -1,8 +1,8 @@
-import { Component, DestroyRef, NgZone, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Observable, Subscription, interval, switchMap, startWith, forkJoin, of, map } from 'rxjs';
+import { Subscription, of, map } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ProductsService } from '../../products/products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
@@ -25,8 +25,6 @@ import { Inventory } from '../../../shared/models/inventory';
 import { AuthService } from '../../../core/auth/auth.service';
 
 type StatusFilter = 'ALL' | Product['status'] | 'DELETED';
-
-const INVENTORY_POLL_INTERVAL_MS = 30_000;
 
 @Component({
   selector: 'app-seller-products',
@@ -52,11 +50,8 @@ export class SellerProducts implements OnInit, OnDestroy {
   private readonly inventoryService = inject(InventoryService);
   private readonly authService = inject(AuthService);
   private readonly router = inject(Router);
-  private readonly destroyRef = inject(DestroyRef);
-  private readonly ngZone = inject(NgZone);
-
-  private inventoryPollSub: Subscription | null = null;
-
+  private pageRequest: Subscription | null = null;
+  private inventoryRequest: Subscription | null = null;
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   searchQuery = signal('');
 
@@ -149,11 +144,11 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadProducts();
-    this.destroyRef.onDestroy(() => this.stopInventoryPoll());
   }
 
   ngOnDestroy() {
-    this.stopInventoryPoll();
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
   }
 
   loadProducts() {
@@ -170,10 +165,12 @@ export class SellerProducts implements OnInit, OnDestroy {
       return;
     }
 
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
     this.loading.set(true);
     this.loadError.set(null);
     this.selectedIds.set(new Set());
-    this.productsService
+    this.pageRequest = this.productsService
       .getSellerProducts(sellerId, {
         status:
           this.statusFilter() === 'ALL' || this.statusFilter() === 'DELETED'
@@ -191,8 +188,7 @@ export class SellerProducts implements OnInit, OnDestroy {
           if (!this.hasActiveFilters()) {
             this.allProductsTotal.set(response.total);
           }
-          this.loading.set(false);
-          this.startInventoryPoll();
+          this.loadInventory(this.products().map((p) => p.id), () => this.loading.set(false));
         },
         error: (err) => {
           this.loadError.set(toApiError(err));
@@ -201,54 +197,34 @@ export class SellerProducts implements OnInit, OnDestroy {
       });
   }
 
-  private startInventoryPoll() {
-    this.stopInventoryPoll();
-    const productIds = this.products().map((p) => p.id);
-    if (productIds.length === 0) return;
+  private loadInventory(productIds: string[], onComplete?: () => void) {
+    if (productIds.length === 0) {
+      onComplete?.();
+      return;
+    }
 
-    this.ngZone.runOutsideAngular(() => {
-      this.inventoryPollSub = interval(INVENTORY_POLL_INTERVAL_MS)
-        .pipe(
-          startWith(0),
-          switchMap(() => this.fetchAllInventory(productIds)),
-        )
-        .subscribe((inventoryMap) => {
-          this.ngZone.run(() => {
-            this.products.update((rows) =>
-              rows.map((row) => {
-                const inv = inventoryMap.get(row.id);
-                return inv ? toProductRow(row, inv) : row;
-              }),
-            );
-          });
-        });
-    });
-  }
-
-  private stopInventoryPoll() {
-    this.inventoryPollSub?.unsubscribe();
-    this.inventoryPollSub = null;
-  }
-
-  private fetchAllInventory(productIds: string[]): Observable<Map<string, Inventory>> {
-    if (productIds.length === 0) return of(new Map());
-
-    const requests = productIds.map((id) =>
-      this.inventoryService.getInventory(id).pipe(
-        catchError(() => of(null)),
-        map((inv) => ({ id, inv })),
-      ),
-    );
-
-    return forkJoin(requests).pipe(
-      map((results) => {
-        const map = new Map<string, Inventory>();
-        for (const { id, inv } of results) {
-          if (inv) map.set(id, inv);
-        }
-        return map;
-      }),
-    );
+    this.inventoryRequest?.unsubscribe();
+    this.inventoryRequest = this.inventoryService
+      .getSellerInventoryBulk(productIds)
+      .pipe(
+        map((record) => {
+          const inventoryMap = new Map<string, Inventory>();
+          for (const [id, inv] of Object.entries(record)) {
+            inventoryMap.set(id, inv);
+          }
+          return inventoryMap;
+        }),
+        catchError(() => of(new Map<string, Inventory>())),
+      )
+      .subscribe((inventoryMap) => {
+        this.products.update((rows) =>
+          rows.map((row) => {
+            const inv = inventoryMap.get(row.id);
+            return inv ? toProductRow(row, inv) : row;
+          }),
+        );
+        onComplete?.();
+      });
   }
 
   closeLoadError = () => {

@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -10,7 +11,6 @@ import { DealFilters, DealPriceRange } from '../components/deal-filters/deal-fil
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { CategoriesService } from '../../categories/categories.service';
 import { DealsService } from '../deals.service';
-import { DealStatus } from '../../../shared/models/deal';
 import { DealOverview } from '../interfaces/deal-overview';
 import { BuyerFilterDeals, DealSortKey } from '../interfaces/deals-query-params';
 
@@ -23,7 +23,8 @@ const DEALS_PER_PAGE = 6;
   imports: [ActiveDealCard, DealFilters, Pagination, ErrorState, PageHeader],
   templateUrl: './browse-deals.html',
 })
-export class BrowseDeals implements OnInit {
+export class BrowseDeals implements OnInit, OnDestroy {
+  private dealsRequest: Subscription | null = null;
   deals = signal<DealOverview[]>([]);
   categories = signal<Category[]>([]);
   total = signal(0);
@@ -127,10 +128,15 @@ export class BrowseDeals implements OnInit {
     });
   }
 
+  ngOnDestroy() {
+    this.dealsRequest?.unsubscribe();
+  }
+
   loadDeals() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.dealsService
+    this.dealsRequest?.unsubscribe();
+    this.dealsRequest = this.dealsService
       .getDealsOverview({
         status: this.filterBy(),
         search: this.searchQuery().trim() || undefined,
