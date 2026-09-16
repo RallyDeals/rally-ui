@@ -164,7 +164,10 @@ export class BrowseProducts implements OnInit, OnDestroy {
 
   loadInventoryForProducts(products: Product[]) {
     const ids = products.map((p) => p.id);
-    if (ids.length === 0) return;
+    if (ids.length === 0) {
+      this.loading.set(false);
+      return;
+    }
     this.inventoryRequest?.unsubscribe();
     this.inventoryRequest = this.inventoryService.getPublicInventoryBulk(ids).subscribe({
       next: (map) => {
