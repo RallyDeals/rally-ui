@@ -29,12 +29,18 @@ export class CartService {
     });
   }
 
-  add(product: Product, quantity = 1) {
+  add(product: Product, quantity = 1, availableStock?: number) {
+    const stock = availableStock ?? product.availableStock;
     this.items.update((items) => {
       const existing = items.find((item) => item.id === product.id);
+      const cap = (stock && stock > 0 ? stock : undefined) ?? existing?.stock;
+      const nextQuantity = Math.min(
+        (existing?.quantity ?? 0) + quantity,
+        cap ?? Number.MAX_SAFE_INTEGER,
+      );
       if (existing) {
         return items.map((item) =>
-          item.id === product.id ? { ...item, quantity: item.quantity + quantity } : item,
+          item.id === product.id ? { ...item, quantity: nextQuantity, stock: cap } : item,
         );
       }
       return [
@@ -45,7 +51,8 @@ export class CartService {
           imageAlt: product.name,
           name: product.name,
           price: product.basePrice,
-          quantity,
+          quantity: nextQuantity,
+          stock: cap,
         },
       ];
     });
@@ -53,7 +60,11 @@ export class CartService {
 
   increment = (id: string) => {
     this.items.update((items) =>
-      items.map((item) => (item.id === id ? { ...item, quantity: item.quantity + 1 } : item)),
+      items.map((item) => {
+        if (item.id !== id) return item;
+        const cap = item.stock && item.stock > 0 ? item.stock : Number.MAX_SAFE_INTEGER;
+        return { ...item, quantity: Math.min(item.quantity + 1, cap) };
+      }),
     );
   };
 

@@ -25,7 +25,8 @@
         <span class="w-7 text-center font-label-sm font-semibold">{{ item().quantity }}</span>
         <button
           type="button"
-          class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors rounded-r-lg"
+          [disabled]="stockReached()"
+          class="w-7 h-7 flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container transition-colors rounded-r-lg disabled:text-on-surface-variant/40 disabled:hover:bg-transparent disabled:cursor-not-allowed"
           (click)="onIncrement()(item().id)"
         >
           +

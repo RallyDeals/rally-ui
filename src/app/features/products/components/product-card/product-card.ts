@@ -19,6 +19,13 @@ export class ProductCard implements OnDestroy {
   outOfStock = computed(() => this.product().stockDescription === 'out_of_stock');
   lowStock = computed(() => this.product().stockDescription === 'low_stock');
   stockDescription = computed(() => this.product().stockDescription ?? '');
+  cartQuantity = computed(
+    () => this.cartService.items().find((i) => i.id === this.product().id)?.quantity ?? 0,
+  );
+  allInCart = computed(() => {
+    const stock = this.product().availableStock;
+    return stock != null && stock > 0 && this.cartQuantity() >= stock;
+  });
   extraClasses = input('');
   added = signal(false);
   addedToCart = output<string>();
@@ -45,13 +52,16 @@ export class ProductCard implements OnDestroy {
 
   addToCart = (event: Event) => {
     event.stopPropagation();
+    if (this.allInCart()) {
+      return;
+    }
     if (!this.authService.isLoggedIn()) {
       this.router.navigate(['/auth/login'], {
         queryParams: { returnUrl: `/products/${this.product().id}` },
       });
       return;
     }
-    this.cartService.add(this.product());
+    this.cartService.add(this.product(), 1, this.product().availableStock);
     this.addedToCart.emit(this.product().id);
     this.added.set(true);
     clearTimeout(this.addTimer);

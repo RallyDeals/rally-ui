@@ -159,13 +159,6 @@ export class BrowseProducts implements OnInit, OnDestroy {
     });
   }
 
-  onAddedToCart = (productId: string) => {
-    const updated = this.products().map((p) =>
-      p.id === productId ? { ...p, availableStock: Math.max(0, (p.availableStock ?? 0) - 1) } : p,
-    );
-    this.products.set(updated);
-  };
-
   loadInventoryForProducts(products: Product[]) {
     const ids = products.map((p) => p.id);
     if (ids.length === 0) return;
@@ -175,6 +168,7 @@ export class BrowseProducts implements OnInit, OnDestroy {
         const updated = products.map((p) => ({
           ...p,
           stockDescription: map[p.id].status,
+          availableStock: map[p.id].displayQuantity ?? p.availableStock,
         }));
         this.products.set(updated);
         this.loading.set(false);
