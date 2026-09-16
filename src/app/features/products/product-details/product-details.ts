@@ -9,7 +9,7 @@ import { CartService } from '../../cart/cart.service';
 import { Product, ActiveDeal } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
-import { Inventory } from '../../../shared/models/inventory';
+import { PublicStockStatus } from '../../../shared/models/inventory';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -40,7 +40,7 @@ export interface DisplayDeal {
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  inventory = signal<Inventory | null>(null);
+  inventory = signal<PublicStockStatus | null>(null);
   selectedImage = signal('');
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -58,7 +58,7 @@ export class ProductDetails implements OnInit, OnDestroy {
 
   readonly primaryDeal = computed(() => this.displayDeals()[0] ?? null);
   readonly availableStock = computed(() => {
-    const stock = this.inventory()?.availableStock ?? 0;
+    const stock = this.inventory()?.displayQuantity ?? 0;
     const product = this.product();
     if (!product) return stock;
     const cartItem = this.cartService.items().find((i) => i.id === product.id);
@@ -161,8 +161,8 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   loadInventory(productId: string) {
-    this.inventoryService.getInventory(productId).subscribe({
-      next: (inventory) => this.inventory.set(inventory),
+    this.inventoryService.getPublicInventoryBulk([productId]).subscribe({
+      next: (inventory) => this.inventory.set(inventory[productId]),
       error: () => this.inventory.set(null),
     });
   }
@@ -198,8 +198,6 @@ export class ProductDetails implements OnInit, OnDestroy {
       return;
     }
     this.cartService.add(product, this.quantity());
-    const remaining = this.availableStock() - this.quantity();
-    this.inventory.set({ ...this.inventory()!, availableStock: remaining });
     this.quantity.set(1);
     this.added.set(true);
     clearTimeout(this.addTimer);

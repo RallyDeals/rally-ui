@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { environment } from '../../../environments/environment';
-import { Inventory } from '../models/inventory';
+import { Inventory, PublicStockStatus } from '../models/inventory';
 
 @Injectable({ providedIn: 'root' })
 export class InventoryService {
@@ -14,8 +14,12 @@ export class InventoryService {
     return this.http.get<Inventory>(`${this.apiUrl}/inventory/${productId}`);
   }
 
-  getInventoryBulk(productIds: string[]): Observable<Record<string, Inventory>> {
-    return this.http.post<Record<string, Inventory>>(`${this.apiUrl}/inventory/bulk`, productIds);
+  getSellerInventoryBulk(productIds: string[]): Observable<Record<string, Inventory>> {
+    return this.http.post<Record<string, Inventory>>(`${this.apiUrl}/inventory/seller/bulk`, productIds);
+  }
+
+  getPublicInventoryBulk(productIds: string[]): Observable<Record<string, PublicStockStatus>> {
+    return this.http.post<Record<string, PublicStockStatus>>(`${this.apiUrl}/inventory/bulk`, productIds);
   }
 
   restock(productId: string, quantity: number): Observable<{ message: string }> {
