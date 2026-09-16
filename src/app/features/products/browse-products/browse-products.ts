@@ -104,6 +104,9 @@ export class BrowseProducts implements OnInit, OnDestroy {
       this.selectedTag.set((params['tag'] as string | undefined) ?? null);
       this.minPrice.set(parseOptionalNumber(params['minPrice']));
       this.maxPrice.set(parseOptionalNumber(params['maxPrice']));
+      this.searchQuery.set((params['q'] as string | undefined) ?? '');
+      this.sortBy.set((params['sort'] as string | undefined) ?? DEFAULT_SORT);
+      this.page.set(parseOptionalNumber(params['page']) ?? 1);
       this.loadProducts();
     });
     this.loadCategories();
@@ -187,13 +190,17 @@ export class BrowseProducts implements OnInit, OnDestroy {
 
   search = () => {
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   clearSearch = () => {
     this.searchQuery.set('');
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   onCategoryChange = (categoryId: string | null) => {
@@ -234,7 +241,9 @@ export class BrowseProducts implements OnInit, OnDestroy {
   onSortChange = (sort: string) => {
     this.sortBy.set(sort);
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   resetFilters = () => {
@@ -246,13 +255,19 @@ export class BrowseProducts implements OnInit, OnDestroy {
 
   goToPage = (page: number) => {
     this.page.set(page);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   private buildQueryParams(
-    override: Record<string, string | number | null | undefined>,
+    override: Record<string, string | number | null | undefined> = {},
   ): Record<string, string> {
     const params: Record<string, string> = {};
+    const q = this.searchQuery().trim();
+    if (q) {
+      params['q'] = q;
+    }
     const categoryId = this.selectedCategoryId();
     const sellerId = this.selectedSellerId();
     const tag = this.selectedTag();
@@ -272,6 +287,12 @@ export class BrowseProducts implements OnInit, OnDestroy {
     }
     if (maxPrice !== null) {
       params['maxPrice'] = String(maxPrice);
+    }
+    if (this.sortBy() !== DEFAULT_SORT) {
+      params['sort'] = this.sortBy();
+    }
+    if (this.page() > 1) {
+      params['page'] = String(this.page());
     }
     for (const [key, value] of Object.entries(override)) {
       if (value === null || value === undefined) {

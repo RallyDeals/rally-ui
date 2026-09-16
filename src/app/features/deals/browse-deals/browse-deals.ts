@@ -1,5 +1,5 @@
 import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Params, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
@@ -17,6 +17,14 @@ import { BuyerFilterDeals, DealSortKey } from '../interfaces/deals-query-params'
 const DEFAULT_FILTER: BuyerFilterDeals = '';
 const DEFAULT_SORT: DealSortKey = 'relevance';
 const DEALS_PER_PAGE = 6;
+
+function parseOptionalNumber(value: unknown): number | null {
+  if (value === null || value === undefined || value === '') {
+    return null;
+  }
+  const parsed = Number(value);
+  return Number.isNaN(parsed) ? null : parsed;
+}
 
 @Component({
   selector: 'app-browse-deals',
@@ -102,30 +110,38 @@ export class BrowseDeals implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Get initial sellerId and sellerName from route params
-    const initialSellerId = this.route.snapshot.queryParams['sellerId'] ?? null;
-    const initialSellerName = this.route.snapshot.queryParams['sellerName'] ?? null;
-    this.sellerId.set(initialSellerId);
-    this.sellerName.set(initialSellerName);
-
-    // Subscribe to query params changes for subsequent navigations
     this.route.queryParams.subscribe((params) => {
-      const newSellerId = params['sellerId'] ?? null;
-      const newSellerName = params['sellerName'] ?? null;
-      // Only reset pagination if sellerId changes
-      if (newSellerId !== this.sellerId()) {
-        this.sellerId.set(newSellerId);
-        this.sellerName.set(newSellerName);
-        this.page.set(1);
-        this.loadDeals();
-      }
+      this.applyQueryParams(params);
+      this.loadDeals();
     });
 
-    this.loadDeals();
     this.categoriesService.getCategories().subscribe({
       next: (categories) => this.categories.set(categories),
       error: () => {},
     });
+  }
+
+  private applyQueryParams(params: Params) {
+    const rawCategories = params['categories'];
+    const categories = (
+      Array.isArray(rawCategories) ? rawCategories : [rawCategories]
+    )
+      .filter((c): c is string => typeof c === 'string' && c.length > 0)
+      .flatMap((c) => c.split(','));
+    this.selectedCategoryIds.set(new Set(categories.map((c) => c.trim()).filter(Boolean)));
+    this.minPrice.set(parseOptionalNumber(params['minPrice']));
+    this.maxPrice.set(parseOptionalNumber(params['maxPrice']));
+    const sort = params['sort'] as DealSortKey | undefined;
+    this.sortBy.set(sort && this.sortOptions.some((o) => o.key === sort) ? sort : DEFAULT_SORT);
+    const status = params['status'] as BuyerFilterDeals | undefined;
+    this.filterBy.set(status === 'active' || status === 'pending' ? status : DEFAULT_FILTER);
+    const search = params['search'];
+    this.searchQuery.set(typeof search === 'string' ? search : '');
+    const sellerId = params['sellerId'];
+    this.sellerId.set(typeof sellerId === 'string' ? sellerId : null);
+    const sellerName = params['sellerName'];
+    this.sellerName.set(typeof sellerName === 'string' ? sellerName : null);
+    this.page.set(parseOptionalNumber(params['page']) ?? 1);
   }
 
   ngOnDestroy() {
@@ -172,26 +188,26 @@ export class BrowseDeals implements OnInit, OnDestroy {
       return next;
     });
     this.page.set(1);
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   onPriceApply = ({ minPrice, maxPrice }: DealPriceRange) => {
     this.minPrice.set(minPrice);
     this.maxPrice.set(maxPrice);
     this.page.set(1);
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   onSortChange = (value: string) => {
     this.sortBy.set(value as DealSortKey);
     this.page.set(1);
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   onFilterChange = (value: string) => {
     this.filterBy.set(value as BuyerFilterDeals);
     this.page.set(1);
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   resetFilters = () => {
@@ -202,31 +218,22 @@ export class BrowseDeals implements OnInit, OnDestroy {
     this.searchQuery.set('');
     this.sellerId.set(null);
     this.sellerName.set(null);
+    this.filterBy.set(DEFAULT_FILTER);
     this.page.set(1);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { sellerId: null, sellerName: null },
-      queryParamsHandling: 'merge',
-    });
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   resetSort = () => {
     this.sortBy.set(DEFAULT_SORT);
     this.page.set(1);
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   clearSellerFilter = () => {
     this.sellerId.set(null);
     this.sellerName.set(null);
     this.page.set(1);
-    this.router.navigate([], {
-      relativeTo: this.route,
-      queryParams: { sellerId: null, sellerName: null },
-      queryParamsHandling: 'merge',
-    });
-    this.loadDeals();
+    this.navigateWithState();
   };
 
   categoryName = (categoryId: string): string =>
@@ -237,6 +244,47 @@ export class BrowseDeals implements OnInit, OnDestroy {
 
   goToPage = (page: number) => {
     this.page.set(page);
-    this.loadDeals();
+    this.navigateWithState();
   };
+
+  private navigateWithState() {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: this.buildQueryParams(),
+    });
+  }
+
+  private buildQueryParams(): Record<string, string> {
+    const params: Record<string, string> = {};
+    const search = this.searchQuery().trim();
+    if (search) {
+      params['search'] = search;
+    }
+    const categories = this.selectedCategoryIdsArray();
+    if (categories.length) {
+      params['categories'] = categories.join(',');
+    }
+    if (this.minPrice() !== null) {
+      params['minPrice'] = String(this.minPrice());
+    }
+    if (this.maxPrice() !== null) {
+      params['maxPrice'] = String(this.maxPrice());
+    }
+    if (this.sortBy() !== DEFAULT_SORT) {
+      params['sort'] = this.sortBy();
+    }
+    if (this.filterBy() !== DEFAULT_FILTER) {
+      params['status'] = this.filterBy();
+    }
+    if (this.sellerId()) {
+      params['sellerId'] = this.sellerId()!;
+    }
+    if (this.sellerName()) {
+      params['sellerName'] = this.sellerName()!;
+    }
+    if (this.page() > 1) {
+      params['page'] = String(this.page());
+    }
+    return params;
+  }
 }
