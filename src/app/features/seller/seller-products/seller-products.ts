@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular
 import { NgClass } from '@angular/common';
 import { DatePipe } from '@angular/common';
 import { Router, RouterLink } from '@angular/router';
-import { Subscription, of, map } from 'rxjs';
+import { Subscription, forkJoin, map, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 import { ProductsService } from '../../products/products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
@@ -52,12 +52,14 @@ export class SellerProducts implements OnInit, OnDestroy {
   private readonly router = inject(Router);
   private pageRequest: Subscription | null = null;
   private inventoryRequest: Subscription | null = null;
+  private statsRequest: Subscription | null = null;
   readonly placeholderImage = PLACEHOLDER_IMAGE;
   searchQuery = signal('');
 
   products = signal<ProductRow[]>([]);
   total = signal(0);
   allProductsTotal = signal(0);
+  pendingCount = signal(0);
   page = signal(1);
   limit = 10;
   loading = signal(true);
@@ -122,12 +124,6 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   readonly resolveImageUrl = resolveImageUrl;
 
-  readonly pendingCount = computed(
-    () =>
-      this.products().filter((product) => !product.deleted && product.status === 'PENDING_APPROVAL')
-        .length,
-  );
-
   readonly lowStockCount = computed(
     () =>
       this.products().filter((product) => !product.deleted && product.stockStatus !== 'IN_STOCK')
@@ -144,11 +140,13 @@ export class SellerProducts implements OnInit, OnDestroy {
 
   ngOnInit() {
     this.loadProducts();
+    this.loadStats();
   }
 
   ngOnDestroy() {
     this.pageRequest?.unsubscribe();
     this.inventoryRequest?.unsubscribe();
+    this.statsRequest?.unsubscribe();
   }
 
   loadProducts() {
@@ -185,9 +183,6 @@ export class SellerProducts implements OnInit, OnDestroy {
         next: (response) => {
           this.products.set(response.items.map((p) => toProductRow(p)));
           this.total.set(response.total);
-          if (!this.hasActiveFilters()) {
-            this.allProductsTotal.set(response.total);
-          }
           this.loadInventory(this.products().map((p) => p.id), () => this.loading.set(false));
         },
         error: (err) => {
@@ -225,6 +220,35 @@ export class SellerProducts implements OnInit, OnDestroy {
         );
         onComplete?.();
       });
+  }
+
+  private loadStats() {
+    const sellerId = this.authService.currentUser()?.id;
+    if (!sellerId) {
+      return;
+    }
+
+    this.statsRequest?.unsubscribe();
+    this.statsRequest = forkJoin({
+      all: this.productsService.getSellerProducts(sellerId, {
+        page: 1,
+        limit: 1,
+      }),
+      pending: this.productsService.getSellerProducts(sellerId, {
+        status: 'PENDING_APPROVAL',
+        page: 1,
+        limit: 1,
+      }),
+    }).subscribe({
+      next: ({ all, pending }) => {
+        this.allProductsTotal.set(all.total);
+        this.pendingCount.set(pending.total);
+      },
+      error: () => {
+        this.allProductsTotal.set(0);
+        this.pendingCount.set(0);
+      },
+    });
   }
 
   closeLoadError = () => {
@@ -294,6 +318,7 @@ export class SellerProducts implements OnInit, OnDestroy {
         next.delete(product.id);
         this.selectedIds.set(next);
         this.loadProducts();
+        this.loadStats();
       },
       error: (err) => {
         this.actionError.set(toApiError(err));
@@ -334,7 +359,10 @@ export class SellerProducts implements OnInit, OnDestroy {
       return;
     }
     this.productsService.restoreProduct(product.id).subscribe({
-      next: () => this.loadProducts(),
+      next: () => {
+        this.loadProducts();
+        this.loadStats();
+      },
       error: (err) => {
         this.actionError.set(toApiError(err));
       },
