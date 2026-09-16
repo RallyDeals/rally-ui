@@ -1,4 +1,4 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -9,6 +9,7 @@ import { DealsToolbar } from './deals-toolbar/deals-toolbar';
 import { DealRow } from './deal-row/deal-row';
 import { DealsService } from '../../deals/deals.service';
 import { DealOverview } from '../../deals/interfaces/deal-overview';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 5;
 
@@ -17,8 +18,9 @@ const PAGE_SIZE = 5;
   imports: [PageHeader, DealsStats, DealsToolbar, DealRow, Pagination, ErrorState],
   templateUrl: './deals-management.html',
 })
-export class DealsManagement implements OnInit {
+export class DealsManagement implements OnInit, OnDestroy {
   private readonly dealsService = inject(DealsService);
+  private dealsRequest: Subscription | null = null;
 
   deals = signal<DealOverview[]>([]);
   total = signal(0);
@@ -44,10 +46,15 @@ export class DealsManagement implements OnInit {
     this.loadAnalytics();
   }
 
+  ngOnDestroy() {
+    this.dealsRequest?.unsubscribe();
+  }
+
   loadDeals() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.dealsService
+    this.dealsRequest?.unsubscribe();
+    this.dealsRequest = this.dealsService
       .getDealsOverview({
         search: this.search(),
         status: this.status() || 'ALL',

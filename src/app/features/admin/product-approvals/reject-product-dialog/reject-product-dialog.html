@@ -1,0 +1,62 @@
+@if (open()) {
+  <div
+    class="fixed inset-0 z-[100] flex items-start justify-center bg-black/50 px-rally-gutter py-rally-xl overflow-y-auto"
+    (click)="dismiss()"
+  >
+    <div
+      class="bg-surface-container-lowest rounded-lg shadow-lg w-full max-w-md p-rally-lg flex flex-col gap-rally-md"
+      (click)="$event.stopPropagation()"
+    >
+      <div class="flex items-center justify-between">
+        <h2 class="section-title-plain">Reject Product</h2>
+        <button
+          type="button"
+          aria-label="Close"
+          (click)="dismiss()"
+          [disabled]="rejecting()"
+          class="w-8 h-8 inline-flex items-center justify-center rounded-full text-on-surface-variant hover:text-on-surface hover:bg-surface-container transition-colors disabled:opacity-50"
+        >
+          <span class="material-symbols-outlined text-[18px]">close</span>
+        </button>
+      </div>
+
+      <p class="font-body-md text-body-md text-on-surface-variant">
+        Rejecting <span class="text-on-surface font-bold">{{ product()?.name }}</span>
+      </p>
+
+      <div class="flex flex-col gap-rally-xs">
+        <label class="text-label-sm font-label-sm text-on-surface-variant px-rally-xs">Rejection Reason</label>
+        <textarea
+          rows="4"
+          class="bg-surface-container-low border-none rounded-lg px-rally-md py-rally-sm text-body-md outline-none focus:ring-2 focus:ring-primary-container transition-all resize-none"
+          placeholder="Explain why this product is being rejected (required)"
+          [value]="reason()"
+          (input)="reason.set($any($event.target).value)"
+        ></textarea>
+      </div>
+
+      @if (error()) {
+        <p class="text-label-sm text-error px-rally-xs">{{ error() }}</p>
+      }
+
+      <div class="flex items-center gap-rally-sm mt-rally-xs">
+        <button
+          type="button"
+          (click)="dismiss()"
+          [disabled]="rejecting()"
+          class="flex-1 py-2 rounded-lg border border-outline text-on-surface font-label-sm text-label-sm hover:border-primary hover:text-primary transition-colors disabled:opacity-50"
+        >
+          Cancel
+        </button>
+        <button
+          type="button"
+          (click)="submit()"
+          [disabled]="!canSubmit()"
+          class="flex-1 py-2 rounded-lg font-label-sm text-label-sm font-bold bg-error text-on-error hover:bg-error/90 transition-colors disabled:opacity-50 disabled:pointer-events-none"
+        >
+          {{ rejecting() ? 'Rejecting…' : 'Reject Product' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

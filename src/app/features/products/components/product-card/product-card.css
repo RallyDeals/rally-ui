@@ -77,18 +77,33 @@
   transform: none;
 }
 
-.out-of-stock-badge {
+.stock-badge {
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
   padding: 0.25rem 0.625rem;
-  background-color: var(--color-error);
-  color: var(--color-on-error);
-  border-radius: 0.375rem;
+  border-radius: 9999px;
   font-family: var(--font-label-sm);
   font-size: var(--text-label-sm);
-  font-weight: 700;
+  font-weight: 600;
+  line-height: 1;
 }
-.out-of-stock-badge .material-symbols-outlined {
+
+.stock-badge--out {
+  background-color: var(--color-error);
+  color: var(--color-on-error);
+}
+
+.stock-badge--low {
+  background-color: var(--color-tertiary);
+  color: var(--color-on-tertiary);
+}
+
+.stock-badge--in {
+  background-color: var(--color-secondary);
+  color: var(--color-on-secondary);
+}
+
+.stock-badge .material-symbols-outlined {
   font-size: 16px;
 }

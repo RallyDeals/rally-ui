@@ -9,7 +9,7 @@ import { CartService } from '../../cart/cart.service';
 import { Product, ActiveDeal } from '../../../shared/models/product';
 import { ProductsService } from '../products.service';
 import { InventoryService } from '../../../shared/services/inventory.service';
-import { Inventory } from '../../../shared/models/inventory';
+import { PublicStockStatus } from '../../../shared/models/inventory';
 import { ApiError } from '../../../shared/models/api-error';
 import { toApiError } from '../../../shared/utils/api-error.util';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
@@ -40,7 +40,7 @@ export interface DisplayDeal {
 export class ProductDetails implements OnInit, OnDestroy {
   product = signal<Product | null>(null);
   relatedProducts = signal<Product[]>([]);
-  inventory = signal<Inventory | null>(null);
+  inventory = signal<PublicStockStatus | null>(null);
   selectedImage = signal('');
   loading = signal(true);
   error = signal<ApiError | null>(null);
@@ -57,14 +57,19 @@ export class ProductDetails implements OnInit, OnDestroy {
   });
 
   readonly primaryDeal = computed(() => this.displayDeals()[0] ?? null);
+  readonly inventoryKnown = computed(() => this.inventory() != null);
   readonly availableStock = computed(() => {
-    const stock = this.inventory()?.availableStock ?? 0;
+    const status = this.inventory()?.status;
+    if (status === 'out_of_stock') return 0;
+    const quantity = this.inventory()?.displayQuantity;
+    if (quantity == null) return Number.MAX_SAFE_INTEGER;
     const product = this.product();
-    if (!product) return stock;
-    const cartItem = this.cartService.items().find((i) => i.id === product.id);
-    return Math.max(0, stock - (cartItem?.quantity ?? 0));
+    const cartItem = this.cartService.items().find((i) => i.id === product?.id);
+    return Math.max(0, quantity - (cartItem?.quantity ?? 0));
   });
-  readonly outOfStock = computed(() => this.availableStock() <= 0);
+  readonly outOfStock = computed(
+    () => (this.inventoryKnown() && this.inventory()?.status === 'out_of_stock') || this.availableStock()==0,
+  );
 
   readonly minDealPrice = computed(() => {
     const deals = this.displayDeals();
@@ -148,7 +153,6 @@ export class ProductDetails implements OnInit, OnDestroy {
       next: (product) => {
         this.product.set(product);
         this.selectedImage.set(product.images?.[0] ?? product.imageUrl ?? '');
-        this.loading.set(false);
         this.titleService.setTitle(product.name);
         this.loadRelatedProducts(product);
         this.loadInventory(product.id);
@@ -161,9 +165,15 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   loadInventory(productId: string) {
-    this.inventoryService.getInventory(productId).subscribe({
-      next: (inventory) => this.inventory.set(inventory),
-      error: () => this.inventory.set(null),
+    this.inventoryService.getPublicInventoryBulk([productId]).subscribe({
+      next: (inventory) => {
+        this.inventory.set(inventory[productId]);
+        this.loading.set(false);
+      },
+      error: () => {
+        this.inventory.set(null);
+        this.loading.set(false);
+      },
     });
   }
 
@@ -176,7 +186,7 @@ export class ProductDetails implements OnInit, OnDestroy {
   }
 
   incrementQuantity = () => {
-    if (this.quantity() < this.availableStock()) {
+    if (!this.inventoryKnown() || this.quantity() < this.availableStock()) {
       const next = this.quantity() + 1;
       this.quantity.set(next);
     }
@@ -197,9 +207,7 @@ export class ProductDetails implements OnInit, OnDestroy {
       });
       return;
     }
-    this.cartService.add(product, this.quantity());
-    const remaining = this.availableStock() - this.quantity();
-    this.inventory.set({ ...this.inventory()!, availableStock: remaining });
+    this.cartService.add(product, this.quantity(), this.inventory()?.displayQuantity);
     this.quantity.set(1);
     this.added.set(true);
     clearTimeout(this.addTimer);

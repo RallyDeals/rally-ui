@@ -1,10 +1,11 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { PageHeader } from '../../../shared/components/page-header/page-header';
 import { Pagination } from '../../../shared/components/pagination/pagination';
 import { ErrorState } from '../../../shared/components/error-state/error-state';
 import { ErrorModal } from '../../../shared/components/error-modal/error-modal';
 import { ProductApprovalFilters } from './product-approval-filters/product-approval-filters';
 import { PendingProductRow } from './pending-product-row/pending-product-row';
+import { RejectProductDialog } from './reject-product-dialog/reject-product-dialog';
 import { ProductsService } from '../../products/products.service';
 import { Product } from '../../../shared/models/product';
 import { ApiError } from '../../../shared/models/api-error';
@@ -13,18 +14,20 @@ import { UserService } from '../../auth/admin-user.service';
 import { CategoriesService } from '../../categories/categories.service';
 import { Category } from '../../../shared/models/category';
 import { Seller } from '../interfaces/seller';
+import { Subscription } from 'rxjs';
 
 const PAGE_SIZE = 4;
 
 @Component({
   selector: 'app-product-approvals',
-  imports: [PageHeader, Pagination, ErrorState, ErrorModal, ProductApprovalFilters, PendingProductRow],
+  imports: [PageHeader, Pagination, ErrorState, ErrorModal, ProductApprovalFilters, PendingProductRow, RejectProductDialog],
   templateUrl: './product-approvals.html',
 })
-export class ProductApprovals implements OnInit {
+export class ProductApprovals implements OnInit, OnDestroy {
   private readonly productsService = inject(ProductsService);
   private readonly userService = inject(UserService);
   private readonly categoriesService = inject(CategoriesService);
+  private productsRequest: Subscription | null = null;
 
   pendingProducts = signal<Product[]>([]);
   total = signal(0);
@@ -33,6 +36,7 @@ export class ProductApprovals implements OnInit {
   loading = signal(true);
   loadError = signal<ApiError | null>(null);
   actionError = signal<ApiError | null>(null);
+  rejectionTarget = signal<Product | null>(null);
 
   selectedCategoryId = signal('');
   selectedSellerId = signal('');
@@ -55,10 +59,15 @@ export class ProductApprovals implements OnInit {
     this.loadSellers();
   }
 
+  ngOnDestroy() {
+    this.productsRequest?.unsubscribe();
+  }
+
   loadPendingProducts() {
     this.loading.set(true);
     this.loadError.set(null);
-    this.productsService
+    this.productsRequest?.unsubscribe();
+    this.productsRequest = this.productsService
       .getPendingApprovalProducts({
         categoryId: this.selectedCategoryId() || undefined,
         sellerId: this.selectedSellerId() || undefined,
@@ -139,14 +148,11 @@ export class ProductApprovals implements OnInit {
   };
 
   rejectProduct = (product: Product) => {
-    this.actionError.set(null);
-    this.productsService.rejectProduct(product.id).subscribe({
-      next: () => {
-        this.loadPendingProducts();
-      },
-      error: (err) => {
-        this.actionError.set(toApiError(err));
-      },
-    });
+    this.rejectionTarget.set(product);
+  };
+
+  rejectProductWithReason = () => {
+    this.rejectionTarget.set(null);
+    this.loadPendingProducts();
   };
 }

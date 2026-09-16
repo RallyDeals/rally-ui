@@ -97,8 +97,8 @@ export class ProductsService {
     return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/approve`, {});
   }
 
-  rejectProduct(id: string): Observable<void> {
-    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/reject`, {});
+  rejectProduct(id: string, reason: string): Observable<void> {
+    return this.http.patch<void>(`${this.apiUrl}/products/admin/${id}/reject`, { reason });
   }
 
   deleteProduct(id: string): Observable<void> {

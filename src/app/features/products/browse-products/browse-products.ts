@@ -1,5 +1,6 @@
-import { Component, OnInit, computed, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { Category } from '../../../shared/models/category';
 import { Product } from '../../../shared/models/product';
 import { ProductCard } from '../components/product-card/product-card';
@@ -29,7 +30,7 @@ function parseOptionalNumber(value: unknown): number | null {
   templateUrl: './browse-products.html',
   styleUrl: './browse-products.css',
 })
-export class BrowseProducts implements OnInit {
+export class BrowseProducts implements OnInit, OnDestroy {
   products = signal<Product[]>([]);
   categories = signal<Category[]>([]);
   total = signal(0);
@@ -47,6 +48,9 @@ export class BrowseProducts implements OnInit {
   minPrice = signal<number | null>(null);
   maxPrice = signal<number | null>(null);
   sortBy = signal(DEFAULT_SORT);
+
+  private pageRequest: Subscription | null = null;
+  private inventoryRequest: Subscription | null = null;
 
   selectedCategory = computed(
     () => this.categories().find((c) => c.id === this.selectedCategoryId()) ?? null,
@@ -100,15 +104,25 @@ export class BrowseProducts implements OnInit {
       this.selectedTag.set((params['tag'] as string | undefined) ?? null);
       this.minPrice.set(parseOptionalNumber(params['minPrice']));
       this.maxPrice.set(parseOptionalNumber(params['maxPrice']));
+      this.searchQuery.set((params['q'] as string | undefined) ?? '');
+      this.sortBy.set((params['sort'] as string | undefined) ?? DEFAULT_SORT);
+      this.page.set(parseOptionalNumber(params['page']) ?? 1);
       this.loadProducts();
     });
     this.loadCategories();
   }
 
+  ngOnDestroy() {
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
+  }
+
   loadProducts() {
+    this.pageRequest?.unsubscribe();
+    this.inventoryRequest?.unsubscribe();
     this.loading.set(true);
     this.loadError.set(null);
-    this.productsService
+    this.pageRequest = this.productsService
       .getProducts({
         q: this.searchQuery().trim() || undefined,
         tag: this.selectedTag() ?? undefined,
@@ -124,7 +138,6 @@ export class BrowseProducts implements OnInit {
         next: (response) => {
           this.products.set(response.items);
           this.total.set(response.total);
-          this.loading.set(false);
           this.hasLoadedOnce = true;
           this.lastSuccessfulPage = this.page();
           this.loadInventoryForProducts(response.items);
@@ -149,27 +162,27 @@ export class BrowseProducts implements OnInit {
     });
   }
 
-  onAddedToCart = (productId: string) => {
-    const updated = this.products().map((p) =>
-      p.id === productId ? { ...p, availableStock: Math.max(0, (p.availableStock ?? 0) - 1) } : p,
-    );
-    this.products.set(updated);
-  };
-
   loadInventoryForProducts(products: Product[]) {
     const ids = products.map((p) => p.id);
-    if (ids.length === 0) return;
-    this.inventoryService.getInventoryBulk(ids).subscribe({
+    if (ids.length === 0) {
+      this.loading.set(false);
+      return;
+    }
+    this.inventoryRequest?.unsubscribe();
+    this.inventoryRequest = this.inventoryService.getPublicInventoryBulk(ids).subscribe({
       next: (map) => {
         const updated = products.map((p) => ({
           ...p,
-          availableStock: map[p.id]?.availableStock ?? 0,
+          stockDescription: map[p.id].status,
+          availableStock: map[p.id].displayQuantity ?? p.availableStock,
         }));
         this.products.set(updated);
+        this.loading.set(false);
       },
       error: () => {
         const updated = products.map((p) => ({ ...p, availableStock: 0 }));
         this.products.set(updated);
+        this.loading.set(false);
       },
     });
   }
@@ -180,13 +193,17 @@ export class BrowseProducts implements OnInit {
 
   search = () => {
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   clearSearch = () => {
     this.searchQuery.set('');
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   onCategoryChange = (categoryId: string | null) => {
@@ -227,7 +244,9 @@ export class BrowseProducts implements OnInit {
   onSortChange = (sort: string) => {
     this.sortBy.set(sort);
     this.page.set(1);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   resetFilters = () => {
@@ -239,13 +258,19 @@ export class BrowseProducts implements OnInit {
 
   goToPage = (page: number) => {
     this.page.set(page);
-    this.loadProducts();
+    this.router.navigate(['/products'], {
+      queryParams: this.buildQueryParams(),
+    });
   };
 
   private buildQueryParams(
-    override: Record<string, string | number | null | undefined>,
+    override: Record<string, string | number | null | undefined> = {},
   ): Record<string, string> {
     const params: Record<string, string> = {};
+    const q = this.searchQuery().trim();
+    if (q) {
+      params['q'] = q;
+    }
     const categoryId = this.selectedCategoryId();
     const sellerId = this.selectedSellerId();
     const tag = this.selectedTag();
@@ -265,6 +290,12 @@ export class BrowseProducts implements OnInit {
     }
     if (maxPrice !== null) {
       params['maxPrice'] = String(maxPrice);
+    }
+    if (this.sortBy() !== DEFAULT_SORT) {
+      params['sort'] = this.sortBy();
+    }
+    if (this.page() > 1) {
+      params['page'] = String(this.page());
     }
     for (const [key, value] of Object.entries(override)) {
       if (value === null || value === undefined) {

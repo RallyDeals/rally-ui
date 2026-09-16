@@ -12,14 +12,24 @@
       [alt]="product().name"
       fallbackSrc="/assets/placeholder.svg"
     />
-    @if (outOfStock()) {
-      <span class="out-of-stock-badge absolute top-2 left-2 z-10">
-        <span class="material-symbols-outlined">block</span>
-        Out of Stock
+
+    @if (stockDescription()) {
+      <span
+        class="stock-badge absolute top-2 left-2 z-10"
+        [class.stock-badge--out]="outOfStock()"
+        [class.stock-badge--low]="lowStock()"
+        [class.stock-badge--in]="!outOfStock() && !lowStock()"
+      >
+        @if (outOfStock()) {
+          <span class="material-symbols-outlined">block</span>
+        }
+        {{ stockDescription() | snakeCase }}
       </span>
-    } @else if (hasActiveDeal) {
-      <span class="deal-hint-badge absolute top-2 left-2 z-10">
-        <span class="material-symbols-outlined">groups</span>
+    }
+    @if (hasActiveDeal) {
+      <span
+        [class]="'deal-hint-badge absolute ' + (stockDescription() ? 'top-10' : 'top-2') + ' left-2 z-10'">        <span
+        class="material-symbols-outlined">groups</span>
         Group Deal
       </span>
     }
@@ -40,14 +50,14 @@
       <button
         class="product-card__add shrink-0"
         [class.product-card__add-added]="added()"
-        [class.product-card__add-disabled]="outOfStock()"
-        [disabled]="outOfStock()"
+        [class.product-card__add-disabled]="outOfStock() || allInCart()"
+        [disabled]="outOfStock() || allInCart()"
         (click)="addToCart($event)"
       >
         <span class="icon-md">
-          {{ added() ? 'check' : 'add_shopping_cart' }}
+          {{ added() || allInCart() ? 'check' : 'add_shopping_cart' }}
         </span>
-        {{ added() ? 'Added' : (outOfStock() ? 'Unavailable' : 'Add') }}
+        {{ added() ? 'Added' : outOfStock() ? 'Unavailable' : allInCart() ? 'In Cart' : 'Add' }}
       </button>
     </div>
   </div>

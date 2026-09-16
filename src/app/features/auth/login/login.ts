@@ -46,15 +46,15 @@ export class Login {
   }
 
   private resolveRedirect(role: string): string {
-    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
-    if (returnUrl && returnUrl.startsWith('/')) {
-      return returnUrl;
-    }
     if (role === 'ADMIN') {
       return 'admin';
     }
     if (role === 'SELLER') {
       return 'seller';
+    }
+    const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+    if (returnUrl && returnUrl.startsWith('/')) {
+      return returnUrl;
     }
     return '/';
   }
@@ -89,7 +89,7 @@ export class Login {
             error: (otpErr) => {
               // Handle potential failure of resending OTP if needed
               this.error.set(toApiError(otpErr));
-            }
+            },
           });
           return;
         }

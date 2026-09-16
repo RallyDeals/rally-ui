@@ -1,6 +1,7 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, inject, signal } from '@angular/core';
 import { Title } from '@angular/platform-browser';
 import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { UserService } from '../../../auth/admin-user.service';
 import { Seller } from '../../interfaces/seller';
 import { PageResponse } from '../../../products/page-response';
@@ -23,12 +24,13 @@ const PAGE_SIZE = 10;
   imports: [SellerDetailsHeader, SellerDetailsStats, SellerProductRow, Pagination, ErrorState],
   templateUrl: './seller-details.html',
 })
-export class SellerDetails implements OnInit {
+export class SellerDetails implements OnInit, OnDestroy {
   private readonly userService = inject(UserService);
   private readonly productsService = inject(ProductsService);
   private readonly dealService = inject(DealsService);
   private readonly activatedRoute = inject(ActivatedRoute);
   private readonly titleService = inject(Title);
+  private productsRequest: Subscription | null = null;
   private sellerId = '';
 
   seller = signal<Seller | null>(null);
@@ -52,6 +54,10 @@ export class SellerDetails implements OnInit {
     this.loadProducts();
   }
 
+  ngOnDestroy() {
+    this.productsRequest?.unsubscribe();
+  }
+
   loadSeller() {
     this.loading.set(true);
     this.sellerError.set(null);
@@ -72,7 +78,8 @@ export class SellerDetails implements OnInit {
   loadProducts() {
     this.productsLoading.set(true);
     this.productsError.set(null);
-    this.productsService.getAdminProductsBySeller(this.sellerId, { page: this.page(), limit: PAGE_SIZE }).subscribe({
+    this.productsRequest?.unsubscribe();
+    this.productsRequest = this.productsService.getAdminProductsBySeller(this.sellerId, { page: this.page(), limit: PAGE_SIZE }).subscribe({
       next: (products) => {
         this.sellerProducts.set(products);
         this.productsLoading.set(false);

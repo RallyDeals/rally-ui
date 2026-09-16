@@ -14,7 +14,7 @@ export class Pagination {
 
   pages = computed<(number | '...')[]>(() => {
     const total = this.totalPages();
-    if (total <= 7) {
+    if (total <= 5) {
       return Array.from({ length: total }, (_, index) => index + 1);
     }
     const current = this.page();

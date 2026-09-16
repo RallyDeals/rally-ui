@@ -16,4 +16,8 @@ export class CartItem {
 
   subtotal = computed(() => this.item().price * this.item().quantity);
   imageSrc = computed(() => resolveImageUrl(this.item().image, PLACEHOLDER_IMAGE));
+  stockReached = computed(() => {
+    const stock = this.item().stock;
+    return stock ? this.item().quantity >= stock : false;
+  });
 }
